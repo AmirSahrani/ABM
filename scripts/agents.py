@@ -1,6 +1,7 @@
 import mesa as ms
 import numpy as np
 from dataclasses import dataclass
+import math
 
 
 @dataclass
@@ -23,12 +24,24 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe):
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, lamb: float):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
         self.vision = vision
         self.tribe = tribe
+        self.hardship = self.calculate_hardship()
+        self.legitimacy = self.calculate_legitimacy()
+
+    def calculate_hardship(self):
+        return 1 / math.exp(self.spice * self.lamb)
+
+    def calculate_legitimacy(self):
+        legitimacy = {}
+        for other_tribe in self.model.tribes:
+            if other_tribe.id != self.tribe.id:
+                legitimacy[other_tribe] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
+        return legitimacy
 
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
