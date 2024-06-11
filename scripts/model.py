@@ -14,12 +14,15 @@ class DuneModel(ms.Model):
         self.height = height
         self.n_tribes = n_tribes
         self.n_agents = n_agents
+        self.tribes = []
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
         self.datacollector = ms.DataCollector({
             "Nomad": lambda m: m.schedule.get_type_count(Nomad)
         })
+        
+        self.lamb = 0.1
 
         spice_dist = np.random.binomial(5, 0.2, (self.width, self.height))
         id = 0
@@ -32,12 +35,13 @@ class DuneModel(ms.Model):
 
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
+            self.tribes.append(tribe)
             for a in range(self.n_agents):
                 x = np.random.randint(self.width)
                 y = np.random.randint(self.height)
                 spice = 3
                 vision = 3
-                nom = Nomad(id, self, (x, y), spice, vision, tribe)
+                nom = Nomad(id, self, (x, y), spice, vision, tribe, self.lamb)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)

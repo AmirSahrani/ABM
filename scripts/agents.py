@@ -30,6 +30,7 @@ class Nomad(ms.Agent):
         self.spice = spice
         self.vision = vision
         self.tribe = tribe
+        self.lamb = lamb
         self.hardship = self.calculate_hardship()
         self.legitimacy = self.calculate_legitimacy()
 
@@ -40,8 +41,9 @@ class Nomad(ms.Agent):
         legitimacy = {}
         for other_tribe in self.model.tribes:
             if other_tribe.id != self.tribe.id:
-                legitimacy[other_tribe] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
+                legitimacy[other_tribe.id] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
         return legitimacy
+
 
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
