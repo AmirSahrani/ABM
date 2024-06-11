@@ -69,7 +69,7 @@ server = mesa.visualization.ModularServer(
         "width": 100,
         "height": 100,
         "n_tribes": 3,
-        "n_agents": 20
+        "n_agents": 50
     },
     visualization_elements=[canvas_element, chart_element],
     name="Dune"

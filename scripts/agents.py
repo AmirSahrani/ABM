@@ -90,7 +90,7 @@ class Nomad(ms.Agent):
         self.sniff()
         self.fight()
 
-        if self.spice < 0:
+        if self.spice <= 0:
             self.model.remove_agent(self)
         # TODO split agent
 
