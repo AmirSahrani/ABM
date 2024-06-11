@@ -8,12 +8,13 @@ MONITOR = True
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int):
+    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, sigma: float):
         super().__init__()
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
         self.n_agents = n_agents
+        self.dist_sigma = sigma
         self.tribes = []
 
         self.schedule = ms.time.RandomActivationByType(self)
@@ -24,7 +25,12 @@ class DuneModel(ms.Model):
         
         self.lamb = 0.1
 
-        spice_dist = np.random.binomial(5, 0.2, (self.width, self.height))
+        x = np.linspace(-1, 1, self.width)
+        y = np.linspace(-1, 1, self.height)
+        xx, yy = np.meshgrid(x, y)
+        dist = np.sqrt(xx ** 2 + yy ** 2)
+        spice_dist = np.exp(-dist / self.dist_sigma)
+        spice_dist = (spice_dist / spice_dist.max() * 20).astype(int)
         id = 0
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]

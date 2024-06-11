@@ -5,28 +5,29 @@ from model import DuneModel
 
 color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00F8ff"}
 spice_color = {
-    0: "#8B4513",  # SaddleBrown
-    1: "#7E3E12",
-    2: "#723711",
-    3: "#653010",
-    4: "#59290E",
-    5: "#4D220C",
-    6: "#401B0A",
-    7: "#341409",
-    8: "#280D07",
-    9: "#1C0605",
-    10: "#100003",
-    11: "#0C0003",
-    12: "#080002",
-    13: "#040001",
-    14: "#020001",
-    15: "#010000",
-    16: "#010000",
-    17: "#010000",
-    18: "#010000",
-    19: "#010000",
-    20: "#000000"   # Black
+    0: "#FFFFE0", # light yellow
+    1: "#FFF8C1",
+    2: "#FFF1A3",
+    3: "#FFEB84",
+    4: "#FFE465",
+    5: "#FFDE47",
+    6: "#FFD728",
+    7: "#FFD109",
+    8: "#FFCA00",
+    9: "#FFB800",
+    10: "#FFA500",
+    11: "#FF9500",
+    12: "#FF8500",
+    13: "#FF7500",
+    14: "#FF6500",
+    15: "#FF5400",
+    16: "#FF4500",
+    17: "#FF3700",
+    18: "#FF2900",
+    19: "#FF1B00",
+    20: "#FF0D00", # red
 }
+
 
 
 def Nomad_portrayal(agent):
@@ -68,10 +69,11 @@ server = mesa.visualization.ModularServer(
     model_params={
         "width": 100,
         "height": 100,
-        "n_tribes": 3,
-        "n_agents": 5
+        "n_tribes": 2,
+        "n_agents": 50,
+        "sigma": 0.4
     },
-    visualization_elements=[canvas_element, chart_element],
+    visualization_elements=[canvas_element, chart_element], 
     name="Dune"
 )
 server.launch()

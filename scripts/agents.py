@@ -81,12 +81,24 @@ class Nomad(ms.Agent):
         if spice_patch.spice < 0:
             self.model.remove_agent(spice_patch)
 
-    def step(self):
-        self.move()
-        self.sniff()
+    def trade(self):
+        neighbor_agents = self.model.grid.get_neighbors(self.pos, True, True, self.vision)
+        tribe_neighbors = [a for a in neighbor_agents if a.tribe == self.tribe]
+        if len(tribe_neighbors) != 0:
+            other_nomad = np.random.choice(tribe_neighbors)
+            combined_spice = self.spice + other_nomad.spice
+            self.spice = combined_spice // 2
+            other_nomad.spice = combined_spice // 2
+            print(f"Nomad {self.id} traded with Nomad {other_nomad.id}")
+        else:
+            return
 
+    def step(self):
         if self.spice < 0:
             self.model.remove_agent(self)
+        
+        self.move()
+        self.sniff()
         # TODO split agent
 
 
