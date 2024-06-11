@@ -74,9 +74,9 @@ class Nomad(ms.Agent):
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += 1
-        spice_patch.spice -= 1
-        if spice_patch.spice < 0:
+        self.spice += spice_patch.spice
+        spice_patch.spice = 0
+        if spice_patch.spice == 0:
             self.model.remove_agent(spice_patch)
     
     def fight(self):
@@ -92,7 +92,9 @@ class Nomad(ms.Agent):
 
         if self.spice < 0:
             self.model.remove_agent(self)
-        # TODO split agent
+        elif self.spice > 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
+            self.model.add_agent(self)
+            
 
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     if agent1.spice >= agent2.spice:
