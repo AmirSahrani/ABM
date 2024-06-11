@@ -2,7 +2,7 @@ import mesa as ms
 import numpy as np
 from dataclasses import dataclass
 import math
-
+import nashpy as nash
 
 @dataclass
 class Tribe():

@@ -41,7 +41,7 @@ class DuneModel(ms.Model):
                 y = np.random.randint(self.height)
                 spice = 3
                 vision = 3
-                nom = Nomad(id, self, (x, y), spice, vision, tribe, self.lamb)
+                nom = Nomad(id, self, (x, y), spice, vision, tribe)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
