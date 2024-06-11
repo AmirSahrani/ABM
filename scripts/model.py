@@ -8,13 +8,14 @@ MONITOR = True
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int):
+    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, vision_radius: int):
         super().__init__()
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
         self.n_agents = n_agents
         self.tribes = []
+        self.vision_radius = vision_radius
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -40,7 +41,7 @@ class DuneModel(ms.Model):
                 x = np.random.randint(self.width)
                 y = np.random.randint(self.height)
                 spice = 3
-                vision = 3
+                vision = vision_radius
                 nom = Nomad(id, self, (x, y), spice, vision, tribe)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
@@ -60,7 +61,7 @@ class DuneModel(ms.Model):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
 
-    def run_model(self, step_count=200):
+    def run_model(self, step_count=10000):
         if self.verbose:
             print(
                 "Initial number Sugarscape Agent: ",

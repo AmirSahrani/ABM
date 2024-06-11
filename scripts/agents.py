@@ -52,11 +52,9 @@ class Nomad(ms.Agent):
         for agent in this_cell:
             if isinstance(agent, Spice):
                 return agent
+        return None
 
     def move(self):
-        """
-        !! vision is currently the step size, we probably do not want that
-        """
         neighbors = [
             i
             for i in self.model.grid.get_neighborhood(
@@ -64,20 +62,54 @@ class Nomad(ms.Agent):
             )
             if not self.is_occupied(i)
         ]
-
-        # TODO this is hacky and in accurate, now we just randomly move
+        
+        if not neighbors:
+            return 
+        
         neighbors.append(self.pos)
-        max_spice = [self.get_spice(p) for p in neighbors]
-        max_spice = list(filter(lambda x: x is not None, max_spice))
-        new_pos = np.random.choice(max_spice)
-        self.model.grid.move_agent(self, new_pos.pos)
+        
+        spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in neighbors]
+        interaction_scores = []
+        
+        for p in neighbors:
+            cellmates = self.model.grid.get_cell_list_contents([p])
+            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
+            interaction_score = 0
+            for other in other_nomads:
+                if self.tribe != other.tribe:
+                    interaction_score -= other.spice if other.spice > self.spice else 0
+                else:
+                    interaction_score += 1
+            interaction_scores.append(interaction_score)
+    
+        preferences = [spice + interaction for spice, interaction in zip(spice_levels, interaction_scores)]
+        total_preference = sum(preferences)
+        if total_preference > 0:
+            probabilities = [pref / total_preference for pref in preferences]
+        else:
+            probabilities = [1 / len(preferences)] * len(preferences)
+        
+        new_pos = self.random.choices(neighbors, probabilities)[0]
+        
+        self.model.grid.move_agent(self, new_pos)
+
+        # neighbors.append(self.pos)
+        # max_spice = [self.get_spice(p) for p in neighbors]
+        # max_spice = list(filter(lambda x: x is not None, max_spice))
+        # new_pos = np.random.choice(max_spice)
+        
+        
+        # self.model.grid.move_agent(self, new_pos.pos)
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += 1
-        spice_patch.spice -= 1
-        if spice_patch.spice < 0:
-            self.model.remove_agent(spice_patch)
+        if spice_patch is not None:
+            self.spice += 1
+            spice_patch.spice -= 1
+            if spice_patch.spice <= 0:
+                self.model.remove_agent(spice_patch)
+        else:
+            pass
     
     def fight(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
