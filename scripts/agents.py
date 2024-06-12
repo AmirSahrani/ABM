@@ -1,7 +1,7 @@
 import mesa as ms
+import nashpy as nash
 import numpy as np
 from dataclasses import dataclass
-import math
 
 
 @dataclass
@@ -11,25 +11,37 @@ class Tribe():
 
 
 class Nomad(ms.Agent):
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, lamb: float):
+    """
+    A Nomad is an agent foraging for spice, it has the following attributes:
+
+    [pos (int, int)]: and x,y coordinate representing its location on a finite grid
+    [spice int]: Their spice level, if it gets below a threshold it dies
+    [vision int]: Their range of vision, they can see spice and enemy Nomads within their vision
+    [tribe Tribe]: a tribe they are associated with, they only attack enemy tribes
+    [hardship float]: their spice level, defined as 1/exp(spice*lamb), 1 represents maximum hardship
+    [legitimacy dict(Tribe, float)]: a dict containing the legitimacy felt toward each other tribe 1/exp((self.tribe.total_spice - other.tribe.total_spice)*lamb).
+    [id int]: Unique id to represent them in the model
+    [model ms.Model]: The model they are associated with
+    """
+
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
         self.vision = vision
         self.tribe = tribe
-        self.lamb = lamb
-        self.hardship = self.calculate_hardship()
-        self.legitimacy = self.calculate_legitimacy()
+        # self.hardship = self.calculate_hardship()
+        # self.legitimacy = self.calculate_legitimacy()
 
-    def calculate_hardship(self):
-        return 1 / math.exp(self.spice * self.lamb)
+    # def calculate_hardship(self):
+    #     return 1 / math.exp(self.spice * self.lamb)
 
-    def calculate_legitimacy(self):
-        legitimacy = {}
-        for other_tribe in self.model.tribes:
-            if other_tribe.id != self.tribe.id:
-                legitimacy[other_tribe.id] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
-        return legitimacy
+    # def calculate_legitimacy(self):
+    #     legitimacy = {}
+    #     for other_tribe in self.model.tribes:
+    #         if other_tribe.id != self.tribe.id:
+    #             legitimacy[other_tribe] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
+    #     return legitimacy
 
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -40,43 +52,44 @@ class Nomad(ms.Agent):
         for agent in this_cell:
             if isinstance(agent, Spice):
                 return agent
+        return None
 
     def move(self):
         visible_positions = [
-            i
-            for i in self.model.grid.get_neighborhood(
-                self.pos, False, False, self.vision
-            )
-        ]
+        i
+        for i in self.model.grid.get_neighborhood(
+            self.pos, False, False, self.vision
+        )
+    ]   
         visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
 
         if not visible_positions:
             return
-
+        
         visible_positions.append(self.pos)
-
+        
         spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
         interaction_scores = []
-
+        
         for p in visible_positions:
             cellmates = self.model.grid.get_cell_list_contents([p])
             other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
             interaction_score = 0
             if not other_nomads:
-                interaction_score += spice_levels[visible_positions.index(p)] * 10
+                interaction_score += spice_levels[visible_positions.index(p)] * 10 
             for other in other_nomads:
                 if self.tribe != other.tribe:
                     interaction_score -= other.spice if other.spice > self.spice else 0
                 else:
                     if other.spice > self.spice:
-                        interaction_score += other.spice
+                        interaction_score += other.spice 
                     else:
                         interaction_score -= other.spice
             interaction_scores.append(interaction_score)
 
         preferences = [spice + interaction for spice, interaction in zip(spice_levels, interaction_scores)]
         total_preference = sum(preferences)
-
+        
         if total_preference > 0:
             probabilities = [pref / total_preference for pref in preferences]
         else:
@@ -103,6 +116,14 @@ class Nomad(ms.Agent):
 
         self.model.grid.move_agent(self, best_move)
 
+        # neighbors.append(self.pos)
+        # max_spice = [self.get_spice(p) for p in neighbors]
+        # max_spice = list(filter(lambda x: x is not None, max_spice))
+        # new_pos = np.random.choice(max_spice)
+        
+        
+        # self.model.grid.move_agent(self, new_pos.pos)
+
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
         if spice_patch is not None:
@@ -128,14 +149,45 @@ class Nomad(ms.Agent):
                 self.model.record_trade()
 
     def step(self):
-
         self.move()
         self.sniff()
+        self.fight()
         self.trade()
-        self.spice -= 1
         if self.spice < 0:
             self.model.remove_agent(self)
-        # TODO split agent
+        elif self.spice > 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
+            self.model.add_agent(self)
+
+def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
+    if agent1.spice >= agent2.spice:
+        weak_agent = agent2
+        strong_agent = agent1
+    else:
+        weak_agent = agent1
+        strong_agent = agent2
+
+    if agent1.tribe != agent2.tribe:
+        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
+        weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
+
+        fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
+
+        equilibria = list(fight.support_enumeration())
+        print(equilibria)
+
+        strong_agent_strategy = np.argmax(equilibria[0])
+        weak_agent_strategy = np.argmax(equilibria[1])
+
+        strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
+        weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
+
+    else:
+        payoff = (strong_agent.spice - weak_agent.spice) // 2
+        weak_agent.spice += payoff
+        strong_agent.spice -= payoff
+
+    # print(f"After the game, the stronger agent has {strong_agent.spice} spice.")
+    # print(f"After the game, the weaker agent has {weak_agent.spice} spice.")
 
 class Spice(ms.Agent):
     def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int):

@@ -58,11 +58,17 @@ def Nomad_portrayal(agent):
 
 
 canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 500, 500)
-
-trade_chart = ms.visualization.ChartModule(
-    [{"Label": "Trades", "Color": "#FF0000"}],
-    data_collector_name='datacollector'
+chart_element = ms.visualization.ChartModule(
+    [{"Label": "Nomad", "Color": "#AA0000"}]
 )
+
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 2,
+    "n_agents": 1000,
+    "vision_radius": 3
+}
 
 tribe_nomads_chart = ms.visualization.ChartModule(
     [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},

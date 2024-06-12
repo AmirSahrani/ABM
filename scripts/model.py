@@ -4,17 +4,35 @@ from agents import Nomad, Spice, Tribe
 
 MONITOR = True
 
+
+def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
+    # Initialize an empty map
+    spice_map = np.zeros((width, height))
+    heap_pos_x = np.random.randint(0, width, n_heaps)
+    heap_pos_y = np.random.randint(0, height, n_heaps)
+
+    for (heap_x, heap_y) in zip(heap_pos_x, heap_pos_y):
+        cov = np.random.uniform(3, 9, (2, 2))
+        cov = cov @ cov.T
+        heap = np.random.multivariate_normal([heap_x, heap_y], cov, size=total_spice).astype(int)
+
+        for (x, y) in zip(heap[:, 0], heap[:, 1]):
+            if 0 < x < width and 0 < y < height:
+                spice_map[x, y] += 1
+
+    return (spice_map / np.max(spice_map) * 20).astype(int)
+
+
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, sigma: float):
+    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int):
         super().__init__()
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
         self.n_agents = n_agents
-        self.dist_sigma = sigma
-        self.tribes = []
+        self.n_heaps = n_heaps
         self.total_trades = 0
 
         self.schedule = ms.time.RandomActivationByType(self)
@@ -28,21 +46,15 @@ class DuneModel(ms.Model):
             "Tribe_1_Spice": lambda m: m.total_spice(1),
         })
 
-        self.lamb = 0.1
-
-        x = np.linspace(-1, 1, self.width)
-        y = np.linspace(-1, 1, self.height)
-        xx, yy = np.meshgrid(x, y)
-        dist = np.sqrt(xx ** 2 + yy ** 2)
-        spice_dist = np.exp(-dist / self.dist_sigma)
-        spice_dist = (spice_dist / spice_dist.max() * 20).astype(int)
+        spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
         id = 0
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
-            spice = Spice(id, (x, y), self, max_spice)
-            id += 1
-            self.grid.place_agent(spice, (x, y))
-            self.schedule.add(spice)
+            if max_spice > 0:
+                spice = Spice(id, (x, y), self, max_spice)
+                id += 1
+                self.grid.place_agent(spice, (x, y))
+                self.schedule.add(spice)
 
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
@@ -52,7 +64,7 @@ class DuneModel(ms.Model):
                 y = np.random.randint(self.height)
                 spice = 3
                 vision = 3
-                nom = Nomad(id, self, (x, y), spice, vision, tribe, self.lamb)
+                nom = Nomad(id, self, (x, y), spice, vision, tribe)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
@@ -78,8 +90,21 @@ class DuneModel(ms.Model):
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
+    
+    def add_agent(self, parent_agent):
+        x, y = parent_agent.pos
+        spice = parent_agent.spice//2
+        vision = parent_agent.vision
+        tribe = parent_agent.tribe
 
-    def run_model(self, step_count=200):
+        new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
+        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe)
+        self.grid.place_agent(new_agent, (x, y))
+        self.schedule.add(new_agent)
+
+        parent_agent.spice -= parent_agent.spice//2
+
+    def run_model(self, step_count=10000):
         if self.verbose:
             print(
                 "Initial number Sugarscape Agent: ",
