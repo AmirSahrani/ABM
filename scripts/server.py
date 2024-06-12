@@ -67,21 +67,16 @@ chart_element = mesa.visualization.ChartModule(
 model_params = {
     "width": 100,
     "height": 100,
-    "n_tribes": 2,
-    "n_agents": 1000,
-    "vision_radius": 3
+    "n_tribes": 3,
+    "n_agents": 100,
+    "n_heaps": 4,
+    "vision_radius": 3,
 }
 
 server = mesa.visualization.ModularServer(
     model_cls=DuneModel,
-    model_params={
-        "width": 100,
-        "height": 100,
-        "n_tribes": 3,
-        "n_agents": 20,
-        "n_heaps": 4
-    },
-    visualization_elements=[canvas_element, chart_element], 
+    model_params=model_params,
+    visualization_elements=[canvas_element, chart_element],
     name="Dune"
 )
 server.launch()
