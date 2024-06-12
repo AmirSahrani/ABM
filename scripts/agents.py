@@ -149,7 +149,6 @@ class Nomad(ms.Agent):
             self.model.remove_agent(self)
         # TODO split agent
 
-
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     if agent1.spice >= agent2.spice:
         weak_agent = agent2

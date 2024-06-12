@@ -76,6 +76,19 @@ class DuneModel(ms.Model):
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
+    
+    def add_agent(self, parent_agent):
+        x, y = parent_agent.pos
+        spice = parent_agent.spice//2
+        vision = parent_agent.vision
+        tribe = parent_agent.tribe
+
+        new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
+        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe)
+        self.grid.place_agent(new_agent, (x, y))
+        self.schedule.add(new_agent)
+
+        parent_agent.spice -= parent_agent.spice//2
 
     def run_model(self, step_count=10000):
         if self.verbose:
