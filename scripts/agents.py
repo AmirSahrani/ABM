@@ -1,7 +1,7 @@
 import mesa as ms
+import nashpy as nash
 import numpy as np
 from dataclasses import dataclass
-import math
 
 
 @dataclass
@@ -95,7 +95,7 @@ class Nomad(ms.Agent):
     def step(self):
         self.move()
         self.sniff()
-        # self.fight()
+        self.fight()
 
         if self.spice < 0:
             self.model.remove_agent(self)
