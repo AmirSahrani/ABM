@@ -76,7 +76,7 @@ class Nomad(ms.Agent):
             other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
             interaction_score = 0
             if not other_nomads:
-                interaction_score += spice_levels[visible_positions.index(p)] * 10 
+                interaction_score += spice_levels[visible_positions.index(p)] * 50 
             for other in other_nomads:
                 if self.tribe != other.tribe:
                     interaction_score -= other.spice if other.spice > self.spice else 0
@@ -126,10 +126,14 @@ class Nomad(ms.Agent):
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += 1
-        spice_patch.spice -= 1
-        if spice_patch.spice < 0:
-            self.model.remove_agent(spice_patch)
+        if spice_patch is not None:
+            self.spice += 1
+            spice_patch.spice -= 1
+            if spice_patch.spice <= 0:
+                self.model.remove_agent(spice_patch)
+        else:
+            pass
+        
     
     def fight(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
