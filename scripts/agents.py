@@ -55,43 +55,66 @@ class Nomad(ms.Agent):
         return None
 
     def move(self):
-        neighbors = [
-            i
-            for i in self.model.grid.get_neighborhood(
-                self.pos, False, False, self.vision
-            )
-            if not self.is_occupied(i)
-        ]
+        visible_positions = [
+        i
+        for i in self.model.grid.get_neighborhood(
+            self.pos, False, False, self.vision
+        )
+    ]   
+        visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
+
+        if not visible_positions:
+            return
         
-        if not neighbors:
-            return 
+        visible_positions.append(self.pos)
         
-        neighbors.append(self.pos)
-        
-        spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in neighbors]
+        spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
         interaction_scores = []
         
-        for p in neighbors:
+        for p in visible_positions:
             cellmates = self.model.grid.get_cell_list_contents([p])
             other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
             interaction_score = 0
+            if not other_nomads:
+                interaction_score += spice_levels[visible_positions.index(p)] * 10 
             for other in other_nomads:
                 if self.tribe != other.tribe:
                     interaction_score -= other.spice if other.spice > self.spice else 0
                 else:
-                    interaction_score += 1
+                    if other.spice > self.spice:
+                        interaction_score += other.spice 
+                    else:
+                        interaction_score -= other.spice
             interaction_scores.append(interaction_score)
-    
+
         preferences = [spice + interaction for spice, interaction in zip(spice_levels, interaction_scores)]
         total_preference = sum(preferences)
+        
         if total_preference > 0:
             probabilities = [pref / total_preference for pref in preferences]
         else:
             probabilities = [1 / len(preferences)] * len(preferences)
-        
-        new_pos = self.random.choices(neighbors, probabilities)[0]
-        
-        self.model.grid.move_agent(self, new_pos)
+
+        chosen_pos = self.random.choices(visible_positions, probabilities)[0]
+
+        immediate_neighbors = [
+            (self.pos[0] + dx, self.pos[1] + dy)
+            for dx in [-1, 0, 1]
+            for dy in [-1, 0, 1]
+            if (dx, dy) != (0, 0)
+        ]
+
+        immediate_neighbors = [
+            pos for pos in immediate_neighbors
+            if self.model.grid.out_of_bounds(pos) == False and not self.is_occupied(pos)
+        ]
+
+        if not immediate_neighbors:
+            return
+
+        best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
+
+        self.model.grid.move_agent(self, best_move)
 
         # neighbors.append(self.pos)
         # max_spice = [self.get_spice(p) for p in neighbors]

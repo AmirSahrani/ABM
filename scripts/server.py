@@ -68,7 +68,7 @@ model_params = {
     "height": 100,
     "n_tribes": 2,
     "n_agents": 1000,
-    "vision_radius": 5
+    "vision_radius": 3
 }
 
 server = mesa.visualization.ModularServer(
