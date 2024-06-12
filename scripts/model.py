@@ -4,7 +4,6 @@ from agents import Nomad, Spice, Tribe
 
 MONITOR = True
 
-
 class DuneModel(ms.Model):
     verbose = MONITOR
 
@@ -16,13 +15,19 @@ class DuneModel(ms.Model):
         self.n_agents = n_agents
         self.dist_sigma = sigma
         self.tribes = []
+        self.total_trades = 0
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
         self.datacollector = ms.DataCollector({
-            "Nomad": lambda m: m.schedule.get_type_count(Nomad)
+            "Nomads": lambda m: m.schedule.get_type_count(Nomad),
+            "Trades": lambda m: m.total_trades,
+            "Tribe_0_Nomads": lambda m: m.count_tribe_nomads(0),
+            "Tribe_1_Nomads": lambda m: m.count_tribe_nomads(1),
+            "Tribe_0_Spice": lambda m: m.total_spice(0),
+            "Tribe_1_Spice": lambda m: m.total_spice(1),
         })
-        
+
         self.lamb = 0.1
 
         x = np.linspace(-1, 1, self.width)
@@ -55,9 +60,17 @@ class DuneModel(ms.Model):
         self.running = True
         self.datacollector.collect(self)
 
+    def count_tribe_nomads(self, tribe_id):
+        return sum(1 for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
+
+    def total_spice(self, tribe_id):
+        return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
+
+    def record_trade(self):
+        self.total_trades += 1
+
     def step(self):
         self.schedule.step()
-        # collect data
         self.datacollector.collect(self)
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
