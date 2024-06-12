@@ -126,19 +126,10 @@ class Nomad(ms.Agent):
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        if spice_patch is not None:
-            self.spice += 1
-            spice_patch.spice -= 1
-            if spice_patch.spice <= 0:
-                self.model.remove_agent(spice_patch)
-        else:
-            pass
-    
-    def fight(self):
-        cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
-        for other in other_nomads:
-            fighting_game(self, other, alpha=0.5)
+        self.spice += 1
+        spice_patch.spice -= 1
+        if spice_patch.spice < 0:
+            self.model.remove_agent(spice_patch)
 
     def step(self):
         self.move()
