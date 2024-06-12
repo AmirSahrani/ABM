@@ -130,15 +130,21 @@ class Nomad(ms.Agent):
         spice_patch.spice -= 1
         if spice_patch.spice < 0:
             self.model.remove_agent(spice_patch)
+    
+    def fight(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
+        for other in other_nomads:
+            fighting_game(self, other, alpha=0.5)
 
     def step(self):
         self.move()
         self.sniff()
         self.fight()
 
-        if self.spice < 0:
+        if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice > 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
+        elif self.spice >= 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
             self.model.add_agent(self)
 
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
@@ -164,10 +170,10 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
         strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
         weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
 
-    else:
-        payoff = (strong_agent.spice - weak_agent.spice) // 2
-        weak_agent.spice += payoff
-        strong_agent.spice -= payoff
+    # else:
+    #     payoff = (strong_agent.spice - weak_agent.spice) // 2
+    #     weak_agent.spice += payoff
+    #     strong_agent.spice -= payoff
 
     # print(f"After the game, the stronger agent has {strong_agent.spice} spice.")
     # print(f"After the game, the weaker agent has {weak_agent.spice} spice.")
