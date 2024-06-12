@@ -52,6 +52,7 @@ class DuneModel(ms.Model):
 
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
+            self.tribes.append(tribe)
             for a in range(self.n_agents):
                 x = np.random.randint(self.width)
                 y = np.random.randint(self.height)
@@ -76,7 +77,7 @@ class DuneModel(ms.Model):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
 
-    def run_model(self, step_count=200):
+    def run_model(self, step_count=10000):
         if self.verbose:
             print(
                 "Initial number Sugarscape Agent: ",

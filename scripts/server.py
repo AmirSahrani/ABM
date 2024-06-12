@@ -63,6 +63,14 @@ chart_element = mesa.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
 
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 2,
+    "n_agents": 1000,
+    "vision_radius": 3
+}
+
 server = mesa.visualization.ModularServer(
     model_cls=DuneModel,
     model_params={
