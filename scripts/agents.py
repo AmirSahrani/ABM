@@ -65,20 +65,27 @@ class Nomad(ms.Agent):
             if not self.is_occupied(i)
         ]
 
-        # TODO this is hacky and in accurate, now we just randomly move
+        # TODO this is hacky and inaccurate, now we just randomly move
         neighbors.append(self.pos)
         max_spice = [self.get_spice(p) for p in neighbors]
         max_spice = list(filter(lambda x: x is not None, max_spice))
-        new_pos = np.random.choice(max_spice)
-        self.model.grid.move_agent(self, new_pos.pos)
+        if max_spice:
+            new_pos = np.random.choice(max_spice)
+            new_pos = new_pos.pos
+        else:
+            move = np.random.binomial(1, 0.5, 2)
+            new_pos = ((self.pos[0] + move[0]) % 100, (self.pos[1] + move[1]) % 100)
+
+        self.model.grid.move_agent(self, new_pos)
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += 1
-        spice_patch.spice -= 1
-        if spice_patch.spice < 0:
-            self.model.remove_agent(spice_patch)
-    
+        if spice_patch:
+            self.spice += 1
+            spice_patch.spice -= 1
+            if spice_patch.spice < 0:
+                self.model.remove_agent(spice_patch)
+
     def fight(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
@@ -88,22 +95,23 @@ class Nomad(ms.Agent):
     def step(self):
         self.move()
         self.sniff()
-        self.fight()
+        # self.fight()
 
         if self.spice < 0:
             self.model.remove_agent(self)
         # TODO split agent
 
+
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     if agent1.spice >= agent2.spice:
-            weak_agent = agent2
-            strong_agent = agent1
+        weak_agent = agent2
+        strong_agent = agent1
     else:
         weak_agent = agent1
         strong_agent = agent2
 
-    if agent1.tribe != agent2.tribe: 
-        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha*strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha/2)*strong_agent.spice]])
+    if agent1.tribe != agent2.tribe:
+        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
         weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
 
         fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
@@ -116,9 +124,9 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
 
         strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
         weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
-    
+
     else:
-        payoff = (strong_agent.spice - weak_agent.spice)//2
+        payoff = (strong_agent.spice - weak_agent.spice) // 2
         weak_agent.spice += payoff
         strong_agent.spice -= payoff
 
