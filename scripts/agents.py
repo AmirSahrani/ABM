@@ -1,7 +1,7 @@
 import mesa as ms
+import nashpy as nash
 import numpy as np
 from dataclasses import dataclass
-import math
 
 
 @dataclass
@@ -52,32 +52,87 @@ class Nomad(ms.Agent):
         for agent in this_cell:
             if isinstance(agent, Spice):
                 return agent
+        return None
 
     def move(self):
-        """
-        !! vision is currently the step size, we probably do not want that
-        """
-        neighbors = [
-            i
-            for i in self.model.grid.get_neighborhood(
-                self.pos, False, False, self.vision
-            )
-            if not self.is_occupied(i)
+        visible_positions = [
+        i
+        for i in self.model.grid.get_neighborhood(
+            self.pos, False, False, self.vision
+        )
+    ]   
+        visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
+
+        if not visible_positions:
+            return
+        
+        visible_positions.append(self.pos)
+        
+        spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
+        interaction_scores = []
+        
+        for p in visible_positions:
+            cellmates = self.model.grid.get_cell_list_contents([p])
+            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
+            interaction_score = 0
+            if not other_nomads:
+                interaction_score += spice_levels[visible_positions.index(p)] * 10 
+            for other in other_nomads:
+                if self.tribe != other.tribe:
+                    interaction_score -= other.spice if other.spice > self.spice else 0
+                else:
+                    if other.spice > self.spice:
+                        interaction_score += other.spice 
+                    else:
+                        interaction_score -= other.spice
+            interaction_scores.append(interaction_score)
+
+        preferences = [spice + interaction for spice, interaction in zip(spice_levels, interaction_scores)]
+        total_preference = sum(preferences)
+        
+        if total_preference > 0:
+            probabilities = [pref / total_preference for pref in preferences]
+        else:
+            probabilities = [1 / len(preferences)] * len(preferences)
+
+        chosen_pos = self.random.choices(visible_positions, probabilities)[0]
+
+        immediate_neighbors = [
+            (self.pos[0] + dx, self.pos[1] + dy)
+            for dx in [-1, 0, 1]
+            for dy in [-1, 0, 1]
+            if (dx, dy) != (0, 0)
         ]
 
-        # TODO this is hacky and in accurate, now we just randomly move
-        neighbors.append(self.pos)
-        max_spice = [self.get_spice(p) for p in neighbors]
-        max_spice = list(filter(lambda x: x is not None, max_spice))
-        new_pos = np.random.choice(max_spice)
-        self.model.grid.move_agent(self, new_pos.pos)
+        immediate_neighbors = [
+            pos for pos in immediate_neighbors
+            if self.model.grid.out_of_bounds(pos) == False and not self.is_occupied(pos)
+        ]
+
+        if not immediate_neighbors:
+            return
+
+        best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
+
+        self.model.grid.move_agent(self, best_move)
+
+        # neighbors.append(self.pos)
+        # max_spice = [self.get_spice(p) for p in neighbors]
+        # max_spice = list(filter(lambda x: x is not None, max_spice))
+        # new_pos = np.random.choice(max_spice)
+        
+        
+        # self.model.grid.move_agent(self, new_pos.pos)
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += spice_patch.spice
-        spice_patch.spice = 0
-        if spice_patch.spice == 0:
-            self.model.remove_agent(spice_patch)
+        if spice_patch is not None:
+            self.spice += 1
+            spice_patch.spice -= 1
+            if spice_patch.spice <= 0:
+                self.model.remove_agent(spice_patch)
+        else:
+            pass
     
     def fight(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
@@ -92,20 +147,18 @@ class Nomad(ms.Agent):
 
         if self.spice < 0:
             self.model.remove_agent(self)
-        elif self.spice > 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
-            self.model.add_agent(self)
-            
+        # TODO split agent
 
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     if agent1.spice >= agent2.spice:
-            weak_agent = agent2
-            strong_agent = agent1
+        weak_agent = agent2
+        strong_agent = agent1
     else:
         weak_agent = agent1
         strong_agent = agent2
 
-    if agent1.tribe != agent2.tribe: 
-        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha*strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha/2)*strong_agent.spice]])
+    if agent1.tribe != agent2.tribe:
+        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
         weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
 
         fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
@@ -118,9 +171,9 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
 
         strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
         weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
-    
+
     else:
-        payoff = (strong_agent.spice - weak_agent.spice)//2
+        payoff = (strong_agent.spice - weak_agent.spice) // 2
         weak_agent.spice += payoff
         strong_agent.spice -= payoff
 

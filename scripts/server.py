@@ -5,7 +5,7 @@ from model import DuneModel
 
 color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00F8ff"}
 spice_color = {
-    0: "#8B4513",  # SaddleBrown
+    0: "#ffffff",  # SaddleBrown
     1: "#7E3E12",
     2: "#723711",
     3: "#653010",
@@ -63,13 +63,22 @@ chart_element = mesa.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
 
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 2,
+    "n_agents": 1000,
+    "vision_radius": 3
+}
+
 server = mesa.visualization.ModularServer(
     model_cls=DuneModel,
     model_params={
         "width": 100,
         "height": 100,
         "n_tribes": 3,
-        "n_agents": 20
+        "n_agents": 20,
+        "n_heaps": 4
     },
     visualization_elements=[canvas_element, chart_element],
     name="Dune"
