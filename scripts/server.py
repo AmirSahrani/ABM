@@ -68,7 +68,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 3,
-    "n_agents": 100,
+    "n_agents": 1000,
     "n_heaps": 8,
     "vision_radius": 5,
 }
