@@ -92,7 +92,7 @@ server = ms.visualization.ModularServer(
     DuneModel,
     [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
     "Dune Model",
-    {"width": 100, "height": 100, "n_tribes": 2, "n_agents": 50, "n_heaps": 1}
+    {"width": 100, "height": 100, "n_tribes": 2, "n_agents": 50, "n_heaps": 1, "vision_radius": 1}
 )
 
 server.launch()

@@ -42,6 +42,7 @@ class DuneModel(ms.Model):
         self.n_heaps = n_heaps
         self.vision_radius = vision_radius
         self.tribes = []
+        self.total_trades = 0
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -83,7 +84,7 @@ class DuneModel(ms.Model):
                 nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
-                self.scheduee.add(nom)
+                self.schedule.add(nom)
 
         self.running = True
         self.datacollector.collect(self)

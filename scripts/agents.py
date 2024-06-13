@@ -164,11 +164,19 @@ class Nomad(ms.Agent):
             self.model.add_agent(self)
 
 
-def trade(agent1: Nomad, agent2: Nomad, beta):
-    combined_spice = agent1.spice + agent2.spice
-    agent1.spice = combined_spice * beta
-    agent2.spice = combined_spice * beta
-    # print(f"Nomad {agent1.id} traded with Nomad {agent2.id}")
+def trade(self, trade_percentage=0.1):
+        neighbor_agents = self.model.grid.get_neighbors(self.pos, True, True, self.vision)
+        tribe_neighbors = [a for a in neighbor_agents if isinstance(a, Nomad) and a.tribe == self.tribe]
+
+        for other_nomad in tribe_neighbors:
+            if other_nomad != self:
+                trade_amount_self = int(self.spice * trade_percentage)
+                trade_amount_other = int(other_nomad.spice * trade_percentage)
+
+                self.spice = self.spice - trade_amount_self + trade_amount_other
+                other_nomad.spice = other_nomad.spice - trade_amount_other + trade_amount_self
+
+                self.model.record_trade()
 
 
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
