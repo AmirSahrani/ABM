@@ -34,12 +34,15 @@ class DuneModel(ms.Model):
         self.n_agents = n_agents
         self.n_heaps = n_heaps
         self.total_trades = 0
+        self.tribes = []
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "Trades": lambda m: m.total_trades,
+            "Trades_per_step": lambda m: m.total_trades / m.schedule.time if m.schedule.time > 0 else 0,
+            "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
             "Tribe_0_Nomads": lambda m: m.count_tribe_nomads(0),
             "Tribe_1_Nomads": lambda m: m.count_tribe_nomads(1),
             "Tribe_0_Spice": lambda m: m.total_spice(0),

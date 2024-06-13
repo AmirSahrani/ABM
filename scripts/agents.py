@@ -151,7 +151,6 @@ class Nomad(ms.Agent):
     def step(self):
         self.move()
         self.sniff()
-        self.fight()
         self.trade()
         if self.spice < 0:
             self.model.remove_agent(self)

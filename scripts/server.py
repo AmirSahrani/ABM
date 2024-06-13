@@ -62,13 +62,10 @@ chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
 
-model_params = {
-    "width": 100,
-    "height": 100,
-    "n_tribes": 2,
-    "n_agents": 1000,
-    "vision_radius": 3
-}
+trade_chart = ms.visualization.ChartModule(
+    [{"Label": "No_of_Trades", "Color": "#0000FF"}],
+    data_collector_name='datacollector'
+)
 
 tribe_nomads_chart = ms.visualization.ChartModule(
     [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
@@ -86,7 +83,7 @@ server = ms.visualization.ModularServer(
     DuneModel,
     [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
     "Dune Model",
-    {"width": 100, "height": 100, "n_tribes": 2, "n_agents": 50, "sigma": 10}
+    {"width": 100, "height": 100, "n_tribes": 2, "n_agents": 50, "n_heaps": 1}
 )
 
 server.launch()
