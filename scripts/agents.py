@@ -152,15 +152,16 @@ class Nomad(ms.Agent):
     #         fighting_game(self, opponent, alpha=0.5)
 
     def step(self):
+        swimming_pentaly = 5
         self.move()
         self.sniff()
-        self.spice -= self.metabolism
+        self.spice -= self.metabolism * (swimming_pentaly * any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos)))
 
         if self.spice <= 0:
+            print('ded')
             self.model.remove_agent(self)
         elif self.spice >= 20:  # Not sure how much they should have to reproduce yet. This is a placeholder.
             self.model.add_agent(self)
-        self.spice -= self.metabolism
 
 
 def trade(agent1: Nomad, agent2: Nomad, beta):
@@ -214,3 +215,9 @@ class Spice(ms.Agent):
             self.model.remove_agent(self)
         elif self.spice > 20:
             self.spice += 1
+
+
+class Water(ms.Agent):
+    def __init__(self, id: int, pos: tuple, model: ms.Model):
+        super().__init__(id, model)
+        self.pos = pos

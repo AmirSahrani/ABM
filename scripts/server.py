@@ -1,6 +1,6 @@
 import mesa
 
-from agents import Nomad, Spice
+from agents import Nomad, Spice, Water
 from model import DuneModel
 
 color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00AAff"}
@@ -55,6 +55,15 @@ def Nomad_portrayal(agent):
             "w": 1,
             "h": 1,
         }
+    elif type(agent) is Water:
+        return {
+            "Color": "#0000Af",
+            "Shape": "rect",
+            "Filled": "true",
+            "Layer": 0,
+            "w": 1,
+            "h": 1,
+        }
 
     return {}
 
@@ -68,7 +77,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 3,
-    "n_agents": 1,
+    "n_agents": 100,
     "n_heaps": 8,
     "vision_radius": 5,
 }
