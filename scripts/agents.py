@@ -2,6 +2,7 @@ import mesa as ms
 import nashpy as nash
 import numpy as np
 from dataclasses import dataclass
+import random
 
 
 @dataclass
@@ -24,12 +25,13 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe):
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: int):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
         self.vision = vision
         self.tribe = tribe
+        self.metabolism = metabolism
         # self.hardship = self.calculate_hardship()
         # self.legitimacy = self.calculate_legitimacy()
 
@@ -55,47 +57,27 @@ class Nomad(ms.Agent):
         return None
 
     def move(self):
+        """
+        move towards spice, if no spice is visible, move randomly
+        """
         visible_positions = [
-        i
-        for i in self.model.grid.get_neighborhood(
-            self.pos, False, False, self.vision
-        )
-    ]   
+            i for i in self.model.grid.get_neighborhood(
+                self.pos, False, False, self.vision
+            )
+        ]
+
         visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
 
         if not visible_positions:
             return
-        
-        visible_positions.append(self.pos)
-        
+
         spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
-        interaction_scores = []
-        
-        for p in visible_positions:
-            cellmates = self.model.grid.get_cell_list_contents([p])
-            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
-            interaction_score = 0
-            if not other_nomads:
-                interaction_score += spice_levels[visible_positions.index(p)] * 10 
-            for other in other_nomads:
-                if self.tribe != other.tribe:
-                    interaction_score -= other.spice if other.spice > self.spice else 0
-                else:
-                    if other.spice > self.spice:
-                        interaction_score += other.spice 
-                    else:
-                        interaction_score -= other.spice
-            interaction_scores.append(interaction_score)
 
-        preferences = [spice + interaction for spice, interaction in zip(spice_levels, interaction_scores)]
-        total_preference = sum(preferences)
-        
-        if total_preference > 0:
-            probabilities = [pref / total_preference for pref in preferences]
+        if max(spice_levels) > 0:
+            max_spice_positions = [pos for pos, spice in zip(visible_positions, spice_levels) if spice == max(spice_levels)]
+            chosen_pos = self.random.choice(max_spice_positions)
         else:
-            probabilities = [1 / len(preferences)] * len(preferences)
-
-        chosen_pos = self.random.choices(visible_positions, probabilities)[0]
+            chosen_pos = self.random.choice(visible_positions)
 
         immediate_neighbors = [
             (self.pos[0] + dx, self.pos[1] + dy)
@@ -106,7 +88,7 @@ class Nomad(ms.Agent):
 
         immediate_neighbors = [
             pos for pos in immediate_neighbors
-            if self.model.grid.out_of_bounds(pos) == False and not self.is_occupied(pos)
+            if not self.model.grid.out_of_bounds(pos) and not self.is_occupied(pos)
         ]
 
         if not immediate_neighbors:
@@ -115,31 +97,78 @@ class Nomad(ms.Agent):
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
 
         self.model.grid.move_agent(self, best_move)
+        self.check_interactions()
 
         # neighbors.append(self.pos)
         # max_spice = [self.get_spice(p) for p in neighbors]
         # max_spice = list(filter(lambda x: x is not None, max_spice))
         # new_pos = np.random.choice(max_spice)
-        
-        
+
         # self.model.grid.move_agent(self, new_pos.pos)
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)
-        self.spice += 1
-        spice_patch.spice -= 1
-        if spice_patch.spice < 0:
-            self.model.remove_agent(spice_patch)
+        if spice_patch is not None:
+            self.spice += 1
+            spice_patch.spice -= 1
+            if spice_patch.spice <= 0:
+                self.model.remove_agent(spice_patch)
+        else:
+            pass
+
+    def check_interactions(self):
+        """
+        Check for interactions (fight or trade) with other nomads in the immediate neighborhood.
+        """
+        immediate_neighbors = [
+            (self.pos[0] + dx, self.pos[1] + dy)
+            for dx in [-1, 0, 1]
+            for dy in [-1, 0, 1]
+            if (dx, dy) != (0, 0)
+        ]
+
+        immediate_neighbors = [
+            pos for pos in immediate_neighbors
+            if not self.model.grid.out_of_bounds(pos)
+        ]
+
+        for pos in immediate_neighbors:
+            cellmates = self.model.grid.get_cell_list_contents([pos])
+            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self]
+
+            for other in other_nomads:
+                if other.tribe != self.tribe:
+                    fighting_game(self, other, alpha=0.5)
+                elif other.tribe == self.tribe:
+                    trade(self, other, beta=0.5)
+
+    # def fight(self):
+    #     visible_positions = [i for i in self.model.grid.get_neighborhood(self.pos, False, False, self.vision)]
+    #     for p in visible_positions:
+    #         cellmates = self.model.grid.get_cell_list_contents([p])
+    #         other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self and agent.tribe != self.tribe]
+    #     if other_nomads:
+    #         opponent = random.choice(other_nomads)
+    #         fighting_game(self, opponent, alpha=0.5)
 
     def step(self):
         self.move()
         self.sniff()
-        self.fight()
+        self.spice -= self.metabolism
 
-        if self.spice < 0:
+        if self.spice <= 0:
             self.model.remove_agent(self)
-        elif self.spice > 20: #Not sure how much they should have to reproduce yet. This is a placeholder.
+        elif self.spice >= 20:  # Not sure how much they should have to reproduce yet. This is a placeholder.
             self.model.add_agent(self)
+        self.spice -= self.metabolism
+
+
+def trade(agent1: Nomad, agent2: Nomad, beta):
+    combined_spice = agent1.spice + agent2.spice
+    agent1.spice = combined_spice * beta
+    agent2.spice = combined_spice * beta
+    # print(f"Nomad {agent1.id} traded with Nomad {agent2.id}")
+
 
 def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     if agent1.spice >= agent2.spice:
@@ -164,10 +193,10 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
         strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
         weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
 
-    else:
-        payoff = (strong_agent.spice - weak_agent.spice) // 2
-        weak_agent.spice += payoff
-        strong_agent.spice -= payoff
+    # else:
+    #     payoff = (strong_agent.spice - weak_agent.spice) // 2
+    #     weak_agent.spice += payoff
+    #     strong_agent.spice -= payoff
 
     # print(f"After the game, the stronger agent has {strong_agent.spice} spice.")
     # print(f"After the game, the weaker agent has {weak_agent.spice} spice.")

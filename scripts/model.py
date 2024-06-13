@@ -26,13 +26,15 @@ def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int):
+    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int):
         super().__init__()
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
         self.n_agents = n_agents
         self.n_heaps = n_heaps
+        self.vision_radius = vision_radius
+        self.tribes = []
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -57,8 +59,9 @@ class DuneModel(ms.Model):
                 x = np.random.randint(self.width)
                 y = np.random.randint(self.height)
                 spice = 3
-                vision = 3
-                nom = Nomad(id, self, (x, y), spice, vision, tribe)
+                vision = vision_radius
+                metabolism = .1
+                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
@@ -76,19 +79,20 @@ class DuneModel(ms.Model):
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
-    
+
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        spice = parent_agent.spice//2
+        spice = parent_agent.spice // 2
         vision = parent_agent.vision
         tribe = parent_agent.tribe
+        metabolism = parent_agent.metabolism
 
         new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe)
+        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe, metabolism)
         self.grid.place_agent(new_agent, (x, y))
         self.schedule.add(new_agent)
 
-        parent_agent.spice -= parent_agent.spice//2
+        parent_agent.spice -= parent_agent.spice // 2
 
     def run_model(self, step_count=10000):
         if self.verbose:
