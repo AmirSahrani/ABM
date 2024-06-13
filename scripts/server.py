@@ -3,7 +3,7 @@ import mesa
 from agents import Nomad, Spice
 from model import DuneModel
 
-color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00F8ff"}
+color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00AAff"}
 spice_color = {
     0: "#FFFFE0", # light yellow
     1: "#FFF8C1",
@@ -68,7 +68,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 3,
-    "n_agents": 1000,
+    "n_agents": 1,
     "n_heaps": 8,
     "vision_radius": 5,
 }

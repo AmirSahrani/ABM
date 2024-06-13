@@ -60,7 +60,8 @@ class DuneModel(ms.Model):
                 y = np.random.randint(self.height)
                 spice = 3
                 vision = vision_radius
-                nom = Nomad(id, self, (x, y), spice, vision, tribe)
+                metabolism = .1
+                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
@@ -78,19 +79,20 @@ class DuneModel(ms.Model):
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
-    
+
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        spice = parent_agent.spice//2
+        spice = parent_agent.spice // 2
         vision = parent_agent.vision
         tribe = parent_agent.tribe
+        metabolism = parent_agent.metabolism
 
         new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe)
+        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe, metabolism)
         self.grid.place_agent(new_agent, (x, y))
         self.schedule.add(new_agent)
 
-        parent_agent.spice -= parent_agent.spice//2
+        parent_agent.spice -= parent_agent.spice // 2
 
     def run_model(self, step_count=10000):
         if self.verbose:
