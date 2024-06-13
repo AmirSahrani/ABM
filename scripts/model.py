@@ -112,17 +112,20 @@ class DuneModel(ms.Model):
 
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        spice = parent_agent.spice // 2
-        vision = parent_agent.vision
-        tribe = parent_agent.tribe
-        metabolism = parent_agent.metabolism
+        neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+        empty_cells = [cell for cell in neighbors if self.grid.is_cell_empty(cell)]
+        if empty_cells:
+            new_pos = random.choice(empty_cells)
+            spice = parent_agent.spice // 2
+            vision = parent_agent.vision
+            tribe = parent_agent.tribe
 
-        new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe, metabolism)
-        self.grid.place_agent(new_agent, (x, y))
-        self.schedule.add(new_agent)
+            new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
+            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe)
+            self.grid.place_agent(new_agent, new_pos)
+            self.schedule.add(new_agent)
 
-        parent_agent.spice -= parent_agent.spice // 2
+            parent_agent.spice -= parent_agent.spice // 2
 
     def run_model(self, step_count=10000):
         if self.verbose:
