@@ -2,12 +2,13 @@ import mesa as ms
 import numpy as np
 from agents import Nomad, Spice, Tribe, Water
 import random
+import os
+from matplotlib import pyplot as plt
 
 MONITOR = True
 
 
 def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
-    # Initialize an empty map
     spice_map = np.zeros((width, height))
     heap_pos_x = np.random.randint(0, width, n_heaps)
     heap_pos_y = np.random.randint(0, height, n_heaps)
@@ -34,8 +35,9 @@ def gen_river(width, height):
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int):
+    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int):
         super().__init__()
+        self.experiment_name = experiment_name
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
@@ -45,6 +47,8 @@ class DuneModel(ms.Model):
         self.total_fights = 0
         self.tribes = []
         self.vision_radius = vision_radius
+        self.step_count = step_count
+        self.current_step = 0
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -53,11 +57,10 @@ class DuneModel(ms.Model):
             "Trades": lambda m: m.total_trades,
             "Trades_per_step": lambda m: m.total_trades / m.schedule.time if m.schedule.time > 0 else 0,
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
-            "Tribe_0_Nomads": lambda m: m.count_tribe_nomads(0),
-            "Tribe_1_Nomads": lambda m: m.count_tribe_nomads(1),
-            "Tribe_0_Spice": lambda m: m.total_spice(0),
-            "Tribe_1_Spice": lambda m: m.total_spice(1),
+            **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
+            **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)}
         })
+
 
         spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
         river = gen_river(self.width, self.height)
@@ -106,6 +109,10 @@ class DuneModel(ms.Model):
         self.datacollector.collect(self)
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
+        self.current_step += 1
+        if self.current_step >= self.step_count:
+            self.running = False
+            self.save_results(self.experiment_name)  
 
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
@@ -128,19 +135,57 @@ class DuneModel(ms.Model):
 
             parent_agent.spice -= parent_agent.spice // 2
 
-    def run_model(self, step_count=10000):
-        if self.verbose:
-            print(
-                "Initial number Agent: ",
-                self.schedule.get_type_count(Nomad),
-            )
+    def save_results(self, experiment_name):
+        experiment_dir = os.path.join("Experiments", experiment_name)
+        os.makedirs(experiment_dir, exist_ok=True)
 
-        for i in range(step_count):
+        figures_dir = os.path.join(experiment_dir, "Figures")
+        records_dir = os.path.join(experiment_dir, "Records")
+        os.makedirs(figures_dir, exist_ok=True)
+        os.makedirs(records_dir, exist_ok=True)
+
+        data = self.datacollector.get_model_vars_dataframe()
+        data.to_csv(os.path.join(records_dir, "simulation_data.csv"))
+
+        self.save_plot(data, "Trades", os.path.join(figures_dir, "trades_plot.png"))
+        self.save_plot(data, [f"Tribe_{i}_Nomads" for i in range(self.n_tribes)], os.path.join(figures_dir, "nomads_plot.png"))
+        self.save_plot(data, [f"Tribe_{i}_Spice" for i in range(self.n_tribes)], os.path.join(figures_dir, "spice_plot.png"))
+
+
+
+    def save_plot(self, data, columns, filename):
+        plt.figure()
+        if isinstance(columns, list):
+            for column in columns:
+                plt.plot(data[column], label=column)
+            plt.legend()
+            ylabel = "Values"
+            title = "Values over Time"
+        else:
+            plt.plot(data[columns])
+            ylabel = columns
+            title = f"{columns} over Time"
+        plt.xlabel("Step")
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.grid()
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def run_model(self, step_count=200):
+        self.step_count = step_count
+        self.current_step = 0
+        self.running = True
+
+        if self.verbose:
+            print("Initial number Sugarscape Agent: ", self.schedule.get_type_count(Nomad))
+
+        while self.running and self.current_step < self.step_count:
             self.step()
 
         if self.verbose:
             print("")
-            print(
-                "Final number Agent: ",
-                self.schedule.get_type_count(Nomad),
-            )
+            print("Final number Sugarscape Agent: ", self.schedule.get_type_count(Nomad))
+
+        self.save_results(self.experiment_name)

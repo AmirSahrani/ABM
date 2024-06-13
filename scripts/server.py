@@ -3,6 +3,22 @@ import mesa as ms
 from agents import Nomad, Spice, Water
 from model import DuneModel
 
+
+
+EXPERIMENT_NAME = "Balint_trial2"
+
+model_params = {
+    "experiment_name": EXPERIMENT_NAME,
+    "width": 100,
+    "height": 100,
+    "n_tribes": 3,
+    "n_agents": 100,
+    "n_heaps": 8,
+    "vision_radius": 5,
+    "step_count": 100,
+}
+
+
 color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00AAff"}
 spice_color = {
     0: "#FFFFE0", # light yellow
@@ -76,26 +92,19 @@ trade_chart = ms.visualization.ChartModule(
     data_collector_name='datacollector'
 )
 
+tribe_colors = ["#0000FF", "#00FF00", "#FFA500", "#FF4500", "#FF0000", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
+tribe_nomad_labels = [f"Tribe_{i}_Nomads" for i in range(model_params["n_tribes"])]
+tribe_spice_labels = [f"Tribe_{i}_Spice" for i in range(model_params["n_tribes"])]
+
 tribe_nomads_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
-     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"}],
+    [{"Label": label, "Color": color} for label, color in zip(tribe_nomad_labels, tribe_colors)],
     data_collector_name='datacollector'
 )
 
 tribe_spice_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Spice", "Color": "#FFA500"},
-     {"Label": "Tribe_1_Spice", "Color": "#FF4500"}],
+    [{"Label": label, "Color": color} for label, color in zip(tribe_spice_labels, tribe_colors)],
     data_collector_name='datacollector'
 )
-
-model_params = {
-    "width": 100,
-    "height": 100,
-    "n_tribes": 3,
-    "n_agents": 100,
-    "n_heaps": 8,
-    "vision_radius": 5,
-}
 
 server = ms.visualization.ModularServer(
     DuneModel,
