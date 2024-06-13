@@ -1,6 +1,7 @@
 import mesa as ms
 import numpy as np
 from agents import Nomad, Spice, Tribe, Water
+import random
 
 MONITOR = True
 
@@ -121,7 +122,7 @@ class DuneModel(ms.Model):
             tribe = parent_agent.tribe
 
             new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe)
+            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism)
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
 
