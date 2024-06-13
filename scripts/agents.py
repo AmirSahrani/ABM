@@ -25,7 +25,7 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: int):
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
