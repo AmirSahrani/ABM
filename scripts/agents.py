@@ -3,6 +3,7 @@ import nashpy as nash
 import numpy as np
 from dataclasses import dataclass
 import random
+import math
 
 
 @dataclass
@@ -140,7 +141,7 @@ class Nomad(ms.Agent):
                 if other.tribe != self.tribe:
                     fighting_game(self, other, alpha=0.5)
                 elif other.tribe == self.tribe:
-                    trade(self, other, beta=0.5)
+                    trade(self, agent1=self, agent2=other, trade_percentage=0.5)
 
     # def fight(self):
     #     visible_positions = [i for i in self.model.grid.get_neighborhood(self.pos, False, False, self.vision)]
@@ -164,14 +165,19 @@ class Nomad(ms.Agent):
             self.model.add_agent(self)
 
 
-def trade(agent1: Nomad, agent2: Nomad, beta):
-    combined_spice = agent1.spice + agent2.spice
-    agent1.spice = combined_spice * beta
-    agent2.spice = combined_spice * beta
-    # print(f"Nomad {agent1.id} traded with Nomad {agent2.id}")
+    
+
+def trade(self, agent1: Nomad, agent2: Nomad, trade_percentage: float):
+    trade_amount_self = int(agent1.spice * trade_percentage)
+    trade_amount_other = int(agent2.spice * trade_percentage)
+
+    agent1.spice = agent1.spice - trade_amount_self + trade_amount_other
+    agent2.spice = agent2.spice - trade_amount_other + trade_amount_self
+
+    self.model.record_trade()
 
 
-def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
+def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float):
     if agent1.spice >= agent2.spice:
         weak_agent = agent2
         strong_agent = agent1
@@ -186,28 +192,7 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
         strong_agent.spice += 0
         weak_agent.spice -= 0
 
-    # if agent1.tribe != agent2.tribe:
-        # strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
-        # weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
 
-        # fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
-
-        # equilibria = list(fight.support_enumeration())
-        # print(equilibria)
-
-        # strong_agent_strategy = np.argmax(equilibria[0])
-        # weak_agent_strategy = np.argmax(equilibria[1])
-
-        # strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
-        # weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
-
-    # else:
-    #     payoff = (strong_agent.spice - weak_agent.spice) // 2
-    #     weak_agent.spice += payoff
-    #     strong_agent.spice -= payoff
-
-    # print(f"After the game, the stronger agent has {strong_agent.spice} spice.")
-    # print(f"After the game, the weaker agent has {weak_agent.spice} spice.")
 
 class Spice(ms.Agent):
     def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int):

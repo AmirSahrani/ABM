@@ -41,6 +41,7 @@ class DuneModel(ms.Model):
         self.n_agents = n_agents
         self.n_heaps = n_heaps
         self.total_trades = 0
+        self.total_fights = 0
         self.tribes = []
         self.vision_radius = vision_radius
 
