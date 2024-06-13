@@ -40,9 +40,10 @@ class DuneModel(ms.Model):
         self.n_tribes = n_tribes
         self.n_agents = n_agents
         self.n_heaps = n_heaps
-        self.vision_radius = vision_radius
-        self.tribes = []
         self.total_trades = 0
+        self.total_fights = 0
+        self.tribes = []
+        self.vision_radius = vision_radius
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -63,9 +64,10 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                water = Water(id, (x, y), self)
-                id += 1
-                self.grid.place_agent(water, (x, y))
+                pass
+                # water = Water(id, (x, y), self)
+                # id += 1
+                # self.grid.place_agent(water, (x, y))
             elif max_spice > 0:
                 spice = Spice(id, (x, y), self, max_spice)
                 id += 1
@@ -110,17 +112,20 @@ class DuneModel(ms.Model):
 
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        spice = parent_agent.spice // 2
-        vision = parent_agent.vision
-        tribe = parent_agent.tribe
-        metabolism = parent_agent.metabolism
+        neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+        empty_cells = [cell for cell in neighbors if self.grid.is_cell_empty(cell)]
+        if empty_cells:
+            new_pos = random.choice(empty_cells)
+            spice = parent_agent.spice // 2
+            vision = parent_agent.vision
+            tribe = parent_agent.tribe
 
-        new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-        new_agent = Nomad(new_agent_id, self, (x, y), spice, vision, tribe, metabolism)
-        self.grid.place_agent(new_agent, (x, y))
-        self.schedule.add(new_agent)
+            new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
+            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe)
+            self.grid.place_agent(new_agent, new_pos)
+            self.schedule.add(new_agent)
 
-        parent_agent.spice -= parent_agent.spice // 2
+            parent_agent.spice -= parent_agent.spice // 2
 
     def run_model(self, step_count=10000):
         if self.verbose:

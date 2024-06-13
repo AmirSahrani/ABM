@@ -88,11 +88,20 @@ tribe_spice_chart = ms.visualization.ChartModule(
     data_collector_name='datacollector'
 )
 
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 3,
+    "n_agents": 100,
+    "n_heaps": 8,
+    "vision_radius": 5,
+}
+
 server = ms.visualization.ModularServer(
     DuneModel,
     [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
     "Dune Model",
-    {"width": 100, "height": 100, "n_tribes": 2, "n_agents": 50, "n_heaps": 1, "vision_radius": 1}
+    model_params
 )
 
 server.launch()
