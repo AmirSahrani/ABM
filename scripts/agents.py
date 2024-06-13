@@ -178,21 +178,28 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     else:
         weak_agent = agent1
         strong_agent = agent2
+        
+    if weak_agent.spice > alpha*strong_agent.spice:
+        strong_agent.spice += weak_agent.spice - alpha*strong_agent.spice
+        weak_agent.spice -= alpha*weak_agent.spice
+    elif weak_agent.spice <= alpha*strong_agent.spice:
+        strong_agent.spice += 0
+        weak_agent.spice -= 0
 
-    if agent1.tribe != agent2.tribe:
-        strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
-        weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
+    # if agent1.tribe != agent2.tribe:
+        # strong_agent_payoffs = np.array([[0, weak_agent.spice - alpha * strong_agent.spice], [weak_agent.spice, weak_agent.spice - (alpha / 2) * strong_agent.spice]])
+        # weak_agent_payoffs = np.array([[0, -weak_agent.spice], [-weak_agent.spice, -weak_agent.spice]])
 
-        fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
+        # fight = nash.Game(strong_agent_payoffs, weak_agent_payoffs)
 
-        equilibria = list(fight.support_enumeration())
-        print(equilibria)
+        # equilibria = list(fight.support_enumeration())
+        # print(equilibria)
 
-        strong_agent_strategy = np.argmax(equilibria[0])
-        weak_agent_strategy = np.argmax(equilibria[1])
+        # strong_agent_strategy = np.argmax(equilibria[0])
+        # weak_agent_strategy = np.argmax(equilibria[1])
 
-        strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
-        weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
+        # strong_agent.spice += strong_agent_payoffs[strong_agent_strategy, weak_agent_strategy]
+        # weak_agent.spice += weak_agent_payoffs[weak_agent_strategy, strong_agent_strategy]
 
     # else:
     #     payoff = (strong_agent.spice - weak_agent.spice) // 2

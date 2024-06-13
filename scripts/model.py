@@ -55,9 +55,10 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                water = Water(id, (x, y), self)
-                id += 1
-                self.grid.place_agent(water, (x, y))
+                pass
+                # water = Water(id, (x, y), self)
+                # id += 1
+                # self.grid.place_agent(water, (x, y))
             elif max_spice > 0:
                 spice = Spice(id, (x, y), self, max_spice)
                 id += 1
@@ -76,7 +77,7 @@ class DuneModel(ms.Model):
                 nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
-                self.scheduee.add(nom)
+                self.schedule.add(nom)
 
         self.running = True
         self.datacollector.collect(self)
