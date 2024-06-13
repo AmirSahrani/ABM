@@ -209,7 +209,6 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha):
     # print(f"After the game, the stronger agent has {strong_agent.spice} spice.")
     # print(f"After the game, the weaker agent has {weak_agent.spice} spice.")
 
-
 class Spice(ms.Agent):
     def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int):
         super().__init__(id, model)

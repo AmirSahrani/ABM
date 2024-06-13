@@ -1,4 +1,4 @@
-import mesa
+import mesa as ms
 
 from agents import Nomad, Spice, Water
 from model import DuneModel
@@ -27,8 +27,6 @@ spice_color = {
     19: "#FF1B00",
     20: "#FF0D00", # red
 }
-
-
 
 def Nomad_portrayal(agent):
     if agent is None:
@@ -68,9 +66,26 @@ def Nomad_portrayal(agent):
     return {}
 
 
-canvas_element = mesa.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 500, 500)
-chart_element = mesa.visualization.ChartModule(
+canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 500, 500)
+chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
+)
+
+trade_chart = ms.visualization.ChartModule(
+    [{"Label": "No_of_Trades", "Color": "#0000FF"}],
+    data_collector_name='datacollector'
+)
+
+tribe_nomads_chart = ms.visualization.ChartModule(
+    [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
+     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"}],
+    data_collector_name='datacollector'
+)
+
+tribe_spice_chart = ms.visualization.ChartModule(
+    [{"Label": "Tribe_0_Spice", "Color": "#FFA500"},
+     {"Label": "Tribe_1_Spice", "Color": "#FF4500"}],
+    data_collector_name='datacollector'
 )
 
 model_params = {
@@ -82,10 +97,11 @@ model_params = {
     "vision_radius": 5,
 }
 
-server = mesa.visualization.ModularServer(
-    model_cls=DuneModel,
-    model_params=model_params,
-    visualization_elements=[canvas_element, chart_element],
-    name="Dune"
+server = ms.visualization.ModularServer(
+    DuneModel,
+    [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
+    "Dune Model",
+    model_params
 )
+
 server.launch()
