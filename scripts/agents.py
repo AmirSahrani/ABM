@@ -201,9 +201,9 @@ class Spice(ms.Agent):
 
     def step(self):
         if self.spice == 0:
-            self.model.regenerate_spice(self)
+            self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
+            self.spice += 1 * np.random.binomial(1, .5, 1)[0]
 
 
 class Water(ms.Agent):

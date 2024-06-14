@@ -51,6 +51,7 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
+        self.spice_threshold = 500
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
@@ -128,14 +129,20 @@ class DuneModel(ms.Model):
     def record_cooperation(self):
         self.total_cooperation += 1 / 2
     
-    def regenerate_spice(self, depleted_spice):
-        self.remove_agent(depleted_spice)
-        spice_dist = self.gen_spice_map(self.width, self.height, self.n_heaps, 1000)
+    def total_spice_in_system(self):
+        total_spice = 0
+        for agent in self.schedule.agents:
+            if isinstance(agent, Spice):
+                total_spice += agent.spice
+        return total_spice
+
+    def regenerate_spice(self, depleted_spice=None):
+        new_spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
         id = max(agent.unique_id for agent in self.schedule.agents) + 1
         for x in range(self.width):
             for y in range(self.height):
-                max_spice = 20
-                if self.grid.is_cell_empty((x, y)):
+                max_spice = new_spice_dist[x, y]
+                if max_spice > 0:
                     new_spice = Spice(id, (x, y), self, max_spice)
                     self.grid.place_agent(new_spice, (x, y))
                     self.schedule.add(new_spice)
@@ -144,6 +151,9 @@ class DuneModel(ms.Model):
     def step(self):
         self.schedule.step()
         self.datacollector.collect(self)
+        total_spice = self.total_spice_in_system()
+        if total_spice < self.spice_threshold:
+            self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1
