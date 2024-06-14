@@ -33,7 +33,7 @@ def gen_river(width, height):
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int):
+    def __init__(self, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, alpha: float, trade_percentage: float):
         super().__init__()
         self.width = width
         self.height = height
@@ -44,6 +44,8 @@ class DuneModel(ms.Model):
         self.total_fights = 0
         self.tribes = []
         self.vision_radius = vision_radius
+        self.alpha = alpha
+        self.trade_percentage = trade_percentage
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
