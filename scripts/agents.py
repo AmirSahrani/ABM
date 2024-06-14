@@ -201,7 +201,7 @@ class Spice(ms.Agent):
 
     def step(self):
         if self.spice == 0:
-            self.model.remove_agent(self)
+            self.model.regenerate_spice(self)
         elif self.spice > 20:
             self.spice += 1 * np.random.binomial(1, .99, 1)[0]
 

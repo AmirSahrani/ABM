@@ -127,6 +127,20 @@ class DuneModel(ms.Model):
 
     def record_cooperation(self):
         self.total_cooperation += 1 / 2
+    
+    def regenerate_spice(self, depleted_spice):
+        self.remove_agent(depleted_spice)
+        while True:
+            x = np.random.randint(self.width)
+            y = np.random.randint(self.height)
+            if self.grid.is_cell_empty((x, y)):
+                break
+
+        new_spice_id = max(agent.unique_id for agent in self.schedule.agents) + 1
+        max_spice = 20
+        new_spice = Spice(new_spice_id, (x, y), self, max_spice)
+        self.grid.place_agent(new_spice, (x, y))
+        self.schedule.add(new_spice)
 
     def step(self):
         self.schedule.step()
