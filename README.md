@@ -28,6 +28,8 @@ To run experiments with different configurations, you can use a TOML file to spe
 1. **Create a Configuration File**: Create a TOML file (e.g., `config.toml`) with the desired parameters. Below is an example configuration file:
 
     ```toml
+    trails = 10
+
     [parameters]
     experiment_name = "test"
     width = 100

@@ -1,5 +1,9 @@
+# Number of trails for each configution
+trails = 10
+
 [parameters]
 # In case you specify a range, the experiment_name is the base for the name, the experiment folder will contain the parameter that varied and its value
+# !!! If you have your range set over multiple parameters, make sure all of them are also specified here, as this will the the base value for when iterating over the other variables
 experiment_name = "test"
 width = 100
 height = 100
@@ -18,5 +22,4 @@ location_generator = "random_locations"
 
 # Specify the variables you would like to change, the list should read [start, end, step], like np.arange 
 [ranges]
-n_heaps = [3, 10, 1]
-n_tribes = [2, 5, 1]
+n_heaps = [3, 10, 5]
