@@ -88,7 +88,10 @@ chart_element = ms.visualization.ChartModule(
 )
 
 trade_chart = ms.visualization.ChartModule(
-    [{"Label": "No_of_Trades", "Color": "#0000FF"}],
+    [{"Label": "Tribe_0_Trades", "Color": "#FFE465"},
+    {"Label": "Tribe_1_Trades", "Color": "#0000FF"},
+     {"Label": "Fights_per_step", "Color": "#00FF00"},
+     {"Label": "Cooperation_per_step", "Color": "#FF0000"}],
     data_collector_name='datacollector'
 )
 
@@ -106,9 +109,24 @@ tribe_spice_chart = ms.visualization.ChartModule(
     data_collector_name='datacollector'
 )
 
+tribe_clustering_chart = ms.visualization.ChartModule(
+    [{"Label": "Tribe_0_Clustering", "Color": "#FFA500"},
+     {"Label": "Tribe_1_Clustering", "Color": "#FF4500"}],
+    data_collector_name='datacollector'
+)
+
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 2,
+    "n_agents": 1000,
+    "n_heaps": 8,
+    "vision_radius": 5,
+}
+
 server = ms.visualization.ModularServer(
     DuneModel,
-    [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
+    [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
     "Dune Model",
     model_params
 )

@@ -43,22 +43,24 @@ class DuneModel(ms.Model):
         self.n_tribes = n_tribes
         self.n_agents = n_agents
         self.n_heaps = n_heaps
-        self.total_trades = 0
         self.total_fights = 0
+        self.total_cooperation = 0
         self.tribes = []
         self.vision_radius = vision_radius
         self.step_count = step_count
         self.current_step = 0
 
+        self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
-            "Trades": lambda m: m.total_trades,
-            "Trades_per_step": lambda m: m.total_trades / m.schedule.time if m.schedule.time > 0 else 0,
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
+            "Cooperation_per_step": lambda m: m.total_cooperation / m.schedule.time if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)}
+            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering(i)) for i in range(self.n_tribes)}
+            **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i]/ m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
 
@@ -100,9 +102,31 @@ class DuneModel(ms.Model):
 
     def total_spice(self, tribe_id):
         return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
+    
+    def clustering(self, tribe_id):
+        clustering = 0
+        i=0
+        for a in self.schedule.agents:
+            if isinstance(a, Nomad) and a.tribe.id == tribe_id:
+                x, y = a.pos
+                neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+                for pos in neighbors:
+                    cellmates = self.grid.get_cell_list_contents([pos])
+                    other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != a and agent.tribe == a.tribe]
+                    clustering += len(other_nomads)/len(neighbors)
+            i +=1
+        return clustering/i
+        
 
-    def record_trade(self):
-        self.total_trades += 1
+    def record_trade(self, tribe_id):
+        self.trades_per_tribe[tribe_id] += 1/2
+
+    
+    def record_fight(self):
+        self.total_fights += 1/2
+        
+    def record_cooperation(self):
+        self.total_cooperation += 1/2
 
     def step(self):
         self.schedule.step()
@@ -150,6 +174,8 @@ class DuneModel(ms.Model):
         self.save_plot(data, "Trades", os.path.join(figures_dir, "trades_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Nomads" for i in range(self.n_tribes)], os.path.join(figures_dir, "nomads_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Spice" for i in range(self.n_tribes)], os.path.join(figures_dir, "spice_plot.png"))
+        self.save_plot(data, "Fights_per_step", os.path.join(figures_dir, "fights_plot.png"))
+        self.save_plot(data, "Cooperation_per_step", os.path.join(figures_dir, "cooperation_plot.png"))
 
 
 
