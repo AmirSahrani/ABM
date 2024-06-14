@@ -139,7 +139,7 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=0.5)
+                    fighting_game(self, other, alpha=0.2)
                 elif other.tribe == self.tribe:
                     trade(self, agent1=self, agent2=other, trade_percentage=0.5)
 
@@ -153,19 +153,16 @@ class Nomad(ms.Agent):
     #         fighting_game(self, opponent, alpha=0.5)
 
     def step(self):
-        swimming_pentaly = 5
+        swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
         self.move()
         self.sniff()
-        self.spice -= self.metabolism * (swimming_pentaly * any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos)))
+        self.spice -= self.metabolism * swimming_pentaly
 
         if self.spice <= 0:
-            print('ded')
             self.model.remove_agent(self)
         elif self.spice >= 20:  # Not sure how much they should have to reproduce yet. This is a placeholder.
             self.model.add_agent(self)
 
-
-    
 
 def trade(self, agent1: Nomad, agent2: Nomad, trade_percentage: float):
     trade_amount_self = int(agent1.spice * trade_percentage)
@@ -184,14 +181,13 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float):
     else:
         weak_agent = agent1
         strong_agent = agent2
-        
-    if weak_agent.spice > alpha*strong_agent.spice:
-        strong_agent.spice += weak_agent.spice - alpha*strong_agent.spice
-        weak_agent.spice -= alpha*weak_agent.spice
-    elif weak_agent.spice <= alpha*strong_agent.spice:
+
+    if weak_agent.spice > alpha * strong_agent.spice:
+        strong_agent.spice += alpha * weak_agent.spice - alpha * strong_agent.spice
+        weak_agent.spice -= alpha * weak_agent.spice
+    elif weak_agent.spice <= alpha * strong_agent.spice:
         strong_agent.spice += 0
         weak_agent.spice -= 0
-
 
 
 class Spice(ms.Agent):
@@ -205,7 +201,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 1
+            self.spice += 1 * np.random.binomial(1, 0.01, 1)[0]
 
 
 class Water(ms.Agent):

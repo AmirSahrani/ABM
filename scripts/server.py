@@ -3,6 +3,14 @@ import mesa as ms
 from agents import Nomad, Spice, Water
 from model import DuneModel
 
+model_params = {
+    "width": 100,
+    "height": 100,
+    "n_tribes": 3,
+    "n_agents": 100,
+    "n_heaps": 15,
+    "vision_radius": 5,
+}
 color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00AAff"}
 spice_color = {
     0: "#FFFFE0", # light yellow
@@ -77,25 +85,15 @@ trade_chart = ms.visualization.ChartModule(
 )
 
 tribe_nomads_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
-     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"}],
+    [{"Label": f"Tribe_{i}_Nomads", "Color": color_dic[i]} for i in range(model_params['n_tribes'])],
     data_collector_name='datacollector'
 )
 
 tribe_spice_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Spice", "Color": "#FFA500"},
-     {"Label": "Tribe_1_Spice", "Color": "#FF4500"}],
+    [{"Label": f"Tribe_{i}_total_Spice", "Color": color_dic[i]} for i in range(model_params['n_tribes'])],
     data_collector_name='datacollector'
 )
 
-model_params = {
-    "width": 100,
-    "height": 100,
-    "n_tribes": 3,
-    "n_agents": 100,
-    "n_heaps": 8,
-    "vision_radius": 5,
-}
 
 server = ms.visualization.ModularServer(
     DuneModel,

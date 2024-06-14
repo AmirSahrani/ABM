@@ -3,7 +3,7 @@ import numpy as np
 from agents import Nomad, Spice, Tribe, Water
 import random
 
-MONITOR = True
+MONITOR = False
 
 
 def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
@@ -27,7 +27,7 @@ def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
 def gen_river(width, height):
     river = np.zeros((width, height))
     river[width // 2, :] = 1
-    river[:, height // 3: -height // 3] = 0
+    # river[:, height // 3: -height // 3] = 0
     return river
 
 
@@ -48,16 +48,19 @@ class DuneModel(ms.Model):
 
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
-        self.datacollector = ms.DataCollector({
+
+        measures = {
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "Trades": lambda m: m.total_trades,
             "Trades_per_step": lambda m: m.total_trades / m.schedule.time if m.schedule.time > 0 else 0,
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
-            "Tribe_0_Nomads": lambda m: m.count_tribe_nomads(0),
-            "Tribe_1_Nomads": lambda m: m.count_tribe_nomads(1),
-            "Tribe_0_Spice": lambda m: m.total_spice(0),
-            "Tribe_1_Spice": lambda m: m.total_spice(1),
-        })
+        }
+
+        for i in range(self.n_tribes):
+            measures[f'Tribe_{i}_Nomads'] = lambda m, i=i: m.count_tribe_nomads(i)
+            measures[f'Tribe_{i}_total_Spice'] = lambda m, i=i: m.total_spice(i)
+
+        self.datacollector = ms.DataCollector(measures)
 
         spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
         river = gen_river(self.width, self.height)
@@ -65,10 +68,10 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                pass
-                # water = Water(id, (x, y), self)
-                # id += 1
-                # self.grid.place_agent(water, (x, y))
+                # pass
+                water = Water(id, (x, y), self)
+                id += 1
+                self.grid.place_agent(water, (x, y))
             elif max_spice > 0:
                 spice = Spice(id, (x, y), self, max_spice)
                 id += 1
