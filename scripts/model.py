@@ -2,40 +2,21 @@ import mesa as ms
 import numpy as np
 from agents import Nomad, Spice, Tribe, Water
 import random
+from typing import Callable
 import os
 from matplotlib import pyplot as plt
 
 MONITOR = False
 
 
-def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
-    spice_map = np.zeros((width, height))
-    heap_pos_x = np.random.randint(0, width, n_heaps)
-    heap_pos_y = np.random.randint(0, height, n_heaps)
-
-    for (heap_x, heap_y) in zip(heap_pos_x, heap_pos_y):
-        cov = np.random.uniform(3, 9, (2, 2))
-        cov = cov @ cov.T
-        heap = np.random.multivariate_normal([heap_x, heap_y], cov, size=total_spice).astype(int)
-
-        for (x, y) in zip(heap[:, 0], heap[:, 1]):
-            if 0 < x < width and 0 < y < height:
-                spice_map[x, y] += 1
-
-    return (spice_map / np.max(spice_map) * 20).astype(int)
-
-
-def gen_river(width, height):
-    river = np.zeros((width, height))
-    river[width // 2, :] = 1
-    # river[:, height // 3: -height // 3] = 0
-    return river
-
-
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int, alpha: float, trade_percentage: float):
+    def __init__(self, experiment_name: str, width: int, height: int,
+                 n_tribes: int, n_agents: int, n_heaps: int,
+                 vision_radius: int, step_count: int, alpha: float,
+                 trade_percentage: float, spice_generator: Callable,
+                 river_generator: Callable, location_generator: Callable):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -66,8 +47,8 @@ class DuneModel(ms.Model):
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
-        spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
-        river = gen_river(self.width, self.height)
+        spice_dist = spice_generator(self.width, self.height, self.n_heaps, 1000)
+        river = river_generator(self.width, self.height)
         id = 0
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
@@ -85,9 +66,7 @@ class DuneModel(ms.Model):
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
             self.tribes.append(tribe)
-            for a in range(self.n_agents):
-                x = np.random.randint(self.width)
-                y = np.random.randint(self.height)
+            for x, y in location_generator(self.width, self.height, self):
                 spice = 3
                 vision = vision_radius
                 metabolism = .1
@@ -199,7 +178,6 @@ class DuneModel(ms.Model):
         plt.close()
 
     def run_model(self, step_count=200):
-        self.step_count = step_count
         self.current_step = 0
         self.running = True
 
