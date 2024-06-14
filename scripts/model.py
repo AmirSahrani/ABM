@@ -130,17 +130,16 @@ class DuneModel(ms.Model):
     
     def regenerate_spice(self, depleted_spice):
         self.remove_agent(depleted_spice)
-        while True:
-            x = np.random.randint(self.width)
-            y = np.random.randint(self.height)
-            if self.grid.is_cell_empty((x, y)):
-                break
-
-        new_spice_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-        max_spice = 20
-        new_spice = Spice(new_spice_id, (x, y), self, max_spice)
-        self.grid.place_agent(new_spice, (x, y))
-        self.schedule.add(new_spice)
+        spice_dist = self.gen_spice_map(self.width, self.height, self.n_heaps, 1000)
+        id = max(agent.unique_id for agent in self.schedule.agents) + 1
+        for x in range(self.width):
+            for y in range(self.height):
+                max_spice = 20
+                if self.grid.is_cell_empty((x, y)):
+                    new_spice = Spice(id, (x, y), self, max_spice)
+                    self.grid.place_agent(new_spice, (x, y))
+                    self.schedule.add(new_spice)
+                    id += 1
 
     def step(self):
         self.schedule.step()
