@@ -58,8 +58,8 @@ class DuneModel(ms.Model):
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
             "Cooperation_per_step": lambda m: m.total_cooperation / m.schedule.time if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
-            **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)}
-            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering(i)) for i in range(self.n_tribes)}
+            **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
+            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i]/ m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
@@ -171,11 +171,12 @@ class DuneModel(ms.Model):
         data = self.datacollector.get_model_vars_dataframe()
         data.to_csv(os.path.join(records_dir, "simulation_data.csv"))
 
-        self.save_plot(data, "Trades", os.path.join(figures_dir, "trades_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Nomads" for i in range(self.n_tribes)], os.path.join(figures_dir, "nomads_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Spice" for i in range(self.n_tribes)], os.path.join(figures_dir, "spice_plot.png"))
+        self.save_plot(data, [f"Tribe_{i}_Clustering" for i in range(self.n_tribes)], os.path.join(figures_dir, "clustering_plot.png"))
         self.save_plot(data, "Fights_per_step", os.path.join(figures_dir, "fights_plot.png"))
         self.save_plot(data, "Cooperation_per_step", os.path.join(figures_dir, "cooperation_plot.png"))
+        self.save_plot(data, [f"Tribe_{i}_Trades" for i in range(self.n_tribes)], os.path.join(figures_dir, "trades_plot.png"))
 
 
 

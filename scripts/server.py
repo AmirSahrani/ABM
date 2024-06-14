@@ -87,13 +87,19 @@ chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
 
-trade_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Trades", "Color": "#FFE465"},
-    {"Label": "Tribe_1_Trades", "Color": "#0000FF"},
-     {"Label": "Fights_per_step", "Color": "#00FF00"},
+fight_chart = ms.visualization.ChartModule(
+    [{"Label": "Fights_per_step", "Color": "#00FF00"},
      {"Label": "Cooperation_per_step", "Color": "#FF0000"}],
     data_collector_name='datacollector'
 )
+
+trade_colors = ["#FFA500", "#FF4500", "#FF0000", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
+trade_labels = [f"Tribe_{i}_Trades" for i in range(model_params["n_tribes"])]
+trade_chart = ms.visualization.ChartModule(
+    [{"Label": label, "Color": color} for label, color in zip(trade_labels, trade_colors)],
+    data_collector_name='datacollector'
+)
+
 
 tribe_colors = ["#0000FF", "#00FF00", "#FFA500", "#FF4500", "#FF0000", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
 tribe_nomad_labels = [f"Tribe_{i}_Nomads" for i in range(model_params["n_tribes"])]
@@ -115,18 +121,9 @@ tribe_clustering_chart = ms.visualization.ChartModule(
     data_collector_name='datacollector'
 )
 
-model_params = {
-    "width": 100,
-    "height": 100,
-    "n_tribes": 2,
-    "n_agents": 1000,
-    "n_heaps": 8,
-    "vision_radius": 5,
-}
-
 server = ms.visualization.ModularServer(
     DuneModel,
-    [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
+    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
     "Dune Model",
     model_params
 )
