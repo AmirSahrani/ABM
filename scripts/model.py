@@ -5,7 +5,7 @@ import random
 import os
 from matplotlib import pyplot as plt
 
-MONITOR = True
+MONITOR = False
 
 
 def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
@@ -28,7 +28,7 @@ def gen_spice_map(width: int, height: int, n_heaps: int, total_spice: int):
 def gen_river(width, height):
     river = np.zeros((width, height))
     river[width // 2, :] = 1
-    river[:, height // 3: -height // 3] = 0
+    # river[:, height // 3: -height // 3] = 0
     return river
 
 
@@ -55,6 +55,7 @@ class DuneModel(ms.Model):
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
+
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
@@ -62,9 +63,8 @@ class DuneModel(ms.Model):
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering(i)) for i in range(self.n_tribes)},
-            **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i]/ m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
+            **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
-
 
         spice_dist = gen_spice_map(self.width, self.height, self.n_heaps, 1000)
         river = gen_river(self.width, self.height)
@@ -72,10 +72,10 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                pass
-                # water = Water(id, (x, y), self)
-                # id += 1
-                # self.grid.place_agent(water, (x, y))
+                # pass
+                water = Water(id, (x, y), self)
+                id += 1
+                self.grid.place_agent(water, (x, y))
             elif max_spice > 0:
                 spice = Spice(id, (x, y), self, max_spice)
                 id += 1
@@ -104,31 +104,29 @@ class DuneModel(ms.Model):
 
     def total_spice(self, tribe_id):
         return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
-    
+
     def clustering(self, tribe_id):
         clustering = 0
-        i=0
+        i = 0
         for a in self.schedule.agents:
             if isinstance(a, Nomad) and a.tribe.id == tribe_id:
                 x, y = a.pos
-                neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+                neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False, radius=self.vision_radius)
                 for pos in neighbors:
                     cellmates = self.grid.get_cell_list_contents([pos])
                     other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != a and agent.tribe == a.tribe]
-                    clustering += len(other_nomads)/len(neighbors)
-            i +=1
-        return clustering/i
-        
+                    clustering += len(other_nomads) / len(neighbors)
+            i += 1
+        return clustering / i
 
     def record_trade(self, tribe_id):
-        self.trades_per_tribe[tribe_id] += 1/2
+        self.trades_per_tribe[tribe_id] += 1 / 2
 
-    
     def record_fight(self):
-        self.total_fights += 1/2
-        
+        self.total_fights += 1 / 2
+
     def record_cooperation(self):
-        self.total_cooperation += 1/2
+        self.total_cooperation += 1 / 2
 
     def step(self):
         self.schedule.step()
@@ -138,7 +136,7 @@ class DuneModel(ms.Model):
         self.current_step += 1
         if self.current_step >= self.step_count:
             self.running = False
-            self.save_results(self.experiment_name)  
+            self.save_results(self.experiment_name)
 
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
@@ -179,8 +177,6 @@ class DuneModel(ms.Model):
         self.save_plot(data, "Fights_per_step", os.path.join(figures_dir, "fights_plot.png"))
         self.save_plot(data, "Cooperation_per_step", os.path.join(figures_dir, "cooperation_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Trades" for i in range(self.n_tribes)], os.path.join(figures_dir, "trades_plot.png"))
-
-
 
     def save_plot(self, data, columns, filename):
         plt.figure()
