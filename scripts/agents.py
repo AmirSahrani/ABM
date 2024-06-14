@@ -170,11 +170,11 @@ def trade(self, agent1: Nomad, agent2: Nomad, trade_percentage: float):
 
     agent1.spice = agent1.spice - trade_amount_self + trade_amount_other
     agent2.spice = agent2.spice - trade_amount_other + trade_amount_self
+    
+    self.model.record_trade(agent1.tribe.id)
 
-    self.model.record_trade()
 
-
-def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float):
+def fighting_game(self, agent1: Nomad, agent2: Nomad, alpha: float):
     if agent1.spice >= agent2.spice:
         weak_agent = agent2
         strong_agent = agent1
@@ -188,6 +188,8 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float):
     elif weak_agent.spice <= alpha * strong_agent.spice:
         strong_agent.spice += 0
         weak_agent.spice -= 0
+        self.model.record_cooperation()
+    
 
 
 class Spice(ms.Agent):
