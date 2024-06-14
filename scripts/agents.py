@@ -139,9 +139,9 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=0.2)
+                    fighting_game(self, other, alpha=0.2, model=self.model)
                 elif other.tribe == self.tribe:
-                    trade(self, agent1=self, agent2=other, trade_percentage=0.5)
+                    trade(agent1=self, agent2=other, trade_percentage=0.5, model=self.model)
 
     # def fight(self):
     #     visible_positions = [i for i in self.model.grid.get_neighborhood(self.pos, False, False, self.vision)]
@@ -164,17 +164,17 @@ class Nomad(ms.Agent):
             self.model.add_agent(self)
 
 
-def trade(self, agent1: Nomad, agent2: Nomad, trade_percentage: float):
+def trade(agent1: Nomad, agent2: Nomad, trade_percentage: float, model: ms.Model):
     trade_amount_self = int(agent1.spice * trade_percentage)
     trade_amount_other = int(agent2.spice * trade_percentage)
 
     agent1.spice = agent1.spice - trade_amount_self + trade_amount_other
     agent2.spice = agent2.spice - trade_amount_other + trade_amount_self
     
-    self.model.record_trade(agent1.tribe.id)
+    model.record_trade(agent1.tribe.id)
 
 
-def fighting_game(self, agent1: Nomad, agent2: Nomad, alpha: float):
+def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
     if agent1.spice >= agent2.spice:
         weak_agent = agent2
         strong_agent = agent1
@@ -188,7 +188,7 @@ def fighting_game(self, agent1: Nomad, agent2: Nomad, alpha: float):
     elif weak_agent.spice <= alpha * strong_agent.spice:
         strong_agent.spice += 0
         weak_agent.spice -= 0
-        self.model.record_cooperation()
+        model.record_cooperation()
     
 
 
@@ -203,7 +203,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 1 * np.random.binomial(1, 0.01, 1)[0]
+            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
