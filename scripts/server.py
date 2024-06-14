@@ -3,6 +3,24 @@ from agents import Nomad, Spice, Water
 from model import DuneModel
 from mesa.visualization.ModularVisualization import ModularServer
 
+
+
+EXPERIMENT_NAME = "Balint_trial2"
+
+model_params = {
+    "experiment_name": EXPERIMENT_NAME,
+    "width": 100,
+    "height": 100,
+    "n_tribes": 3,
+    "n_agents": 100,
+    "n_heaps": 8,
+    "vision_radius": 5,
+    "step_count": 100,
+    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
+    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
+}
+
+
 color_dic = {
     2: "#ff0C00",
     1: "#00AA00",
@@ -78,39 +96,43 @@ chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
 
-trade_chart = ms.visualization.ChartModule(
-    [{"Label": "No_of_Trades", "Color": "#0000FF"}],
+fight_chart = ms.visualization.ChartModule(
+    [{"Label": "Fights_per_step", "Color": "#00FF00"},
+     {"Label": "Cooperation_per_step", "Color": "#FF0000"}],
     data_collector_name='datacollector'
 )
 
+trade_colors = ["#FFA500", "#FF4500", "#FF0000", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
+trade_labels = [f"Tribe_{i}_Trades" for i in range(model_params["n_tribes"])]
+trade_chart = ms.visualization.ChartModule(
+    [{"Label": label, "Color": color} for label, color in zip(trade_labels, trade_colors)],
+    data_collector_name='datacollector'
+)
+
+
+tribe_colors = ["#0000FF", "#00FF00", "#FFA500", "#FF4500", "#FF0000", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
+tribe_nomad_labels = [f"Tribe_{i}_Nomads" for i in range(model_params["n_tribes"])]
+tribe_spice_labels = [f"Tribe_{i}_Spice" for i in range(model_params["n_tribes"])]
+
 tribe_nomads_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
-     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"},
-     {"Label": "Tribe_2_Nomads", "Color": "#FF0000"}],
+    [{"Label": label, "Color": color} for label, color in zip(tribe_nomad_labels, tribe_colors)],
     data_collector_name='datacollector'
 )
 
 tribe_spice_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Spice", "Color": "#FFA500"},
-     {"Label": "Tribe_1_Spice", "Color": "#FF4500"},
-     {"Label": "Tribe_2_Spice", "Color": "#FF6347"}],
+    [{"Label": label, "Color": color} for label, color in zip(tribe_spice_labels, tribe_colors)],
     data_collector_name='datacollector'
 )
 
-model_params = {
-    "width": 100,
-    "height": 100,
-    "n_tribes": 3,
-    "n_agents": 150,
-    "n_heaps": 12,
-    "vision_radius": 5,
-    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
-    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
-}
+tribe_clustering_chart = ms.visualization.ChartModule(
+    [{"Label": "Tribe_0_Clustering", "Color": "#FFA500"},
+     {"Label": "Tribe_1_Clustering", "Color": "#FF4500"}],
+    data_collector_name='datacollector'
+)
 
 server = ms.visualization.ModularServer(
     DuneModel,
-    [canvas_element, trade_chart, tribe_nomads_chart, tribe_spice_chart],
+    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
     "Dune Model",
     model_params
 )
