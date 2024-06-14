@@ -96,7 +96,7 @@ class DuneModel(ms.Model):
                     other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != a and agent.tribe == a.tribe]
                     clustering += len(other_nomads) / len(neighbors)
             i += 1
-        return clustering / i
+        return clustering / i if i != 0 else 0
 
     def record_trade(self, tribe_id):
         self.trades_per_tribe[tribe_id] += 1 / 2
@@ -115,7 +115,7 @@ class DuneModel(ms.Model):
         self.current_step += 1
         if self.current_step >= self.step_count:
             self.running = False
-            self.save_results(self.experiment_name)
+            # self.save_results(self.experiment_name)
 
     def remove_agent(self, agent):
         self.grid.remove_agent(agent)
@@ -177,7 +177,7 @@ class DuneModel(ms.Model):
         plt.savefig(filename)
         plt.close()
 
-    def run_model(self, step_count=200):
+    def run_model(self, step_count=200, save=False):
         self.current_step = 0
         self.running = True
 
@@ -191,4 +191,8 @@ class DuneModel(ms.Model):
             print("")
             print("Final number Sugarscape Agent: ", self.schedule.get_type_count(Nomad))
 
-        self.save_results(self.experiment_name)
+        if save:
+            self.save_results(self.experiment_name)
+
+        return self.datacollector.get_model_vars_dataframe()
+

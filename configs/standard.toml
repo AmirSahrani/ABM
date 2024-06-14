@@ -1,3 +1,6 @@
+# Number of trails for each configution
+trails = 10
+
 [parameters]
 # In case you specify a range, the experiment_name is the base for the name, the experiment folder will contain the parameter that varied and its value
 experiment_name = "test"
