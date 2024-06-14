@@ -1,11 +1,16 @@
 import mesa as ms
-
 from agents import Nomad, Spice, Water
 from model import DuneModel
+from mesa.visualization.ModularVisualization import ModularServer
 
-color_dic = {2: "#ff0C00",  1: "#00AA00", 0: "#00AAff"}
+color_dic = {
+    2: "#ff0C00",
+    1: "#00AA00",
+    0: "#00AAff"
+}
+
 spice_color = {
-    0: "#FFFFE0", # light yellow
+    0: "#FFFFE0",
     1: "#FFF8C1",
     2: "#FFF1A3",
     3: "#FFEB84",
@@ -25,48 +30,50 @@ spice_color = {
     17: "#FF3700",
     18: "#FF2900",
     19: "#FF1B00",
-    20: "#FF0D00", # red
+    20: "#FF0D00"
 }
 
 def Nomad_portrayal(agent):
     if agent is None:
         return
 
-    if type(agent) is Nomad:
+    if isinstance(agent, Nomad):
         color = color_dic[agent.tribe.id]
         return {
             "Color": color,
-            "Shape": "rect",
-            "Filled": "true",
+            "Shape": "circle",
+            "Filled": "false",
+            "r": 0.7,
+            "Nomad": f"Tribe {agent.tribe.id}",
             "Layer": 0,
-            "w": 1,
-            "h": 1,
         }
 
-    elif type(agent) is Spice:
+    elif isinstance(agent, Spice):
         color = spice_color[agent.spice]
         return {
             "Color": color,
             "Shape": "rect",
             "Filled": "true",
-            "Layer": 0,
             "w": 1,
             "h": 1,
+            "Spice level": f"{agent.spice}",
+            "Layer": 0,
         }
-    elif type(agent) is Water:
+    elif isinstance(agent, Water):
         return {
             "Color": "#0000Af",
             "Shape": "rect",
             "Filled": "true",
-            "Layer": 0,
             "w": 1,
             "h": 1,
+            "Water":"",
+            "Layer": 0,
         }
 
     return {}
 
+canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 1000, 1000)
 
-canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 500, 500)
 chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
 )
@@ -78,13 +85,15 @@ trade_chart = ms.visualization.ChartModule(
 
 tribe_nomads_chart = ms.visualization.ChartModule(
     [{"Label": "Tribe_0_Nomads", "Color": "#0000FF"},
-     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"}],
+     {"Label": "Tribe_1_Nomads", "Color": "#00FF00"},
+     {"Label": "Tribe_2_Nomads", "Color": "#FF0000"}],
     data_collector_name='datacollector'
 )
 
 tribe_spice_chart = ms.visualization.ChartModule(
     [{"Label": "Tribe_0_Spice", "Color": "#FFA500"},
-     {"Label": "Tribe_1_Spice", "Color": "#FF4500"}],
+     {"Label": "Tribe_1_Spice", "Color": "#FF4500"},
+     {"Label": "Tribe_2_Spice", "Color": "#FF6347"}],
     data_collector_name='datacollector'
 )
 
@@ -92,9 +101,11 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 3,
-    "n_agents": 100,
-    "n_heaps": 8,
+    "n_agents": 150,
+    "n_heaps": 12,
     "vision_radius": 5,
+    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
+    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
 }
 
 server = ms.visualization.ModularServer(
