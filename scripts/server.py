@@ -18,6 +18,7 @@ model_params = {
     "step_count": 100,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
+    "spice_threshold": ms.visualization.Slider("Spice Threshold", 500, 0, 1000, 50),
 }
 
 

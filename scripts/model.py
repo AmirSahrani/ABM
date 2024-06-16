@@ -35,7 +35,7 @@ def gen_river(width, height):
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int, alpha: float, trade_percentage: float):
+    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int, alpha: float, trade_percentage: float, spice_threshold: int):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -51,7 +51,7 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
-        self.spice_threshold = 500
+        self.spice_threshold = spice_threshold
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
