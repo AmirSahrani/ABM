@@ -16,7 +16,8 @@ class DuneModel(ms.Model):
                  n_tribes: int, n_agents: int, n_heaps: int,
                  vision_radius: int, step_count: int, alpha: float,
                  trade_percentage: float, spice_generator: Callable,
-                 river_generator: Callable, location_generator: Callable):
+                 river_generator: Callable, location_generator: Callable,
+                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -32,6 +33,9 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
+        self.spice_kwargs = spice_kwargs
+        self.river_kwargs = spice_kwargs
+        self.location_kwargs = spice_kwargs
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
@@ -47,8 +51,8 @@ class DuneModel(ms.Model):
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
-        spice_dist = spice_generator(self.width, self.height, self.n_heaps, 1000)
-        river = river_generator(self.width, self.height)
+        spice_dist = spice_generator(self)
+        river = river_generator(self)
         id = 0
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
@@ -66,7 +70,7 @@ class DuneModel(ms.Model):
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
             self.tribes.append(tribe)
-            for x, y in location_generator(self.width, self.height, self):
+            for x, y in location_generator(self):
                 spice = 3
                 vision = vision_radius
                 metabolism = .1

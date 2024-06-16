@@ -12,17 +12,28 @@ step_count = 200
 alpha = 0.2
 trade_percentage = 0.3
 
+    [parameters.spice_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
+
+    # [parameters.river_kwargs]
+    # cov_range = [3, 9]
+    # total_spice = 1000
+    #
+    # [parameters.location_kwargs]
+    # cov_range = [3, 9]
+    # total_spice = 1000
+
+
 [functions]
 spice_generator = "gen_spice_map"
-river_generator = "gen_river"
+river_generator = "gen_river_random"
 location_generator = "random_locations"
 
-[integer_ranges]
-n_tribes = [2, 10]
-n_agents = [100, 1000]
-n_heaps = [2, 10]
-vision_radius = [3, 7]
-
-[float_ranges]
-alpha = [0.0, 0.8]
-trade_percentage = [0.0, 0.8]
+[ranges]
+n_tribes = [2, 10, 1]
+n_agents = [100, 1000, 100]
+n_heaps = [2, 10, 1]
+vision_radius = [3, 7, 1]
+alpha = [0.0, 0.8, 0.1]
+trade_percentage = [0.0, 0.8, 0.1]

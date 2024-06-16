@@ -36,8 +36,7 @@ if __name__ == "__main__":
     try:
         float_ranges = config.pop('float_ranges')
     except KeyError:
-        float_ranges = None
-
+        variables = None
     experiments = []
 
     for key, func_name in function_names.items():

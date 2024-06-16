@@ -41,6 +41,16 @@ To run experiments with different configurations, you can use a TOML file to spe
     alpha = 0.2
     trade_percentage = 0.3
 
+        [parameters.spice_kwargs]
+        cov_range = [3, 9]
+        total_spice = 1000
+
+        [parameters.river_kwargs]
+        # pass
+        
+        [parameters.location_kwargs]
+        # pass
+
     [functions]
     spice_generator = "gen_spice_map"
     river_generator = "gen_river"
