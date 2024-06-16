@@ -1,8 +1,8 @@
 import mesa as ms
 from agents import Nomad, Spice, Water
+from experiment_utils import *
 from model import DuneModel
 from mesa.visualization.ModularVisualization import ModularServer
-
 
 
 EXPERIMENT_NAME = "Balint_trial2"
@@ -11,13 +11,20 @@ model_params = {
     "experiment_name": EXPERIMENT_NAME,
     "width": 100,
     "height": 100,
-    "n_tribes": 3,
+    "n_tribes": 2,
     "n_agents": 200,
     "n_heaps": 8,
     "vision_radius": 5,
     "step_count": 100,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
+    "spice_generator": gen_spice_map,
+    "river_generator": gen_river_random,
+    "location_generator": split_tribes_locations,
+    "spice_kwargs": {
+        "total_spice": 1000,
+        "cov_range": (3, 9)
+    }
 }
 
 
