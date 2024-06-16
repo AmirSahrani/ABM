@@ -28,7 +28,6 @@ if __name__ == "__main__":
         variables = config.pop('ranges')
     except KeyError:
         variables = None
-
     experiments = []
 
     # Convert function names to actual function references
