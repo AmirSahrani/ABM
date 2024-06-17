@@ -8,8 +8,8 @@ parameter_ranges = {
     "n_agents": [100, 250, 500, 750, 1000],
     "n_heaps": [2, 4, 6, 8, 10],
     "vision_radius": [2, 3, 4, 5, 6],
-    "alpha": [0.2, 0.5, 0.8],
-    "trade_percentage": [0.2, 0.5, 0.8],
+    "alpha": [0.1, 0.3, 0.5, 0.7],
+    "trade_percentage": [0.1, 0.3, 0.5, 0.7],
     #"spice_threshold": [300, 500, 700]
 }
 
