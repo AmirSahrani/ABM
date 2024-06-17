@@ -185,6 +185,7 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
     if weak_agent.spice > alpha * strong_agent.spice:
         strong_agent.spice += alpha * weak_agent.spice - alpha * strong_agent.spice
         weak_agent.spice -= alpha * weak_agent.spice
+        model.record_fight()
     elif weak_agent.spice <= alpha * strong_agent.spice:
         strong_agent.spice += 0
         weak_agent.spice -= 0
