@@ -63,8 +63,6 @@ def split_tribes_locations(model: DuneModel):
 
     top_bound = 0 + (height // 2) * (len(model.tribes) - 1)
     bottom_bound = top_bound + height // 2 
-    print(left_bound)
-    print(right_bound, bottom_bound)
 
     return zip(np.random.randint(left_bound,
                                  right_bound, model.n_agents),

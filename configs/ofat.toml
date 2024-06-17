@@ -13,16 +13,16 @@ alpha = 0.2
 trade_percentage = 0.3
 
     [parameters.spice_kwargs]
+    cov_range = [10, 100]
+    total_spice = 1000
+
+    [parameters.river_kwargs]
     cov_range = [3, 9]
     total_spice = 1000
 
-    # [parameters.river_kwargs]
-    # cov_range = [3, 9]
-    # total_spice = 1000
-    #
-    # [parameters.location_kwargs]
-    # cov_range = [3, 9]
-    # total_spice = 1000
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
 
 
 [functions]
