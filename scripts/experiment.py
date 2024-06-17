@@ -11,9 +11,21 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+def generate_experiments(kwargs, variables):
+    experiments = []
+
+    if variables:
+        for param, val in variables.items():
+            for iter_val in np.arange(val[0], val[1], val[2]):
+                new_kwargs = kwargs.copy()
+                new_kwargs[param] = iter_val
+                experiments.append(new_kwargs)
+    return experiments
+
+
 def main(kwargs: dict):
     model = DuneModel(**kwargs)
-    return model.run_model()
+    return kwargs, model.run_model()
 
 
 if __name__ == "__main__":
@@ -28,32 +40,28 @@ if __name__ == "__main__":
         variables = config.pop('ranges')
     except KeyError:
         variables = None
+
     experiments = []
 
-    # Convert function names to actual function references
+# Convert function names to actual function references
     for key, func_name in function_names.items():
         kwargs[key] = eval(func_name) if isinstance(func_name, str) else func_name
 
     if variables:
-        for param, val in variables.items():
-            for iter_val in np.arange(val[0], val[1], val[2]):
-                for _ in range(trails):  # Add each configuration multiple times
-                    new_kwargs = kwargs.copy()
-                    new_kwargs["experiment_name"] += f'_{param}_{iter_val}'
-                    new_kwargs[param] = iter_val
-                    experiments.append(new_kwargs)
-
+        experiments = generate_experiments(kwargs, variables)
         resulting_dfs = []
         with multiprocessing.Pool() as pool:
-            for result in tqdm(pool.map(main, experiments)):
-                result['experiment_id'] = np.random.randint(1000000)
+            for kwargs, result in tqdm(pool.map(main, experiments)):
+                for key, val in kwargs.items():
+                    result[key] = val
                 resulting_dfs.append(result)
 
     else:
         resulting_dfs = []
         for _ in range(trails):
             result = main(kwargs)
-            result['experiment_id'] = np.random.randint(1000000)
+            for key, val in kwargs.items():
+                result[key] = val
             resulting_dfs.append(result)
 
     df = pd.concat(resulting_dfs)

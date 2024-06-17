@@ -64,6 +64,6 @@ base_params = {
     "spice_threshold": 500
 }
 
-n_trials = 10
+n_trials = 10 #This takes like two hours if you use 5 values and 10 replicates on Sophie's laptop.
 results = ofat_analysis(base_params, parameter_ranges, n_trials)
 results.to_csv("../data/ofat_results.csv", index=False)
