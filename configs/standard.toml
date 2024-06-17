@@ -28,7 +28,5 @@ trade_percentage = 0.3
 
 [functions]
 spice_generator = "gen_spice_map"
-river_generator = "gen_river"
+river_generator = "gen_river_random"
 location_generator = "random_locations"
-
-
