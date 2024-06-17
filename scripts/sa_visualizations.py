@@ -20,7 +20,7 @@ def plot_ofat_results(df, param_name, output_name):
     plt.show()
 
 
-plot_ofat_results(df, 'n_heaps', 'Cooperation_per_step')
+plot_ofat_results(df, 'n_heaps', 'Fights_per_step')
 # plot_ofat_results(df, 'vision_radius', 'Nomads')
 # plot_ofat_results(df, 'step_count', 'Nomads')
 # plot_ofat_results(df, 'alpha', 'Nomads')

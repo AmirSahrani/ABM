@@ -15,7 +15,7 @@ class DuneModel(ms.Model):
     def __init__(self, experiment_name: str, width: int, height: int,
                  n_tribes: int, n_agents: int, n_heaps: int,
                  vision_radius: int, step_count: int, alpha: float,
-                 trade_percentage: float, spice_generator: Callable,
+                 trade_percentage: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
                  spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}):
         super().__init__()
@@ -33,10 +33,15 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
+        self.spice_threshold = spice_threshold
         self.spice_kwargs = spice_kwargs
         self.river_kwargs = spice_kwargs
         self.location_kwargs = spice_kwargs
-
+        
+        self.spice_generator = spice_generator
+        self.river_generator = river_generator
+        self.location_generator = location_generator
+        
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
@@ -110,10 +115,32 @@ class DuneModel(ms.Model):
 
     def record_cooperation(self):
         self.total_cooperation += 1 / 2
+        
+    def total_spice_in_system(self):
+        total_spice = 0
+        for agent in self.schedule.agents:
+            if isinstance(agent, Spice):
+                total_spice += agent.spice
+        return total_spice
+
+    def regenerate_spice(self, depleted_spice=None):
+        new_spice_dist = self.spice_generator(self)
+        id = max(agent.unique_id for agent in self.schedule.agents) + 1
+        for x in range(self.width):
+            for y in range(self.height):
+                max_spice = new_spice_dist[x, y]
+                if max_spice > 0:
+                    new_spice = Spice(id, (x, y), self, max_spice)
+                    self.grid.place_agent(new_spice, (x, y))
+                    self.schedule.add(new_spice)
+                    id += 1
 
     def step(self):
         self.schedule.step()
         self.datacollector.collect(self)
+        total_spice = self.total_spice_in_system()
+        if total_spice < self.spice_threshold:
+            self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1

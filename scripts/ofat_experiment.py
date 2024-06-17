@@ -10,7 +10,7 @@ parameter_ranges = {
     "vision_radius": [2, 3, 4, 5, 6],
     "alpha": [0.1, 0.3, 0.5, 0.7],
     "trade_percentage": [0.1, 0.3, 0.5, 0.7],
-    #"spice_threshold": [300, 500, 700]
+    "spice_threshold": [0, 100, 300, 500, 700]
 }
 
 def run_simulation(params):
@@ -25,6 +25,7 @@ def run_simulation(params):
         step_count=params["step_count"],
         alpha=params["alpha"],
         trade_percentage=params["trade_percentage"],
+        spice_threshold=params["spice_threshold"],
         spice_generator=gen_spice_map,
         river_generator=gen_river_random,
         location_generator=random_locations,
@@ -60,9 +61,9 @@ base_params = {
     "step_count": 100,
     "alpha": 0.5,
     "trade_percentage": 0.5,
-    #"spice_threshold": 500
+    "spice_threshold": 500
 }
 
-n_trials = 2
+n_trials = 10
 results = ofat_analysis(base_params, parameter_ranges, n_trials)
 results.to_csv("../data/ofat_results.csv", index=False)
