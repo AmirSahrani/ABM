@@ -1,7 +1,7 @@
 import numpy as np
 from model import DuneModel
 from experiment_utils import *
-import toml
+import toml as toml
 from sys import argv
 from tqdm import tqdm
 import pandas as pd
@@ -28,7 +28,6 @@ if __name__ == "__main__":
         variables = config.pop('ranges')
     except KeyError:
         variables = None
-
     experiments = []
 
     # Convert function names to actual function references
@@ -47,21 +46,15 @@ if __name__ == "__main__":
         resulting_dfs = []
         with multiprocessing.Pool() as pool:
             for result in tqdm(pool.map(main, experiments)):
-                resulting_dfs.append(pd.DataFrame([result]))
+                result['experiment_id'] = np.random.randint(1000000)
+                resulting_dfs.append(result)
 
     else:
         resulting_dfs = []
         for _ in range(trails):
-            new_kwargs = kwargs.copy()
-            new_kwargs["experiment_id"] = np.random.randint(1000000)
-            new_kwargs["n_tribes"] = new_kwargs.get("n_tribes", kwargs["n_tribes"])
-            new_kwargs["n_agents"] = new_kwargs.get("n_agents", kwargs["n_agents"])
-            new_kwargs["n_heaps"] = new_kwargs.get("n_heaps", kwargs["n_heaps"])
-            new_kwargs["vision_radius"] = new_kwargs.get("vision_radius", kwargs["vision_radius"])
-            new_kwargs["alpha"] = new_kwargs.get("alpha", kwargs["alpha"])
-            new_kwargs["trade_percentage"] = new_kwargs.get("trade_percentage", kwargs["trade_percentage"])
-            result = main(new_kwargs)
-            resulting_dfs.append(pd.DataFrame([result]))
+            result = main(kwargs)
+            result['experiment_id'] = np.random.randint(1000000)
+            resulting_dfs.append(result)
 
-    df = pd.concat(resulting_dfs, ignore_index=True)
-    df.to_csv(f'data/{kwargs["experiment_name"]}.csv', index=False)
+    df = pd.concat(resulting_dfs)
+    df.to_csv(f'data/{kwargs["experiment_name"]}.csv')
