@@ -34,8 +34,8 @@ class DuneModel(ms.Model):
         self.alpha = alpha
         self.trade_percentage = trade_percentage
         self.spice_kwargs = spice_kwargs
-        self.river_kwargs = spice_kwargs
-        self.location_kwargs = spice_kwargs
+        self.river_kwargs = river_kwargs 
+        self.location_kwargs =location_kwargs 
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
