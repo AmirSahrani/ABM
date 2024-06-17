@@ -23,7 +23,7 @@ model_params = {
     "location_generator": split_tribes_locations,
     "spice_kwargs": {
         "total_spice": 1000,
-        "cov_range": (3, 9)
+        "cov_range": (8, 20)
     }
 }
 
