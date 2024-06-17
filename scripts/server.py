@@ -5,7 +5,7 @@ from model import DuneModel
 from mesa.visualization.ModularVisualization import ModularServer
 
 
-EXPERIMENT_NAME = "Balint_trial2"
+EXPERIMENT_NAME = "Joana_trial_1"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
