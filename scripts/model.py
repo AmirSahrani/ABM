@@ -48,6 +48,7 @@ class DuneModel(ms.Model):
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
+        self.id = 0
 
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
@@ -61,16 +62,15 @@ class DuneModel(ms.Model):
 
         spice_dist = self.spice_generator(self)
         river = self.river_generator(self)
-        self.id = 0
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                water = Water(id, (x, y), self)
                 self.id += 1
+                water = Water(self.id, (x, y), self)
                 self.grid.place_agent(water, (x, y))
                 self.schedule.add(water)
             elif max_spice > 0:
-                spice = Spice(id, (x, y), self, max_spice)
+                spice = Spice(self.id, (x, y), self, max_spice)
                 self.id += 1
                 self.grid.place_agent(spice, (x, y))
                 self.schedule.add(spice)
@@ -82,8 +82,8 @@ class DuneModel(ms.Model):
                 spice = 3
                 vision = vision_radius
                 metabolism = .1
-                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism, alpha, trade_percentage, spice_movement_bias, tribe_movement_bias)
                 self.id += 1
+                nom = Nomad(self.id, self, (x, y), spice, vision, tribe, metabolism, alpha, trade_percentage, spice_movement_bias, tribe_movement_bias)
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
 
@@ -128,22 +128,24 @@ class DuneModel(ms.Model):
 
     def regenerate_spice(self):
         self.n_heaps = 1
-        new_spice_dist = self.spice_generator(self)
-        for x in range(self.width):
-            for y in range(self.height):
-                max_spice = new_spice_dist[x, y]
-                if max_spice > 0:
-                    for agent in self.grid.get_cell_list_contents([x, y]):
+        spice_dist = self.spice_generator(self)
+        for _, (x, y) in self.grid.coord_iter():
+            max_spice = spice_dist[x, y]
+            if max_spice > 0:
+                for agent in self.grid.get_cell_list_contents([x,y]):
                         if isinstance(agent, Water):
                             continue
-                        if isinstance(agent, Spice) and agent.spice < 20:
+                        elif isinstance(agent, Spice) and agent.spice < 20:
                             agent.spice += max_spice
-                            agent.spice %= 20
+                            agent.spice %= 21
+                            break
                         else:
                             self.id += 1
-                            new_spice = Spice(id, (x, y), self, max_spice)
+                            new_spice = Spice(self.id, (x, y), self, max_spice)
                             self.grid.place_agent(new_spice, (x, y))
                             self.schedule.add(new_spice)
+                            break
+
 
     def step(self):
         self.schedule.step()
