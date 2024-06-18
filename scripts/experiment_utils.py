@@ -47,7 +47,7 @@ def gen_river_random(model: DuneModel):
 
     river[loc[0], loc[1]] = 1
     while loc[1] != height:
-        river[loc[0], loc[1]] = 1
+        river[loc[0] % width, loc[1]] = 1
         loc += directions[np.random.randint(3)]
     return river
 
