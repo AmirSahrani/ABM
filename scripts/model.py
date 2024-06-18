@@ -138,7 +138,7 @@ class DuneModel(ms.Model):
             tribe = parent_agent.tribe
 
             new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism)
+            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, alpha=parent_agent.alpha, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
 

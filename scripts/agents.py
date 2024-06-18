@@ -34,7 +34,7 @@ class Nomad(ms.Agent):
         self.tribe = tribe
         self.metabolism = metabolism
         self.spice_movement_bias = spice_movement_bias
-        self.movement_bias = tribe_movement_bias
+        self.tribe_movement_bias = tribe_movement_bias
         self.alpha = alpha
         self.trade_percentage = trade_percentage
         # self.hardship = self.calculate_hardship()
@@ -99,7 +99,7 @@ class Nomad(ms.Agent):
         else:
             tribe_members = [pos for pos in visible_positions if self.is_tribe_member(pos)]
             
-            if tribe_members and self.random.random() < self.movement_bias:
+            if tribe_members and self.random.random() < self.tribe_movement_bias:
                 chosen_pos = self.random.choice(tribe_members)
                 moved_towards = "tribe member"
             else:
