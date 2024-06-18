@@ -17,10 +17,22 @@ def plot_ofat_results(df, param_name, output_name):
     plt.title(f'Mean, Max, and Min of {output_name} for {param_name}')
     plt.legend()
     plt.show()
+    
+def plot_all_values(df, param_name, output_name):
+    df_param = df[[param_name, output_name]]
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df_param[param_name], df_param[output_name], marker='o', color='blue')
 
+    plt.xlabel(f'{param_name}')
+    plt.ylabel(f'{output_name}')
+    #plt.title(f'Number of Nomads for each {param_name}')
+    plt.legend()
+    plt.show()
+    
 
-plot_ofat_results(df, 'n_heaps', 'Cooperation_per_step')
+#plot_all_values(df, 'n_heaps', 'Cooperation_per_step')
+#plot_ofat_results(df, 'vision_radius', 'Fights_per_step')
+plot_all_values(df, 'vision_radius', 'Fights_per_step')
 #plot_ofat_results(df, 'vision_radius', 'Nomads')
-# plot_ofat_results(df, 'step_count', 'Nomads')
-# plot_ofat_results(df, 'alpha', 'Nomads')
-# plot_ofat_results(df, 'trade_percentage', 'Nomads')
+#plot_ofat_results(df, 'alpha', 'Nomads')
+#plot_ofat_results(df, 'trade_percentage', 'Nomads')
