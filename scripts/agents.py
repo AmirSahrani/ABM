@@ -26,13 +26,17 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float):
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float, alpha: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
         self.vision = vision
         self.tribe = tribe
         self.metabolism = metabolism
+        self.spice_movement_bias = spice_movement_bias
+        self.movement_bias = tribe_movement_bias
+        self.alpha = alpha
+        self.trade_percentage = trade_percentage
         # self.hardship = self.calculate_hardship()
         # self.legitimacy = self.calculate_legitimacy()
 
@@ -56,10 +60,24 @@ class Nomad(ms.Agent):
             if isinstance(agent, Spice):
                 return agent
         return None
+    
+    def is_tribe_member(self, pos):
+            """
+            Check if the agent at the given position is a member of the same tribe.
+            """
+            this_cell = self.model.grid.get_cell_list_contents([pos])
+            for agent in this_cell:
+                if isinstance(agent, Nomad):
+                    # print(f"Nomad {agent.unique_id} found at {pos} with tribe {agent.tribe.id}")
+                    if agent.tribe == self.tribe:
+                        # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
+                        return True
+            return False
 
     def move(self):
         """
-        move towards spice, if no spice is visible, move randomly
+        Move towards spice, if no spice is visible, move towards a tribe member with a bias,
+        if no spice or tribe member is visible, move randomly.
         """
         visible_positions = [
             i for i in self.model.grid.get_neighborhood(
@@ -67,18 +85,26 @@ class Nomad(ms.Agent):
             )
         ]
 
-        visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
+        # visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
 
         if not visible_positions:
             return
 
         spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
-
-        if max(spice_levels) > 0:
+        moved_towards = ""
+        if max(spice_levels) > 0 and self.random.random() < self.spice_movement_bias:
             max_spice_positions = [pos for pos, spice in zip(visible_positions, spice_levels) if spice == max(spice_levels)]
             chosen_pos = self.random.choice(max_spice_positions)
+            moved_towards = "spice"
         else:
-            chosen_pos = self.random.choice(visible_positions)
+            tribe_members = [pos for pos in visible_positions if self.is_tribe_member(pos)]
+            
+            if tribe_members and self.random.random() < self.movement_bias:
+                chosen_pos = self.random.choice(tribe_members)
+                moved_towards = "tribe member"
+            else:
+                chosen_pos = self.random.choice(visible_positions)
+                moved_towards = "random"
 
         immediate_neighbors = [
             (self.pos[0] + dx, self.pos[1] + dy)
@@ -96,16 +122,16 @@ class Nomad(ms.Agent):
             return
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
-
+        print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
 
-        # neighbors.append(self.pos)
-        # max_spice = [self.get_spice(p) for p in neighbors]
-        # max_spice = list(filter(lambda x: x is not None, max_spice))
-        # new_pos = np.random.choice(max_spice)
 
-        # self.model.grid.move_agent(self, new_pos.pos)
+
+
+
+
+
 
     def sniff(self):
         spice_patch = self.get_spice(self.pos)

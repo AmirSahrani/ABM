@@ -35,7 +35,7 @@ def gen_river(width, height):
 class DuneModel(ms.Model):
     verbose = MONITOR
 
-    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int, alpha: float, trade_percentage: float):
+    def __init__(self, experiment_name: str, width: int, height: int, n_tribes: int, n_agents: int, n_heaps: int, vision_radius: int, step_count: int, alpha: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -51,6 +51,8 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
+        self.spice_movement_bias = spice_movement_bias
+        self.tribe_movement_bias = tribe_movement_bias
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
@@ -72,10 +74,10 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                # pass
-                water = Water(id, (x, y), self)
-                id += 1
-                self.grid.place_agent(water, (x, y))
+                pass
+                # water = Water(id, (x, y), self)
+                # id += 1
+                # self.grid.place_agent(water, (x, y))
             elif max_spice > 0:
                 spice = Spice(id, (x, y), self, max_spice)
                 id += 1
@@ -91,7 +93,7 @@ class DuneModel(ms.Model):
                 spice = 3
                 vision = vision_radius
                 metabolism = .1
-                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
+                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism, alpha, trade_percentage, spice_movement_bias, tribe_movement_bias)
                 id += 1
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
@@ -117,7 +119,7 @@ class DuneModel(ms.Model):
                     other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != a and agent.tribe == a.tribe]
                     clustering += len(other_nomads) / len(neighbors)
             i += 1
-        return clustering / i
+        return clustering / i if i > 0 else 0
 
     def record_trade(self, tribe_id):
         self.trades_per_tribe[tribe_id] += 1 / 2
