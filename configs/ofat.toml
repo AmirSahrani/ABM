@@ -18,9 +18,16 @@ spice_threshold = 0
     total_spice = 1000
 
     [parameters.river_kwargs]
+    cov_range = [10, 100]
+    total_spice = 1000
+
+    [parameters.river_kwargs]
     cov_range = [3, 9]
     total_spice = 1000
 
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
     [parameters.location_kwargs]
     cov_range = [3, 9]
     total_spice = 1000
