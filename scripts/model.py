@@ -124,6 +124,7 @@ class DuneModel(ms.Model):
         return total_spice
 
     def regenerate_spice(self, depleted_spice=None):
+        model.n_heaps = 1
         new_spice_dist = self.spice_generator(self)
         id = max(agent.unique_id for agent in self.schedule.agents) + 1
         for x in range(self.width):
