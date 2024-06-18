@@ -1,4 +1,4 @@
-trails = 10
+trials = 10
 
 [parameters]
 experiment_name = "ofat_analysis"
