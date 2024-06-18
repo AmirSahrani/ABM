@@ -32,7 +32,8 @@ def gen_river_line(model: DuneModel):
 
 def no_river(model: DuneModel):
     width, height = model.width, model.height
-    return  np.zeros((width, height))
+    return np.zeros((width, height))
+
 
 def gen_river_random(model: DuneModel):
     """ Generates a river using a random walker """
