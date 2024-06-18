@@ -126,7 +126,7 @@ class DuneModel(ms.Model):
         return total_spice
 
     def regenerate_spice(self, depleted_spice=None):
-        model.n_heaps = 1
+        self.n_heaps = 1
         new_spice_dist = self.spice_generator(self)
         id = max(agent.unique_id for agent in self.schedule.agents) + 1
         for x in range(self.width):
@@ -144,6 +144,7 @@ class DuneModel(ms.Model):
         total_spice = self.total_spice_in_system()
         if total_spice < self.spice_threshold:
             self.regenerate_spice()
+            print("New spice mound")
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1

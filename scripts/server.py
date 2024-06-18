@@ -29,7 +29,8 @@ model_params = {
     "spice_kwargs": {
         "total_spice": 1000,
         "cov_range": (8, 20)
-    }
+    },
+    "spice_threshold": 500
 }
 
 
@@ -183,5 +184,5 @@ server = CustomModularServer(
     description=description
 )
 
-
+server.port = 8522
 server.launch()
