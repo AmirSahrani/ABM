@@ -1,0 +1,39 @@
+trails = 10
+
+[parameters]
+experiment_name = "ofat_analysis"
+width = 100
+height = 100
+n_tribes = 3
+n_agents = 200
+n_heaps = 8
+vision_radius = 5
+step_count = 100
+alpha = 0.5
+trade_percentage = 0.5
+
+    [parameters.spice_kwargs]
+    cov_range = [10, 100]
+    total_spice = 1000
+
+    [parameters.river_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
+
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
+
+
+[functions]
+spice_generator = "gen_spice_map"
+river_generator = "gen_river_random"
+location_generator = "random_locations"
+
+[ranges]
+n_tribes = [2, 6, 1]
+n_agents = [100, 1000, 250]
+n_heaps = [2, 10, 2]
+vision_radius = [2, 6, 1]
+alpha = [0.1, 0.7, 0.1]
+trade_percentage = [0.1, 0.7, 0.1]
