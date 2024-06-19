@@ -15,7 +15,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 4,
-    "n_agents": 20,
+    "n_agents": 40,
     "n_heaps": 8,
     "vision_radius": 5,
     "step_count": 200,
@@ -25,7 +25,7 @@ model_params = {
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
     "river_generator": no_river,
-    "location_generator": random_locations,
+    "location_generator": split_tribes_locations,
     "spice_kwargs": {
         "total_spice": 8000,
         "cov_range": (8, 20)
