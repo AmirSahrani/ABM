@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('../data/ofat_results_toml.csv')
+df = pd.read_csv('data/ofat_results_toml.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -36,13 +36,13 @@ def plot_all_ofat_results(df, param_name):
         ax.set_xlabel(param_name)
         ax.set_ylabel(metric)
         ax.set_title(f'{metric} vs {param_name}')
-        ax.grid(True) #For Sandor lol
+        ax.grid(True) #For Sandor lol, I like em too
     
     plt.tight_layout()
     plt.show()
 
 
-plot_all_ofat_results(df, 'n_tribes')
+# plot_all_ofat_results(df, 'n_tribes')
 # plot_all_ofat_results(df, 'n_agents')
 # plot_all_ofat_results(df, 'n_heaps')
 # plot_all_ofat_results(df, 'vision_radius')

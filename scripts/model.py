@@ -237,3 +237,4 @@ class DuneModel(ms.Model):
         if save:
             self.save_results(self.experiment_name)
 
+        return self.datacollector.get_model_vars_dataframe()
