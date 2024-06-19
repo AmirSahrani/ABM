@@ -59,14 +59,12 @@ def random_locations(model: DuneModel):
 
 def split_tribes_locations(model: DuneModel):
     width, height = model.width, model.height
-    """ Assumes only two tribes, locations will be top left, bottom right"""
 
-    assert model.n_tribes == 2, "Splitting tribes only works for 2 tribes"
-    left_bound = 0 + (width // 2) * (len(model.tribes) - 1)
-    right_bound = left_bound + width // 2
+    left_bound = 0 + (width // model.n_tribes) * (len(model.tribes) - 1)
+    right_bound = left_bound + width // model.n_tribes
 
-    top_bound = 0 + (height // 2) * (len(model.tribes) - 1)
-    bottom_bound = top_bound + height // 2 
+    top_bound = 0 + (height // model.n_tribes) * (len(model.tribes) - 1)
+    bottom_bound = top_bound + height // model.n_tribes
 
     return zip(np.random.randint(left_bound,
                                  right_bound, model.n_agents),
