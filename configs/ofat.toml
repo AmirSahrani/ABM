@@ -1,7 +1,7 @@
 trials = 10
 
 [parameters]
-experiment_name = "ofat_analysis"
+experiment_name = "ofat_results"
 width = 100
 height = 100
 n_tribes = 2

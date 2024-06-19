@@ -236,4 +236,12 @@ class DuneModel(ms.Model):
 
         if save:
             self.save_results(self.experiment_name)
+            
+        data = self.datacollector.get_model_vars_dataframe()
+        if data is None or data.empty:
+            print("Data collection returned None or empty DataFrame.")
+        else:
+            print("Data collection successful.")
+
+        return data
 
