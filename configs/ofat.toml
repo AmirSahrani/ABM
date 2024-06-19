@@ -1,4 +1,4 @@
-trails = 10
+trials = 10
 
 [parameters]
 experiment_name = "ofat_analysis"
@@ -11,8 +11,13 @@ vision_radius = 5
 step_count = 100
 alpha = 0.5
 trade_percentage = 0.5
+spice_threshold = 0
 
     [parameters.spice_kwargs]
+    cov_range = [10, 100]
+    total_spice = 1000
+
+    [parameters.river_kwargs]
     cov_range = [10, 100]
     total_spice = 1000
 
@@ -20,6 +25,9 @@ trade_percentage = 0.5
     cov_range = [3, 9]
     total_spice = 1000
 
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
     [parameters.location_kwargs]
     cov_range = [3, 9]
     total_spice = 1000
@@ -37,3 +45,4 @@ n_heaps = [2, 10, 2]
 vision_radius = [2, 6, 1]
 alpha = [0.1, 0.7, 0.1]
 trade_percentage = [0.1, 0.7, 0.1]
+spice_threshold = [0, 500, 100]

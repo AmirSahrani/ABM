@@ -2,7 +2,10 @@ import mesa as ms
 from agents import Nomad, Spice, Water
 from experiment_utils import *
 from model import DuneModel
-from mesa.visualization.ModularVisualization import ModularServer
+from mesa.visualization.ModularVisualization import ModularServer, PageHandler
+import os
+import tornado.web
+
 
 
 EXPERIMENT_NAME = "Joana_trial_1"
@@ -11,20 +14,23 @@ model_params = {
     "experiment_name": EXPERIMENT_NAME,
     "width": 100,
     "height": 100,
-    "n_tribes": 2,
-    "n_agents": 200,
+    "n_tribes": 4,
+    "n_agents": 40,
     "n_heaps": 8,
     "vision_radius": 5,
-    "step_count": 100,
-    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1),
-    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1),
+    "step_count": 200,
+    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
+    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
+    "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
+    "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
-    "river_generator": gen_river_random,
+    "river_generator": no_river,
     "location_generator": split_tribes_locations,
     "spice_kwargs": {
-        "total_spice": 1000,
+        "total_spice": 8000,
         "cov_range": (8, 20)
-    }
+    },
+    "spice_threshold": 900
 }
 
 
@@ -63,7 +69,7 @@ def Nomad_portrayal(agent):
         return
 
     if isinstance(agent, Nomad):
-        color = color_dic[agent.tribe.id]
+        color = tribe_colors[agent.tribe.id]
         return {
             "Color": color,
             "Shape": "circle",
@@ -137,11 +143,46 @@ tribe_clustering_chart = ms.visualization.ChartModule(
     data_collector_name='datacollector'
 )
 
-server = ms.visualization.ModularServer(
+description = """
+By Sophie, Joana, Amir, Bálint, and Sándor
+"""
+
+# package_css_includes = []
+# local_css_includes = ["custom.css"]
+
+class CustomPageHandler(PageHandler):
+    def get(self):
+        elements = self.application.visualization_elements
+        for i, element in enumerate(elements):
+            element.index = i
+        self.render(
+            "modular_template.html",
+            port=self.application.port,
+            model_name=self.application.model_name,
+            description=self.application.description,
+            package_js_includes=self.application.package_js_includes,
+            package_css_includes=self.package_css_includes,
+            local_js_includes=self.application.local_js_includes,
+            local_css_includes=self.application.local_css_includes,
+            scripts=self.application.js_code,
+        )
+
+class CustomModularServer(ModularServer):
+    def __init__(self, model_cls, visualization_elements, name="Mesa Model", model_params=None, port=None, description="No description available"):
+        super().__init__(model_cls, visualization_elements, name, model_params, port)
+        self.description = description
+        self.handlers[0] = (r"/", CustomPageHandler)
+        self.settings["template_path"] = os.path.join(os.path.dirname(__file__), "templates")
+        self.settings["static_path"] = os.path.join(os.path.dirname(__file__), "static")
+        self.handlers.append((r"/static/(.*)", tornado.web.StaticFileHandler, {"path": self.settings["static_path"]}))
+
+server = CustomModularServer(
     DuneModel,
     [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
     "Dune Model",
-    model_params
+    model_params,
+    description=description
 )
 
+server.port = 8700
 server.launch()

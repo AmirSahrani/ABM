@@ -15,7 +15,7 @@ class DuneModel(ms.Model):
     def __init__(self, experiment_name: str, width: int, height: int,
                  n_tribes: int, n_agents: int, n_heaps: int,
                  vision_radius: int, step_count: int, alpha: float,
-                 trade_percentage: float, spice_generator: Callable,
+                 trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
                  spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}):
         super().__init__()
@@ -33,13 +33,22 @@ class DuneModel(ms.Model):
         self.current_step = 0
         self.alpha = alpha
         self.trade_percentage = trade_percentage
+        self.spice_threshold = spice_threshold
+        self.spice_movement_bias = spice_movement_bias
+        self.tribe_movement_bias = tribe_movement_bias
+
+        self.spice_generator = spice_generator
+        self.river_generator = river_generator
+        self.location_generator = location_generator
+
         self.spice_kwargs = spice_kwargs
-        self.river_kwargs = spice_kwargs
-        self.location_kwargs = spice_kwargs
+        self.river_kwargs = river_kwargs
+        self.location_kwargs = location_kwargs
 
         self.trades_per_tribe = {tribe_id: 0 for tribe_id in range(n_tribes)}
         self.schedule = ms.time.RandomActivationByType(self)
         self.grid = ms.space.MultiGrid(self.width, self.height, torus=False)
+        self.id = 0
 
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
@@ -51,31 +60,30 @@ class DuneModel(ms.Model):
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
-        spice_dist = spice_generator(self)
-        river = river_generator(self)
-        id = 0
+        spice_dist = self.spice_generator(self)
+        river = self.river_generator(self)
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if river[x, y]:
-                # pass
-                water = Water(id, (x, y), self)
-                id += 1
+                self.id += 1
+                water = Water(self.id, (x, y), self)
                 self.grid.place_agent(water, (x, y))
+                self.schedule.add(water)
             elif max_spice > 0:
-                spice = Spice(id, (x, y), self, max_spice)
-                id += 1
+                spice = Spice(self.id, (x, y), self, max_spice)
+                self.id += 1
                 self.grid.place_agent(spice, (x, y))
                 self.schedule.add(spice)
 
         for t in range(self.n_tribes):
             tribe = Tribe(t, 0)
             self.tribes.append(tribe)
-            for x, y in location_generator(self):
+            for x, y in self.location_generator(self):
                 spice = 3
                 vision = vision_radius
                 metabolism = .1
-                nom = Nomad(id, self, (x, y), spice, vision, tribe, metabolism)
-                id += 1
+                self.id += 1
+                nom = Nomad(self.id, self, (x, y), spice, vision, tribe, metabolism, alpha, trade_percentage, spice_movement_bias, tribe_movement_bias)
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
 
@@ -110,10 +118,41 @@ class DuneModel(ms.Model):
 
     def record_cooperation(self):
         self.total_cooperation += 1 / 2
+        
+    def total_spice_in_system(self):
+        total_spice = 0
+        for agent in self.schedule.agents:
+            if isinstance(agent, Spice):
+                total_spice += agent.spice
+        return total_spice
+
+    def regenerate_spice(self):
+        self.n_heaps = 1
+        spice_dist = self.spice_generator(self)
+        for _, (x, y) in self.grid.coord_iter():
+            max_spice = spice_dist[x, y]
+            if max_spice > 0:
+                for agent in self.grid.get_cell_list_contents([x,y]):
+                        if isinstance(agent, Water):
+                            continue
+                        elif isinstance(agent, Spice) and agent.spice < 20:
+                            agent.spice += max_spice
+                            agent.spice %= 21
+                            break
+                        else:
+                            self.id += 1
+                            new_spice = Spice(self.id, (x, y), self, max_spice)
+                            self.grid.place_agent(new_spice, (x, y))
+                            self.schedule.add(new_spice)
+                            break
+
 
     def step(self):
         self.schedule.step()
         self.datacollector.collect(self)
+        total_spice = self.total_spice_in_system()
+        if total_spice < self.spice_threshold:
+            self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1
@@ -135,8 +174,8 @@ class DuneModel(ms.Model):
             vision = parent_agent.vision
             tribe = parent_agent.tribe
 
-            new_agent_id = max(agent.unique_id for agent in self.schedule.agents) + 1
-            new_agent = Nomad(new_agent_id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism)
+            self.id += 1
+            new_agent = Nomad(self.id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, alpha=parent_agent.alpha, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
 
@@ -197,6 +236,4 @@ class DuneModel(ms.Model):
 
         if save:
             self.save_results(self.experiment_name)
-
-        return self.datacollector.get_model_vars_dataframe()
 
