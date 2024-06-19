@@ -59,7 +59,7 @@ if __name__ == "__main__":
     else:
         resulting_dfs = []
         for _ in range(trials):
-            result = main(kwargs)
+            kwargs, result = main(kwargs)
             for key, val in kwargs.items():
                 result[key] = val
             resulting_dfs.append(result)
