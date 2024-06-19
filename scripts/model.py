@@ -5,6 +5,8 @@ import random
 from typing import Callable
 import os
 from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 MONITOR = False
 
@@ -52,11 +54,12 @@ class DuneModel(ms.Model):
 
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
+            "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
             "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
             "Cooperation_per_step": lambda m: m.total_cooperation / m.schedule.time if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
-            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering(i)) for i in range(self.n_tribes)},
+            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_K_means(i)[0]) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
@@ -96,19 +99,63 @@ class DuneModel(ms.Model):
     def total_spice(self, tribe_id):
         return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
 
-    def clustering(self, tribe_id):
-        clustering = 0
-        i = 0
-        for a in self.schedule.agents:
-            if isinstance(a, Nomad) and a.tribe.id == tribe_id:
-                x, y = a.pos
-                neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False, radius=self.vision_radius)
-                for pos in neighbors:
-                    cellmates = self.grid.get_cell_list_contents([pos])
-                    other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != a and agent.tribe == a.tribe]
-                    clustering += len(other_nomads) / len(neighbors)
-            i += 1
-        return clustering / i if i != 0 else 0
+    
+    def determine_optimal_k(self, points, max_k):
+        silhouette_scores = []
+        k_range = range(2, min(max_k, len(points)))
+
+        if len(points) < 2:
+            return len(points)
+        
+        for k in k_range:
+            if len(points) <= k:
+                silhouette_scores.append(-1)  
+            else:
+                kmeans = KMeans(n_clusters=k, random_state=0)
+                kmeans.fit(points)
+                labels = kmeans.labels_
+                if len(set(labels)) > 1:  
+                    silhouette_scores.append(silhouette_score(points, labels))
+                else:
+                    silhouette_scores.append(-1)  
+
+        if all(score == -1 for score in silhouette_scores):
+            return len(points)  
+
+        valid_scores = [(score, k) for score, k in zip(silhouette_scores, k_range) if score != -1]
+        optimal_k = max(valid_scores, key=lambda x: x[0])[1]
+        
+        return optimal_k
+
+    def clustering_K_means(self, tribe_id, k_max=20):
+            positions = []
+            for a in self.schedule.agents:
+                if isinstance(a, Nomad) and a.tribe.id == tribe_id:
+                    positions.append(a.pos)
+            
+            positions = np.array(positions)
+            total_individuals = len(positions) 
+            if total_individuals == 0:
+                return 0, []
+            k = self.determine_optimal_k(positions, k_max) 
+            
+            if k > 0:
+                kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
+                labels = kmeans.labels_
+                unique_labels, counts = np.unique(labels, return_counts=True)
+                average_cluster_size = np.mean(counts)/ total_individuals
+            else:
+                average_cluster_size = 0
+                counts = []
+            
+            return average_cluster_size, counts
+        
+    def total_clutering(self, n_tribes):
+        total_clustering = 0
+        for i in range(n_tribes):
+            clustering, _ = self.clustering_K_means(i)
+            total_clustering += self.count_tribe_nomads(i)*clustering/self.schedule.get_type_count(Nomad)
+        return total_clustering
 
     def record_trade(self, tribe_id):
         self.trades_per_tribe[tribe_id] += 1 / 2
