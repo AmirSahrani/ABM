@@ -1,4 +1,4 @@
-trials = 10
+trials = 20
 
 [parameters]
 experiment_name = "ofat_results"
