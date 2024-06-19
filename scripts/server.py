@@ -14,8 +14,8 @@ model_params = {
     "experiment_name": EXPERIMENT_NAME,
     "width": 100,
     "height": 100,
-    "n_tribes": 2,
-    "n_agents": 200,
+    "n_tribes": 4,
+    "n_agents": 40,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 5, 1, 50, 1, description="How far can they see"),
     "step_count": 100,
@@ -24,12 +24,13 @@ model_params = {
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
-    "river_generator": gen_river_random,
+    "river_generator": no_river,
     "location_generator": split_tribes_locations,
     "spice_kwargs": {
-        "total_spice": 1000,
+        "total_spice": 8000,
         "cov_range": (8, 20)
-    }
+    },
+    "spice_threshold": 900
 }
 
 
@@ -68,7 +69,7 @@ def Nomad_portrayal(agent):
         return
 
     if isinstance(agent, Nomad):
-        color = color_dic[agent.tribe.id]
+        color = tribe_colors[agent.tribe.id]
         return {
             "Color": color,
             "Shape": "circle",

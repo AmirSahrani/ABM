@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     function_names = config.pop('functions')
     kwargs = config.pop('parameters')
-    trails = config.pop('trails')
+    trials = config.pop('trials')
     try:
         variables = config.pop('ranges')
     except KeyError:
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     else:
         resulting_dfs = []
-        for _ in range(trails):
+        for _ in range(trials):
             result = main(kwargs)
             for key, val in kwargs.items():
                 result[key] = val
