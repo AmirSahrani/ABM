@@ -1,48 +1,45 @@
-trials = 10
+trials = 20
 
 [parameters]
-experiment_name = "ofat_analysis"
+experiment_name = "ofat_results"
 width = 100
 height = 100
-n_tribes = 3
+n_tribes = 2
 n_agents = 200
 n_heaps = 8
 vision_radius = 5
-step_count = 100
+step_count = 200
 alpha = 0.5
 trade_percentage = 0.5
-spice_threshold = 0
+spice_movement_bias = 1.0
+tribe_movement_bias = 0.0
+spice_threshold = 900
+
 
     [parameters.spice_kwargs]
-    cov_range = [10, 100]
-    total_spice = 1000
+    total_spice = 8000
+    cov_range = [8, 20]
 
     [parameters.river_kwargs]
     cov_range = [10, 100]
     total_spice = 1000
 
-    [parameters.river_kwargs]
-    cov_range = [3, 9]
-    total_spice = 1000
-
     [parameters.location_kwargs]
     cov_range = [3, 9]
     total_spice = 1000
-    [parameters.location_kwargs]
-    cov_range = [3, 9]
-    total_spice = 1000
-
 
 [functions]
 spice_generator = "gen_spice_map"
-river_generator = "gen_river_random"
+river_generator = "no_river" 
 location_generator = "random_locations"
 
 [ranges]
-n_tribes = [2, 6, 1]
-n_agents = [100, 1000, 250]
-n_heaps = [2, 10, 2]
-vision_radius = [2, 6, 1]
-alpha = [0.1, 0.7, 0.1]
-trade_percentage = [0.1, 0.7, 0.1]
-spice_threshold = [0, 500, 100]
+n_tribes = [2, 12, 2]
+n_agents = [200, 1200, 200]
+n_heaps = [2, 12, 2]
+vision_radius = [2, 12, 1]
+alpha = [0.0, 1.0, 0.2]
+trade_percentage = [0.0, 1.0, 0.2]
+spice_movement_bias = [0.0, 1.0, 0.2]
+tribe_movement_bias = [0.0, 1.0, 0.2]
+spice_threshold = [0, 1000, 200]

@@ -25,8 +25,8 @@ def plot_single_ofat_result(df, param_name, output_name):
 
 
 def plot_all_ofat_results(df, param_name):
-    metrics = ['Nomads', 'Cooperation_per_step', 'Fights_per_step']
-    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+    metrics = ['Nomads', 'Cooperation_per_step', 'Fights_per_step', 'total_Clustering']
+    fig, axs = plt.subplots(1, 4, figsize=(18, 6))
     
     for i, metric in enumerate(metrics):
         ax = axs[i]

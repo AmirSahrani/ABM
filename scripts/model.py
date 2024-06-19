@@ -243,6 +243,7 @@ class DuneModel(ms.Model):
         self.save_plot(data, [f"Tribe_{i}_Nomads" for i in range(self.n_tribes)], os.path.join(figures_dir, "nomads_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Spice" for i in range(self.n_tribes)], os.path.join(figures_dir, "spice_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Clustering" for i in range(self.n_tribes)], os.path.join(figures_dir, "clustering_plot.png"))
+        self.save_plot(data, "total_Clustering", os.path.join(figures_dir, "total_clustering_plot.png"))
         self.save_plot(data, "Fights_per_step", os.path.join(figures_dir, "fights_plot.png"))
         self.save_plot(data, "Cooperation_per_step", os.path.join(figures_dir, "cooperation_plot.png"))
         self.save_plot(data, [f"Tribe_{i}_Trades" for i in range(self.n_tribes)], os.path.join(figures_dir, "trades_plot.png"))
