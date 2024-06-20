@@ -154,7 +154,10 @@ class DuneModel(ms.Model):
         total_clustering = 0
         for i in range(n_tribes):
             clustering, _ = self.clustering_K_means(i)
-            total_clustering += self.count_tribe_nomads(i)*clustering/self.schedule.get_type_count(Nomad)
+            if self.schedule.get_type_count(Nomad) > 0: 
+                total_clustering += self.count_tribe_nomads(i)*clustering/self.schedule.get_type_count(Nomad)
+            else: 
+                total_clustering += 0
         return total_clustering
 
     def record_trade(self, tribe_id):
@@ -284,4 +287,8 @@ class DuneModel(ms.Model):
 
         if save:
             self.save_results(self.experiment_name)
+        
+        print("Data collection successful.")
+        
+        return self.datacollector.get_model_vars_dataframe()
 
