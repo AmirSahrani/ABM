@@ -7,6 +7,7 @@ import os
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from copy import deepcopy
 
 MONITOR = False
 
@@ -30,14 +31,14 @@ class DuneModel(ms.Model):
         self.total_fights = 0
         self.total_cooperation = 0
         self.tribes = []
-        self.vision_radius = vision_radius
+        self.spice_threshold = spice_threshold
         self.step_count = step_count
         self.current_step = 0
-        self.alpha = alpha
-        self.trade_percentage = trade_percentage
-        self.spice_threshold = spice_threshold
-        self.spice_movement_bias = spice_movement_bias
-        self.tribe_movement_bias = tribe_movement_bias
+        # self.vision_radius = vision_radius
+        # self.alpha = alpha
+        # self.trade_percentage = trade_percentage
+        # self.spice_movement_bias = spice_movement_bias
+        # self.tribe_movement_bias = tribe_movement_bias
 
         self.spice_generator = spice_generator
         self.river_generator = river_generator
@@ -99,64 +100,63 @@ class DuneModel(ms.Model):
     def total_spice(self, tribe_id):
         return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
 
-    
     def determine_optimal_k(self, points, max_k):
         silhouette_scores = []
         k_range = range(2, min(max_k, len(points)))
 
         if len(points) < 2:
             return len(points)
-        
+
         for k in k_range:
             if len(points) <= k:
-                silhouette_scores.append(-1)  
+                silhouette_scores.append(-1)
             else:
                 kmeans = KMeans(n_clusters=k, random_state=0)
                 kmeans.fit(points)
                 labels = kmeans.labels_
-                if len(set(labels)) > 1:  
+                if len(set(labels)) > 1:
                     silhouette_scores.append(silhouette_score(points, labels))
                 else:
-                    silhouette_scores.append(-1)  
+                    silhouette_scores.append(-1)
 
         if all(score == -1 for score in silhouette_scores):
-            return len(points)  
+            return len(points)
 
         valid_scores = [(score, k) for score, k in zip(silhouette_scores, k_range) if score != -1]
         optimal_k = max(valid_scores, key=lambda x: x[0])[1]
-        
+
         return optimal_k
 
     def clustering_K_means(self, tribe_id, k_max=20):
-            positions = []
-            for a in self.schedule.agents:
-                if isinstance(a, Nomad) and a.tribe.id == tribe_id:
-                    positions.append(a.pos)
-            
-            positions = np.array(positions)
-            total_individuals = len(positions) 
-            if total_individuals == 0:
-                return 0, []
-            k = self.determine_optimal_k(positions, k_max) 
-            
-            if k > 0:
-                kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
-                labels = kmeans.labels_
-                unique_labels, counts = np.unique(labels, return_counts=True)
-                average_cluster_size = np.mean(counts)/ total_individuals
-            else:
-                average_cluster_size = 0
-                counts = []
-            
-            return average_cluster_size, counts
-        
+        positions = []
+        for a in self.schedule.agents:
+            if isinstance(a, Nomad) and a.tribe.id == tribe_id:
+                positions.append(a.pos)
+
+        positions = np.array(positions)
+        total_individuals = len(positions)
+        if total_individuals == 0:
+            return 0, []
+        k = self.determine_optimal_k(positions, k_max)
+
+        if k > 0:
+            kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
+            labels = kmeans.labels_
+            unique_labels, counts = np.unique(labels, return_counts=True)
+            average_cluster_size = np.mean(counts) / total_individuals
+        else:
+            average_cluster_size = 0
+            counts = []
+
+        return average_cluster_size, counts
+
     def total_clutering(self, n_tribes):
         total_clustering = 0
         for i in range(n_tribes):
             clustering, _ = self.clustering_K_means(i)
-            if self.schedule.get_type_count(Nomad) > 0: 
-                total_clustering += self.count_tribe_nomads(i)*clustering/self.schedule.get_type_count(Nomad)
-            else: 
+            if self.schedule.get_type_count(Nomad) > 0:
+                total_clustering += self.count_tribe_nomads(i) * clustering / self.schedule.get_type_count(Nomad)
+            else:
                 total_clustering += 0
         return total_clustering
 
@@ -168,7 +168,7 @@ class DuneModel(ms.Model):
 
     def record_cooperation(self):
         self.total_cooperation += 1 / 2
-        
+
     def total_spice_in_system(self):
         total_spice = 0
         for agent in self.schedule.agents:
@@ -182,20 +182,19 @@ class DuneModel(ms.Model):
         for _, (x, y) in self.grid.coord_iter():
             max_spice = spice_dist[x, y]
             if max_spice > 0:
-                for agent in self.grid.get_cell_list_contents([x,y]):
-                        if isinstance(agent, Water):
-                            continue
-                        elif isinstance(agent, Spice) and agent.spice < 20:
-                            agent.spice += max_spice
-                            agent.spice %= 21
-                            break
-                        else:
-                            self.id += 1
-                            new_spice = Spice(self.id, (x, y), self, max_spice)
-                            self.grid.place_agent(new_spice, (x, y))
-                            self.schedule.add(new_spice)
-                            break
-
+                for agent in self.grid.get_cell_list_contents([x, y]):
+                    if isinstance(agent, Water):
+                        continue
+                    elif isinstance(agent, Spice) and agent.spice < 20:
+                        agent.spice += max_spice
+                        agent.spice %= 21
+                        break
+                    else:
+                        self.id += 1
+                        new_spice = Spice(self.id, (x, y), self, max_spice)
+                        self.grid.place_agent(new_spice, (x, y))
+                        self.schedule.add(new_spice)
+                        break
 
     def step(self):
         self.schedule.step()
@@ -211,25 +210,28 @@ class DuneModel(ms.Model):
             # self.save_results(self.experiment_name)
 
     def remove_agent(self, agent):
+        print(type(agent))
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
 
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+        neighbors = self.grid.get_neighborhood((x, y), moore=True, include_center=False)
         empty_cells = [cell for cell in neighbors if self.grid.is_cell_empty(cell)]
         if empty_cells:
             new_pos = random.choice(empty_cells)
             spice = parent_agent.spice // 2
-            vision = parent_agent.vision
-            tribe = parent_agent.tribe
 
             self.id += 1
-            new_agent = Nomad(self.id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, alpha=parent_agent.alpha, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
+            new_agent = deepcopy(parent_agent)
+            new_agent.id = self.id
+            new_agent.pos = new_pos
+            new_agent.spice = spice
+
+            parent_agent.spice = spice
+
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
-
-            parent_agent.spice -= parent_agent.spice // 2
 
     def save_results(self, experiment_name):
         experiment_dir = os.path.join("Experiments", experiment_name)
@@ -287,13 +289,13 @@ class DuneModel(ms.Model):
 
         if save:
             self.save_results(self.experiment_name)
-        
+
         print("Data collection successful.")
-        
+
         return self.datacollector.get_model_vars_dataframe()
 
         return self.datacollector.get_model_vars_dataframe()
-            
+
         data = self.datacollector.get_model_vars_dataframe()
         if data is None or data.empty:
             print("Data collection returned None or empty DataFrame.")
@@ -301,4 +303,3 @@ class DuneModel(ms.Model):
             print("Data collection successful.")
 
         return data
-
