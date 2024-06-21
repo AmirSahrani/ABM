@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('../data/ofat_results_toml.csv')
+df = pd.read_csv('../data/ofat_results.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -42,12 +42,11 @@ def plot_all_ofat_results(df, param_name):
     plt.show()
 
 
-plot_all_ofat_results(df, 'n_tribes')
-# plot_all_ofat_results(df, 'n_agents')
-# plot_all_ofat_results(df, 'n_heaps')
-# plot_all_ofat_results(df, 'vision_radius')
-# plot_all_ofat_results(df, 'step_count')
-# plot_all_ofat_results(df, 'alpha')
-# plot_all_ofat_results(df, 'trade_percentage')
-# plot_all_ofat_results(df, 'spice_movement_bias')
-# plot_all_ofat_results(df, 'tribe_movement_bias')
+#plot_all_ofat_results(df, 'n_tribes')
+#plot_all_ofat_results(df, 'n_agents')
+plot_all_ofat_results(df, 'n_heaps')
+plot_all_ofat_results(df, 'vision_radius')
+plot_all_ofat_results(df, 'alpha')
+plot_all_ofat_results(df, 'trade_percentage')
+plot_all_ofat_results(df, 'spice_movement_bias')
+plot_all_ofat_results(df, 'tribe_movement_bias')
