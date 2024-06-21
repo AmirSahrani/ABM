@@ -143,7 +143,7 @@ class DuneModel(ms.Model):
                 kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
                 labels = kmeans.labels_
                 unique_labels, counts = np.unique(labels, return_counts=True)
-                average_cluster_size = np.mean(counts)/ total_individuals
+                average_cluster_size = np.mean(counts)
             else:
                 average_cluster_size = 0
                 counts = []

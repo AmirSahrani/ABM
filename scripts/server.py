@@ -30,7 +30,7 @@ model_params = {
         "total_spice": 8000,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 900
+    "spice_threshold": 7000
 }
 
 
@@ -189,5 +189,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8521
+server.port = 8703
 server.launch()
