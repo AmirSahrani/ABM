@@ -8,7 +8,7 @@ import tornado.web
 
 
 
-EXPERIMENT_NAME = "Balint_trial2"
+EXPERIMENT_NAME = "Joana_trial_1"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
@@ -126,6 +126,7 @@ trade_chart = ms.visualization.ChartModule(
 tribe_colors = ["#0000FF", "#00FF00", "#FFA500", "#FF4500", "#FF0000", "#00FFFF", "#FF00FF", "#FFFF00", "#000000", "#FFFFFF"]
 tribe_nomad_labels = [f"Tribe_{i}_Nomads" for i in range(model_params["n_tribes"])]
 tribe_spice_labels = [f"Tribe_{i}_Spice" for i in range(model_params["n_tribes"])]
+tribe_clustering_labels = [f"Tribe_{i}_Clustering" for i in range(model_params["n_tribes"])]
 
 tribe_nomads_chart = ms.visualization.ChartModule(
     [{"Label": label, "Color": color} for label, color in zip(tribe_nomad_labels, tribe_colors)],
@@ -138,8 +139,12 @@ tribe_spice_chart = ms.visualization.ChartModule(
 )
 
 tribe_clustering_chart = ms.visualization.ChartModule(
-    [{"Label": "Tribe_0_Clustering", "Color": "#FFA500"},
-     {"Label": "Tribe_1_Clustering", "Color": "#FF4500"}],
+    [{"Label": label, "Color": color} for label, color in zip(tribe_clustering_labels, tribe_colors)],
+    data_collector_name='datacollector'
+)
+
+total_clustering_chart = ms.visualization.ChartModule(
+    [{"Label": "total_Clustering", "Color": "#00FF00"}],
     data_collector_name='datacollector'
 )
 
@@ -178,7 +183,7 @@ class CustomModularServer(ModularServer):
 
 server = CustomModularServer(
     DuneModel,
-    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart],
+    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart, total_clustering_chart],
     "Dune Model",
     model_params,
     description=description
