@@ -24,8 +24,8 @@ model_params = {
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
-    "river_generator": no_river,
-    "location_generator": split_tribes_locations,
+    "river_generator": gen_river_random,
+    "location_generator": random_locations,
     "spice_kwargs": {
         "total_spice": 8000,
         "cov_range": (8, 20)

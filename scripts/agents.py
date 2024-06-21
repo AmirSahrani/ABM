@@ -30,25 +30,15 @@ class Nomad(ms.Agent):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
-        self.vision = vision
         self.tribe = tribe
-        self.metabolism = metabolism
-        self.spice_movement_bias = spice_movement_bias
-        self.tribe_movement_bias = tribe_movement_bias
-        self.alpha = alpha
-        self.trade_percentage = trade_percentage
-        # self.hardship = self.calculate_hardship()
-        # self.legitimacy = self.calculate_legitimacy()
 
-    # def calculate_hardship(self):
-    #     return 1 / math.exp(self.spice * self.lamb)
-
-    # def calculate_legitimacy(self):
-    #     legitimacy = {}
-    #     for other_tribe in self.model.tribes:
-    #         if other_tribe.id != self.tribe.id:
-    #             legitimacy[other_tribe] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
-    #     return legitimacy
+        self.vision = np.random.randint(0, 10)
+        self.metabolism = np.random.uniform(0, 0.4)
+        self.spice_movement_bias = np.random.uniform(0, 1)
+        self.tribe_movement_bias = np.random.uniform(0, 1)
+        self.alpha = np.random.uniform(0, 1)
+        self.trade_percentage = np.random.uniform(0, 1)
+        self.reproduction_threshold = np.random.randint(20, 100)
 
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -60,19 +50,19 @@ class Nomad(ms.Agent):
             if isinstance(agent, Spice):
                 return agent
         return None
-    
+
     def is_tribe_member(self, pos):
-            """
-            Check if the agent at the given position is a member of the same tribe.
-            """
-            this_cell = self.model.grid.get_cell_list_contents([pos])
-            for agent in this_cell:
-                if isinstance(agent, Nomad):
-                    # print(f"Nomad {agent.unique_id} found at {pos} with tribe {agent.tribe.id}")
-                    if agent.tribe == self.tribe:
-                        # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
-                        return True
-            return False
+        """
+        Check if the agent at the given position is a member of the same tribe.
+        """
+        this_cell = self.model.grid.get_cell_list_contents([pos])
+        for agent in this_cell:
+            if isinstance(agent, Nomad):
+                # print(f"Nomad {agent.unique_id} found at {pos} with tribe {agent.tribe.id}")
+                if agent.tribe == self.tribe:
+                    # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
+                    return True
+        return False
 
     def move(self):
         """
@@ -195,18 +185,9 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=0.2, model=self.model)
+                    fighting_game(self, other, alpha=self.alpha, model=self.model)
                 elif other.tribe == self.tribe:
-                    trade(agent1=self, agent2=other, trade_percentage=0.5, model=self.model)
-
-    # def fight(self):
-    #     visible_positions = [i for i in self.model.grid.get_neighborhood(self.pos, False, False, self.vision)]
-    #     for p in visible_positions:
-    #         cellmates = self.model.grid.get_cell_list_contents([p])
-    #         other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self and agent.tribe != self.tribe]
-    #     if other_nomads:
-    #         opponent = random.choice(other_nomads)
-    #         fighting_game(self, opponent, alpha=0.5)
+                    trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
 
     def step(self):
         swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
@@ -216,7 +197,7 @@ class Nomad(ms.Agent):
 
         if self.spice <= 0:
             self.model.remove_agent(self)
-        elif self.spice >= 20:  # Not sure how much they should have to reproduce yet. This is a placeholder.
+        elif self.spice >= self.reproduction_threshold:
             self.model.add_agent(self)
 
 
@@ -226,7 +207,7 @@ def trade(agent1: Nomad, agent2: Nomad, trade_percentage: float, model: ms.Model
 
     agent1.spice = agent1.spice - trade_amount_self + trade_amount_other
     agent2.spice = agent2.spice - trade_amount_other + trade_amount_self
-    
+
     model.record_trade(agent1.tribe.id)
 
 
@@ -268,7 +249,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
+            self.spice += 0 *np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
