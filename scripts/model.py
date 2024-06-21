@@ -293,3 +293,12 @@ class DuneModel(ms.Model):
         return self.datacollector.get_model_vars_dataframe()
 
         return self.datacollector.get_model_vars_dataframe()
+            
+        data = self.datacollector.get_model_vars_dataframe()
+        if data is None or data.empty:
+            print("Data collection returned None or empty DataFrame.")
+        else:
+            print("Data collection successful.")
+
+        return data
+

@@ -17,8 +17,8 @@ model_params = {
     "n_tribes": 4,
     "n_agents": 40,
     "n_heaps": 8,
-    "vision_radius": 5,
-    "step_count": 200,
+    "vision_radius": ms.visualization.Slider("Vision radius", 5, 1, 50, 1, description="How far can they see"),
+    "step_count": 100,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
@@ -189,5 +189,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8700
+server.port = 8521
 server.launch()
