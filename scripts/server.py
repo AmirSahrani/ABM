@@ -191,5 +191,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8521
+server.port = 8703
 server.launch()
