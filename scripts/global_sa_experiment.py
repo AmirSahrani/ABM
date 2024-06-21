@@ -69,7 +69,7 @@ def main():
             (10, 200),  # n_agents
             (1, 50),    # n_heaps
             (2, 20),    # vision_radius
-            # (50, 500),  # step_count run every 50
+            (50, 500),  # step_count run every 50
             (0.0, 1.0), # alpha
             (0.0, 1.0), # trade_percentage
             (0.0, 1.0), # spice_movement_bias
@@ -96,6 +96,8 @@ def main():
     results_dict = {}
 
     samples = sobol_sample.sample(problem, nr_sobol_samples)
+    samples_csv = pd.DataFrame(samples, columns=problem['names'])
+    samples_csv.to_csv(f'GSA/sobol_samples_{nr_sobol_samples}.csv', index=False)
 
     for param in output_params:
         print(f"Running sensitivity analysis for {param}")
@@ -127,5 +129,5 @@ def main():
 
 
 if __name__ == "__main__":
-    nr_sobol_samples = 512
+    nr_sobol_samples = 16
     main()

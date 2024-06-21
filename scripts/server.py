@@ -8,7 +8,7 @@ import tornado.web
 
 
 
-EXPERIMENT_NAME = "Joana_trial_1"
+EXPERIMENT_NAME = "Babci_trial_1"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
