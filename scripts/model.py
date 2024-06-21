@@ -7,6 +7,7 @@ import os
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+import warnings
 
 MONITOR = False
 
@@ -63,6 +64,7 @@ class DuneModel(ms.Model):
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
+        warnings.filterwarnings("ignore")
         spice_dist = self.spice_generator(self)
         river = self.river_generator(self)
         for _, (x, y) in self.grid.coord_iter():
@@ -216,7 +218,7 @@ class DuneModel(ms.Model):
 
     def add_agent(self, parent_agent):
         x, y = parent_agent.pos
-        neighbors = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+        neighbors = self.grid.get_neighborhood((x, y), moore=True, include_center=False, radius=1)
         empty_cells = [cell for cell in neighbors if self.grid.is_cell_empty(cell)]
         if empty_cells:
             new_pos = random.choice(empty_cells)

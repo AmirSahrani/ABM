@@ -17,7 +17,7 @@ model_params = {
     "n_tribes": 4,
     "n_agents": 500,
     "n_heaps": 8,
-    "vision_radius": ms.visualization.Slider("Vision radius", 5, 1, 50, 1, description="How far can they see"),
+    "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 100,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
@@ -30,7 +30,7 @@ model_params = {
         "total_spice": 8000,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 900
+    "spice_threshold": 7000
 }
 
 
