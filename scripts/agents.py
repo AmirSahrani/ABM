@@ -181,12 +181,22 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
     else:
         weak_agent = agent1
         strong_agent = agent2
-
-    if weak_agent.spice > alpha * strong_agent.spice:
-        strong_agent.spice += alpha * weak_agent.spice - alpha * strong_agent.spice
-        weak_agent.spice -= alpha * weak_agent.spice
+        
+    visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, False, False, strong_agent.vision)]
+    for p in visible_positions:
+        cellmates = model.grid.get_cell_list_contents([p])
+        other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
+        same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
+    
+    cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
+    
+    if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
+        strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
+        weak_agent.spice -= (1-cost) * weak_agent.spice
         model.record_fight()
-    elif weak_agent.spice <= alpha * strong_agent.spice:
+    elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
+        strong_agent.spice += 0
+        weak_agent.spice -= 0
         model.record_cooperation()
 
 

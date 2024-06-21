@@ -15,7 +15,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 4,
-    "n_agents": 80,
+    "n_agents": 500,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 5, 1, 50, 1, description="How far can they see"),
     "step_count": 500,
@@ -183,7 +183,7 @@ class CustomModularServer(ModularServer):
 
 server = CustomModularServer(
     DuneModel,
-    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart, tribe_clustering_chart, total_clustering_chart],
+    [canvas_element, fight_chart, trade_chart, tribe_nomads_chart, tribe_spice_chart,tribe_clustering_chart, total_clustering_chart],
     "Dune Model",
     model_params,
     description=description
