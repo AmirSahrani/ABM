@@ -116,11 +116,11 @@ class Nomad(ms.Agent):
                     chosen_pos = min(visible_positions, key=lambda pos: (pos[0] - center_of_mass[0])**2 + (pos[1] - center_of_mass[1])**2)
                     moved_towards = "tribe member center of mass"
                 else:
-                    chosen_pos = self.random.choice(visible_positions)
+                    chosen_pos = self.non_random_walking()
                     moved_towards = "random"
             else:
                 # No visible tribe members, move randomly
-                chosen_pos = self.random.choice(visible_positions)
+                chosen_pos = self.non_random_walking()
                 moved_towards = "random"
 
         immediate_neighbors = [
@@ -142,7 +142,22 @@ class Nomad(ms.Agent):
         # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
+        
+        
+        
+    def non_random_walking(self):
+        directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        
+        if not hasattr(self, 'current_direction') or self.random.random() < 0.1:
+            self.current_direction = self.random.choice(directions)
 
+        new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
+        
+        if self.model.grid.out_of_bounds(new_pos) or self.is_occupied(new_pos):
+            self.current_direction = self.random.choice(directions)
+            new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
+
+        return new_pos
 
 
 
