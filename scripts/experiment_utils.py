@@ -4,7 +4,7 @@ from model import DuneModel
 
 def gen_spice_map(model: DuneModel):
     width, height, n_heaps = model.width, model.height, model.n_heaps
-    total_spice = model.spice_kwargs["total_spice"]
+    total_spice = model.spice_kwargs["total_spice"] // n_heaps
     cov_range = model.spice_kwargs["cov_range"]
     spice_map = np.zeros((width, height))
 

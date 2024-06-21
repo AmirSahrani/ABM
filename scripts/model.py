@@ -25,7 +25,7 @@ class DuneModel(ms.Model):
         self.width = width
         self.height = height
         self.n_tribes = n_tribes
-        self.n_agents = n_agents
+        self.n_agents = n_agents // n_tribes
         self.n_heaps = n_heaps
         self.total_fights = 0
         self.total_cooperation = 0
