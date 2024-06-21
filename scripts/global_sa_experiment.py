@@ -65,11 +65,11 @@ def main():
         'bounds': [
             (10, 200),  # width
             (10, 200),  # height
-            (1, 10),    # n_tribes
-            (10, 100),  # n_agents
-            (1, 10),    # n_heaps
-            (1, 10),    # vision_radius
-            (50, 500),  # step_count
+            (2, 10),    # n_tribes
+            (10, 200),  # n_agents
+            (1, 50),    # n_heaps
+            (2, 20),    # vision_radius
+            # (50, 500),  # step_count run every 50
             (0.0, 1.0), # alpha
             (0.0, 1.0), # trade_percentage
             (0.0, 1.0), # spice_movement_bias
