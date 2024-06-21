@@ -76,8 +76,9 @@ class Nomad(ms.Agent):
 
     def move(self):
         """
-        Move towards spice, if no spice is visible, move towards a tribe member with a bias,
-        if no spice or tribe member is visible, move randomly.
+        Move towards spice if visible and the spice movement bias is met.
+        If no spice is visible, move towards the center of mass of the spice level of visible tribal members if the tribe movement bias is met.
+        Otherwise, move randomly.
         """
         visible_positions = [
             i for i in self.model.grid.get_neighborhood(
@@ -85,24 +86,40 @@ class Nomad(ms.Agent):
             )
         ]
 
-        # visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
-
         if not visible_positions:
             return
 
+        # Check for spice in visible positions
         spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
         moved_towards = ""
+
         if max(spice_levels) > 0 and self.random.random() < self.spice_movement_bias:
+            # Move towards position with max spicyness
             max_spice_positions = [pos for pos, spice in zip(visible_positions, spice_levels) if spice == max(spice_levels)]
             chosen_pos = self.random.choice(max_spice_positions)
             moved_towards = "spice"
         else:
-            tribe_members = [pos for pos in visible_positions if self.is_tribe_member(pos)]
-            
+            # Get visible tribal members and their spice levels
+            tribe_members = [(pos, agent.spice) for pos in visible_positions
+                            for agent in self.model.grid.get_cell_list_contents([pos])
+                            if isinstance(agent, Nomad) and agent.tribe == self.tribe]
+
             if tribe_members and self.random.random() < self.tribe_movement_bias:
-                chosen_pos = self.random.choice(tribe_members)
-                moved_towards = "tribe member"
+                # Calculate center of mass of spice levels
+                total_spice = sum(spice for _, spice in tribe_members)
+                if total_spice > 0:
+                    center_of_mass = (
+                        sum(pos[0] * spice for pos, spice in tribe_members) / total_spice,
+                        sum(pos[1] * spice for pos, spice in tribe_members) / total_spice
+                    )
+                    # Closest pos to center of mass
+                    chosen_pos = min(visible_positions, key=lambda pos: (pos[0] - center_of_mass[0])**2 + (pos[1] - center_of_mass[1])**2)
+                    moved_towards = "tribe member center of mass"
+                else:
+                    chosen_pos = self.random.choice(visible_positions)
+                    moved_towards = "random"
             else:
+                # No visible tribe members, move randomly
                 chosen_pos = self.random.choice(visible_positions)
                 moved_towards = "random"
 
@@ -122,9 +139,10 @@ class Nomad(ms.Agent):
             return
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
-        #print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
+        # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
+
 
 
 
