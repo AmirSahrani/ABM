@@ -292,3 +292,4 @@ class DuneModel(ms.Model):
         
         return self.datacollector.get_model_vars_dataframe()
 
+        return self.datacollector.get_model_vars_dataframe()

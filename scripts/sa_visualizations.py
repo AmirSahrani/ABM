@@ -39,7 +39,7 @@ def plot_all_ofat_results(df, param_name):
         ax.set_xlabel(param_name)
         ax.set_ylabel(metric)
         ax.set_title(f'{metric} vs {param_name}')
-        ax.grid(True) #For Sandor lol
+        ax.grid(True) #For Sandor lol, I like em too
     
     plt.subplots_adjust(left=0.042,
                     bottom=0.1, 
@@ -59,3 +59,12 @@ plot_all_ofat_results(df, 'trade_percentage')
 plot_all_ofat_results(df, 'spice_movement_bias')
 plot_all_ofat_results(df, 'tribe_movement_bias')
 plot_all_ofat_results(df, 'spice_threshold')
+# plot_all_ofat_results(df, 'n_tribes')
+# plot_all_ofat_results(df, 'n_agents')
+# plot_all_ofat_results(df, 'n_heaps')
+# plot_all_ofat_results(df, 'vision_radius')
+# plot_all_ofat_results(df, 'step_count')
+# plot_all_ofat_results(df, 'alpha')
+# plot_all_ofat_results(df, 'trade_percentage')
+# plot_all_ofat_results(df, 'spice_movement_bias')
+# plot_all_ofat_results(df, 'tribe_movement_bias')
