@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('../data/ofat_results_joana.csv')
+df = pd.read_csv('../data/ofat_results_joana_finer_grain.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -58,3 +58,4 @@ plot_all_ofat_results(df, 'alpha')
 plot_all_ofat_results(df, 'trade_percentage')
 plot_all_ofat_results(df, 'spice_movement_bias')
 plot_all_ofat_results(df, 'tribe_movement_bias')
+plot_all_ofat_results(df, 'spice_threshold')
