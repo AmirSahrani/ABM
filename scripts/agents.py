@@ -30,25 +30,15 @@ class Nomad(ms.Agent):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
-        self.vision = vision
         self.tribe = tribe
-        self.metabolism = metabolism
-        self.spice_movement_bias = spice_movement_bias
-        self.tribe_movement_bias = tribe_movement_bias
-        self.alpha = alpha
-        self.trade_percentage = trade_percentage
-        # self.hardship = self.calculate_hardship()
-        # self.legitimacy = self.calculate_legitimacy()
 
-    # def calculate_hardship(self):
-    #     return 1 / math.exp(self.spice * self.lamb)
-
-    # def calculate_legitimacy(self):
-    #     legitimacy = {}
-    #     for other_tribe in self.model.tribes:
-    #         if other_tribe.id != self.tribe.id:
-    #             legitimacy[other_tribe] = 1 / math.exp((self.tribe.total_spice - other_tribe.total_spice) * self.lamb)
-    #     return legitimacy
+        self.vision = np.random.randint(0, 10)
+        self.metabolism = np.random.uniform(0, 0.4)
+        self.spice_movement_bias = np.random.uniform(0, 1)
+        self.tribe_movement_bias = np.random.uniform(0, 1)
+        self.alpha = np.random.uniform(0, 1)
+        self.trade_percentage = np.random.uniform(0, 1)
+        self.reproduction_threshold = np.random.randint(20, 100)
 
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -60,51 +50,69 @@ class Nomad(ms.Agent):
             if isinstance(agent, Spice):
                 return agent
         return None
-    
+
     def is_tribe_member(self, pos):
-            """
-            Check if the agent at the given position is a member of the same tribe.
-            """
-            this_cell = self.model.grid.get_cell_list_contents([pos])
-            for agent in this_cell:
-                if isinstance(agent, Nomad):
-                    # print(f"Nomad {agent.unique_id} found at {pos} with tribe {agent.tribe.id}")
-                    if agent.tribe == self.tribe:
-                        # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
-                        return True
-            return False
+        """
+        Check if the agent at the given position is a member of the same tribe.
+        """
+        this_cell = self.model.grid.get_cell_list_contents([pos])
+        for agent in this_cell:
+            if isinstance(agent, Nomad):
+                # print(f"Nomad {agent.unique_id} found at {pos} with tribe {agent.tribe.id}")
+                if agent.tribe == self.tribe:
+                    # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
+                    return True
+        return False
 
     def move(self):
         """
-        Move towards spice, if no spice is visible, move towards a tribe member with a bias,
-        if no spice or tribe member is visible, move randomly.
+        Move towards spice if visible and the spice movement bias is met.
+        If no spice is visible, move towards the center of mass of the spice level of visible tribal members if the tribe movement bias is met.
+        Otherwise, move randomly.
         """
         visible_positions = [
             i for i in self.model.grid.get_neighborhood(
-                self.pos, False, False, self.vision
+                self.pos, moore=True, include_center=False, radius=self.vision
             )
         ]
 
-        # visible_positions = [i for i in visible_positions if not self.is_occupied(i)]
 
         if not visible_positions:
             return
 
+        # Check for spice in visible positions
         spice_levels = [self.get_spice(p).spice if self.get_spice(p) else 0 for p in visible_positions]
         moved_towards = ""
+
         if max(spice_levels) > 0 and self.random.random() < self.spice_movement_bias:
+            # Move towards position with max spicyness
             max_spice_positions = [pos for pos, spice in zip(visible_positions, spice_levels) if spice == max(spice_levels)]
             chosen_pos = self.random.choice(max_spice_positions)
             moved_towards = "spice"
         else:
-            tribe_members = [pos for pos in visible_positions if self.is_tribe_member(pos)]
-            
+            # Get visible tribal members and their spice levels
+            tribe_members = [(pos, agent.spice) for pos in visible_positions
+                            for agent in self.model.grid.get_cell_list_contents([pos])
+                            if isinstance(agent, Nomad) and agent.tribe == self.tribe]
+
             if tribe_members and self.random.random() < self.tribe_movement_bias:
-                chosen_pos = self.random.choice(tribe_members)
-                moved_towards = "tribe member"
+                # Calculate center of mass of spice levels
+                total_spice = sum(spice for _, spice in tribe_members)
+                if total_spice > 0:
+                    center_of_mass = (
+                        sum(pos[0] * spice for pos, spice in tribe_members) / total_spice,
+                        sum(pos[1] * spice for pos, spice in tribe_members) / total_spice
+                    )
+                    # Closest pos to center of mass
+                    chosen_pos = min(visible_positions, key=lambda pos: (pos[0] - center_of_mass[0])**2 + (pos[1] - center_of_mass[1])**2)
+                    moved_towards = "tribe member center of mass"
+                else:
+                    chosen_pos = self.non_random_walking()
+                    moved_towards = "random"
             else:
-                chosen_pos = self.random.choice(visible_positions)
-                moved_towards = "random"
+                # No visible tribe members, move randomly
+                chosen_pos = self.non_random_walking()
+                moved_towards = "direction"
 
         immediate_neighbors = [
             (self.pos[0] + dx, self.pos[1] + dy)
@@ -122,13 +130,25 @@ class Nomad(ms.Agent):
             return
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
-        #print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
+        print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
+        
+        
+        
+    def non_random_walking(self):
+        directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        
+        if not hasattr(self, 'current_direction') or self.random.random() < 0.1:
+            self.current_direction = self.random.choice(directions)
 
+        new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
+        
+        if self.model.grid.out_of_bounds(new_pos) or self.is_occupied(new_pos):
+            self.current_direction = self.random.choice(directions)
+            new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
 
-
-
+        return new_pos
 
 
 
@@ -165,18 +185,9 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=0.2, model=self.model)
+                    fighting_game(self, other, alpha=self.alpha, model=self.model)
                 elif other.tribe == self.tribe:
-                    trade(agent1=self, agent2=other, trade_percentage=0.5, model=self.model)
-
-    # def fight(self):
-    #     visible_positions = [i for i in self.model.grid.get_neighborhood(self.pos, False, False, self.vision)]
-    #     for p in visible_positions:
-    #         cellmates = self.model.grid.get_cell_list_contents([p])
-    #         other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != self and agent.tribe != self.tribe]
-    #     if other_nomads:
-    #         opponent = random.choice(other_nomads)
-    #         fighting_game(self, opponent, alpha=0.5)
+                    trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
 
     def step(self):
         swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
@@ -186,7 +197,7 @@ class Nomad(ms.Agent):
 
         if self.spice <= 0:
             self.model.remove_agent(self)
-        elif self.spice >= 20:  # Not sure how much they should have to reproduce yet. This is a placeholder.
+        elif self.spice >= self.reproduction_threshold:
             self.model.add_agent(self)
 
 
@@ -196,7 +207,7 @@ def trade(agent1: Nomad, agent2: Nomad, trade_percentage: float, model: ms.Model
 
     agent1.spice = agent1.spice - trade_amount_self + trade_amount_other
     agent2.spice = agent2.spice - trade_amount_other + trade_amount_self
-    
+
     model.record_trade(agent1.tribe.id)
 
 
@@ -207,8 +218,8 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
     else:
         weak_agent = agent1
         strong_agent = agent2
-        
-    visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, False, False, strong_agent.vision)]
+
+    visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, moore=True, include_center=False, radius=strong_agent.vision)]
     for p in visible_positions:
         cellmates = model.grid.get_cell_list_contents([p])
         other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
@@ -238,7 +249,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
+            self.spice += 0 *np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
