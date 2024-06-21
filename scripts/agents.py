@@ -148,9 +148,9 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=0.2, model=self.model)
+                    fighting_game(self, other, alpha=self.alpha, model=self.model)
                 elif other.tribe == self.tribe:
-                    trade(agent1=self, agent2=other, trade_percentage=0.5, model=self.model)
+                    trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
 
     def step(self):
         swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
@@ -160,7 +160,7 @@ class Nomad(ms.Agent):
 
         if self.spice <= 0:
             self.model.remove_agent(self)
-        elif self.spice >= self.reproduction_threshold:  # Not sure how much they should have to reproduce yet. This is a placeholder.
+        elif self.spice >= self.reproduction_threshold:
             self.model.add_agent(self)
 
 
@@ -183,21 +183,20 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
         strong_agent = agent2
         
     visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, False, False, strong_agent.vision)]
-    for p in visible_positions:
-        cellmates = model.grid.get_cell_list_contents([p])
-        other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
-        same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
-    
-    cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
-    
-    if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
-        strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
-        weak_agent.spice -= (1-cost) * weak_agent.spice
-        model.record_fight()
-    elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
-        strong_agent.spice += 0
-        weak_agent.spice -= 0
-        model.record_cooperation()
+    if visible_positions:
+        for p in visible_positions:
+            cellmates = model.grid.get_cell_list_contents([p])
+            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
+            same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
+        
+        cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
+        
+        if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
+            strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
+            weak_agent.spice -= (1-cost) * weak_agent.spice
+            model.record_fight()
+        elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
+            model.record_cooperation()
 
 
 class Spice(ms.Agent):

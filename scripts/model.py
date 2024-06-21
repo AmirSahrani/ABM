@@ -34,11 +34,11 @@ class DuneModel(ms.Model):
         self.spice_threshold = spice_threshold
         self.step_count = step_count
         self.current_step = 0
-        # self.vision_radius = vision_radius
-        # self.alpha = alpha
-        # self.trade_percentage = trade_percentage
-        # self.spice_movement_bias = spice_movement_bias
-        # self.tribe_movement_bias = tribe_movement_bias
+        self.vision_radius = vision_radius
+        self.alpha = alpha
+        self.trade_percentage = trade_percentage
+        self.spice_movement_bias = spice_movement_bias
+        self.tribe_movement_bias = tribe_movement_bias
 
         self.spice_generator = spice_generator
         self.river_generator = river_generator
@@ -56,8 +56,8 @@ class DuneModel(ms.Model):
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
-            "Fights_per_step": lambda m: m.total_fights / m.schedule.time if m.schedule.time > 0 else 0,
-            "Cooperation_per_step": lambda m: m.total_cooperation / m.schedule.time if m.schedule.time > 0 else 0,
+            "Fights_per_step": lambda m: m.total_fights/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
+            "Cooperation_per_step": lambda m: m.total_cooperation/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_K_means(i)[0]) for i in range(self.n_tribes)},
@@ -210,7 +210,6 @@ class DuneModel(ms.Model):
             # self.save_results(self.experiment_name)
 
     def remove_agent(self, agent):
-        print(type(agent))
         self.grid.remove_agent(agent)
         self.schedule.remove(agent)
 
@@ -221,17 +220,14 @@ class DuneModel(ms.Model):
         if empty_cells:
             new_pos = random.choice(empty_cells)
             spice = parent_agent.spice // 2
+            vision = parent_agent.vision
+            tribe = parent_agent.tribe
 
             self.id += 1
-            new_agent = deepcopy(parent_agent)
-            new_agent.id = self.id
-            new_agent.pos = new_pos
-            new_agent.spice = spice
-
-            parent_agent.spice = spice
-
+            new_agent = Nomad(self.id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, alpha=parent_agent.alpha, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
+            parent_agent.spice = spice
 
     def save_results(self, experiment_name):
         experiment_dir = os.path.join("Experiments", experiment_name)
