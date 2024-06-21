@@ -89,7 +89,10 @@ class Nomad(ms.Agent):
             chosen_pos = self.random.choice(max_spice_positions)
             moved_towards = "spice"
         else:
-            tribe_members = [pos for pos in visible_positions if self.is_tribe_member(pos)]
+            # Get visible tribal members and their spice levels
+            tribe_members = [(pos, agent.spice) for pos in visible_positions
+                            for agent in self.model.grid.get_cell_list_contents([pos])
+                            if isinstance(agent, Nomad) and agent.tribe == self.tribe]
 
             if tribe_members and self.random.random() < self.tribe_movement_bias:
                 # Calculate center of mass of spice levels
