@@ -57,8 +57,8 @@ class DuneModel(ms.Model):
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
-            "Fights_per_step": lambda m: m.total_fights/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
-            "Cooperation_per_step": lambda m: m.total_cooperation/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
+            "Fights_per_step": lambda m: m.total_fights / (m.total_fights + m.total_cooperation) if (m.total_fights + m.total_cooperation) > 0 else 0,
+            "Cooperation_per_step": lambda m: m.total_cooperation / (m.total_fights + m.total_cooperation) if (m.total_fights + m.total_cooperation) > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_K_means(i)[0]) for i in range(self.n_tribes)},

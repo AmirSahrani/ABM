@@ -130,7 +130,7 @@ class Nomad(ms.Agent):
             return
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
-        print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
+        # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
         

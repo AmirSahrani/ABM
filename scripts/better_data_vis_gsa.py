@@ -94,10 +94,8 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
         plt.close()
 
     parameter_pairs = [
-        ("width", "height"),
         ("n_tribes", "n_agents"),
-        ("n_heaps", "vision_radius"),
-        ("step_count", "alpha"),
+        ("alpha", "vision_radius"),
         ("trade_percentage","spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
