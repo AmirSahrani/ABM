@@ -46,6 +46,7 @@ class DuneModel(ms.Model):
         self.location_generator = location_generator
 
         self.spice_kwargs = spice_kwargs
+        self.spice_kwargs["total_spice"] = self.spice_kwargs["total_spice"] // self.n_heaps
         self.river_kwargs = river_kwargs
         self.location_kwargs = location_kwargs
 
