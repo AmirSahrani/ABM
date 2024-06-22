@@ -15,10 +15,10 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 4,
-    "n_agents": 500,
-    "n_heaps": 8,
+    "n_agents": 100,
+    "n_heaps": 3,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
-    "step_count": 100,
+    "step_count": 500,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
@@ -27,10 +27,10 @@ model_params = {
     "river_generator": gen_river_random,
     "location_generator": random_locations,
     "spice_kwargs": {
-        "total_spice": 8000,
+        "total_spice": 10000,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 7000
+    "spice_threshold": 1000
 }
 
 
