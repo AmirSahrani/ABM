@@ -4,7 +4,7 @@ from model import DuneModel
 
 def gen_spice_map(model: DuneModel):
     width, height, n_heaps = model.width, model.height, model.n_heaps
-    total_spice = model.spice_kwargs["total_spice"] // n_heaps
+    total_spice = model.spice_kwargs["total_spice"]
     cov_range = model.spice_kwargs["cov_range"]
     spice_map = np.zeros((width, height))
 
@@ -20,8 +20,9 @@ def gen_spice_map(model: DuneModel):
             if 0 < x < width and 0 < y < height:
                 spice_map[x, y] += 1
 
-    return np.clip((spice_map / np.sum(spice_map) * total_spice).astype(int), 0, 20)
-
+    normalization_factor = total_spice * n_heaps / np.sum(spice_map)
+    final = np.clip((spice_map * normalization_factor).astype(int), 0, 20)
+    return final
 
 def gen_river_line(model: DuneModel):
     width, height = model.width, model.height

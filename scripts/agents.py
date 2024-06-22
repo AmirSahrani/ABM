@@ -130,7 +130,7 @@ class Nomad(ms.Agent):
             return
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
-        print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
+        # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
         
@@ -220,21 +220,20 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
         strong_agent = agent2
 
     visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, moore=True, include_center=False, radius=strong_agent.vision)]
-    for p in visible_positions:
-        cellmates = model.grid.get_cell_list_contents([p])
-        other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
-        same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
-    
-    cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
-    
-    if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
-        strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
-        weak_agent.spice -= (1-cost) * weak_agent.spice
-        model.record_fight()
-    elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
-        strong_agent.spice += 0
-        weak_agent.spice -= 0
-        model.record_cooperation()
+    if visible_positions:
+        for p in visible_positions:
+            cellmates = model.grid.get_cell_list_contents([p])
+            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
+            same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
+        
+        cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
+        
+        if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
+            strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
+            weak_agent.spice -= (1-cost) * weak_agent.spice
+            model.record_fight()
+        elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
+            model.record_cooperation()
     
 
 
