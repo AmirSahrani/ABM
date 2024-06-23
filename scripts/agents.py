@@ -82,7 +82,6 @@ class Nomad(ms.Agent):
             )
         ]
 
-
         if not self.visible_positions:
             return
 
@@ -98,8 +97,8 @@ class Nomad(ms.Agent):
         else:
             # Get visible tribal members and their spice levels
             tribe_members = [(pos, agent.spice) for pos in self.visible_positions
-                            for agent in self.model.grid.get_cell_list_contents([pos])
-                            if isinstance(agent, Nomad) and agent.tribe == self.tribe]
+                             for agent in self.model.grid.get_cell_list_contents([pos])
+                             if isinstance(agent, Nomad) and agent.tribe == self.tribe]
 
             if tribe_members and self.random.random() < self.tribe_movement_bias:
                 # Calculate center of mass of spice levels
@@ -144,12 +143,12 @@ class Nomad(ms.Agent):
         
     def non_random_walking(self):
         directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-        
+
         if not hasattr(self, 'current_direction') or self.random.random() < 0.1:
             self.current_direction = self.random.choice(directions)
 
         new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
-        
+
         if self.model.grid.out_of_bounds(new_pos) or self.is_occupied(new_pos):
             self.current_direction = self.random.choice(directions)
             new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
@@ -225,22 +224,22 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
         strong_agent = agent2
 
     visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, moore=True, include_center=False, radius=strong_agent.vision)]
-    
+
     other_nomads = []
     same_tribe = []
-    
+
     for p in visible_positions:
         cellmates = model.grid.get_cell_list_contents([p])
         other_nomads += [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
         same_tribe += [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
-    
+
     cost = (len(other_nomads)) / (len(other_nomads) + len(same_tribe) + 1)
-    
+
     if (1 - cost) * weak_agent.spice > cost * strong_agent.spice:
         strong_agent.spice += (1 - cost) * weak_agent.spice - cost * strong_agent.spice
         weak_agent.spice -= (1 - cost) * weak_agent.spice
         model.record_fight()
-    elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
+    elif (1 - cost) * weak_agent.spice <= cost * strong_agent.spice:
         strong_agent.spice += 0
         weak_agent.spice -= 0
         model.record_cooperation()
@@ -257,8 +256,8 @@ class Spice(ms.Agent):
     def step(self):
         if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice > 20:
-            self.spice += np.random.binomial(1, .99, 1)[0]
+        elif self.spice < 20:
+            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
