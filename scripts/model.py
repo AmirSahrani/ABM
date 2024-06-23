@@ -9,7 +9,6 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import DBSCAN
 import warnings
-from copy import deepcopy
 
 MONITOR = False
 

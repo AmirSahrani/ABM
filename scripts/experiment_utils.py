@@ -22,8 +22,9 @@ def gen_spice_map(model: DuneModel):
                 spice_map[x, y] += 1
 
     normalization_factor = total_spice * n_heaps / np.sum(spice_map)
-    final = np.clip((spice_map * normalization_factor).astype(int), 0, 20)
+    final = (spice_map * normalization_factor).astype(int)
     return final
+
 
 def gen_river_line(model: DuneModel):
     width, height = model.width, model.height
