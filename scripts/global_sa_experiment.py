@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from SALib.sample import sobol as sobol_sample
@@ -64,7 +65,7 @@ def main():
         ],
         'bounds': [
             (2, 4),     # n_tribes
-            (400, 1000),# n_agents
+            (400, 2000),# n_agents
             (1, 10),    # n_heaps
             (2, 50),    # vision_radius
             (0.0, 1.0), # alpha
@@ -94,18 +95,21 @@ def main():
 
     samples = sobol_sample.sample(problem, nr_sobol_samples)
     
+    output_dir = "GSA"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-    for step_count in tqdm(step_counts, desc="Processing step counts"):  
+    for step_count in step_counts:
         print(f"Running sensitivity analysis for step_count: {step_count}")
 
-        for param in tqdm(output_params, desc=f"Processing parameters for step count {step_count}"):
+        for param in output_params:
             print(f"Running sensitivity analysis for {param} with step_count {step_count}")
             sensitivity_target = salib_wrapper(param, step_count, **kwargs)
             results = parallel_evaluation(sensitivity_target, samples)
             Si = sobol_analyze.analyze(problem, results.flatten())
             results_dict[param] = Si
 
-            save_phase_plot_data(problem, samples, results, filename=f"phase_plot_data_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv")
+            save_phase_plot_data(problem, samples, results, filename=os.path.join(output_dir, f"phase_plot_data_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv"))
 
             sobol_indices_data = {
                 'Parameter': problem['names'],
@@ -124,7 +128,7 @@ def main():
                     sobol_indices_data[f'S2_conf_{problem["names"][i]}_{problem["names"][j]}'] = S2_conf[i, j]
 
             sobol_indices_df = pd.DataFrame(sobol_indices_data)
-            sobol_indices_df.to_csv(f'sobol_results_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv', index=False)
+            sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv'), index=False)
 
 if __name__ == "__main__":
     
