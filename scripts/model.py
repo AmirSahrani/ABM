@@ -21,7 +21,7 @@ class DuneModel(ms.Model):
                  vision_radius: int, step_count: int, alpha: float,
                  trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
-                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}):
+                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, self.frequency=10):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -40,12 +40,14 @@ class DuneModel(ms.Model):
         self.trade_percentage = trade_percentage
         self.spice_movement_bias = spice_movement_bias
         self.tribe_movement_bias = tribe_movement_bias
+        self.frequency = frequency
 
         self.spice_generator = spice_generator
         self.river_generator = river_generator
         self.location_generator = location_generator
 
         self.spice_kwargs = spice_kwargs
+        self.spice_kwargs["total_spice"] = self.spice_kwargs["total_spice"] // self.n_heaps
         self.river_kwargs = river_kwargs
         self.location_kwargs = location_kwargs
 
@@ -200,10 +202,11 @@ class DuneModel(ms.Model):
 
     def step(self):
         self.schedule.step()
-        self.datacollector.collect(self)
-        total_spice = self.total_spice_in_system()
-        if total_spice < self.spice_threshold:
-            self.regenerate_spice()
+        if self.schedule.time % self.frequency == 0:
+            self.datacollector.collect(self)
+            total_spice = self.total_spice_in_system()
+            if total_spice < self.spice_threshold:
+                self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1
