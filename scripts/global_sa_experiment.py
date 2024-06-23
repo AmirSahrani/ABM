@@ -5,25 +5,28 @@ from SALib.sample import sobol as sobol_sample
 from SALib.analyze import sobol as sobol_analyze
 import sys
 import matplotlib.pyplot as plt
-from joblib import Parallel, delayed
-from tqdm import tqdm 
+from joblib import Parallel, delayed, parallel_backend
+from tqdm import tqdm
+import logging
 
 sys.path.append("../scripts")
 from model import DuneModel
 from experiment_utils import *
 sys.path.remove("../scripts")
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def salib_wrapper(target: str, step_count, **kwargs):
     def out_fun(inp):
         try:
             m = DuneModel(
-                width=width,  
-                height=height, 
+                width=width,
+                height=height,
                 n_tribes=int(inp[0]),
                 n_agents=int(inp[1]),
                 n_heaps=int(inp[2]),
                 vision_radius=int(inp[3]),
-                step_count=step_count,  
+                step_count=step_count,
                 alpha=float(inp[4]),
                 trade_percentage=float(inp[5]),
                 spice_movement_bias=float(inp[6]),
@@ -34,14 +37,21 @@ def salib_wrapper(target: str, step_count, **kwargs):
             out = m.run_model()
             return out[target].to_numpy()[-1]
         except Exception as e:
-            print(f"Error processing input: {inp}, Error: {e}")
+            logging.error(f"Error processing input: {inp}, Error: {e}")
             raise e
 
     return out_fun
 
 def parallel_evaluation(fun, samples, n_jobs=-1):
-    results = Parallel(n_jobs=n_jobs)(delayed(fun)(sample) for sample in tqdm(samples, desc="Evaluating samples")) 
-    return np.array(results)
+    with parallel_backend('loky', inner_max_num_threads=1):
+        try:
+            results = Parallel(n_jobs=n_jobs, timeout=600)(
+                delayed(fun)(sample) for sample in tqdm(samples, desc="Evaluating samples")
+            )
+            return np.array(results)
+        except Exception as e:
+            logging.error(f"Error during parallel evaluation: {e}")
+            raise e
 
 def save_phase_plot_data(problem, samples, results, filename="phase_plot_data.csv"):
     data = pd.DataFrame(samples, columns=problem['names'])
@@ -85,13 +95,13 @@ def main():
     }
     output_params = [
         "total_Clustering",
-        "Fights_per_step", 
+        "Fights_per_step",
         "Cooperation_per_step"
-    ] 
+    ]
     [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
 
     results_dict = {}
-    
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -100,10 +110,10 @@ def main():
     samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
 
     for step_count in step_counts:
-        print(f"Running sensitivity analysis for step_count: {step_count}")
+        logging.info(f"Running sensitivity analysis for step_count: {step_count}")
 
         for param in output_params:
-            print(f"Running sensitivity analysis for {param} with step_count {step_count}")
+            logging.info(f"Running sensitivity analysis for {param} with step_count {step_count}")
             sensitivity_target = salib_wrapper(param, step_count, **kwargs)
             results = parallel_evaluation(sensitivity_target, samples)
             Si = sobol_analyze.analyze(problem, results.flatten())
@@ -134,10 +144,10 @@ if __name__ == "__main__":
     
     height = 300
     width = 300
-    nr_sobol_samples = 512
+    nr_sobol_samples = 16
     
     step_counts = [50, 100, 150, 200]
     
-    output_dir = "GSA_1024"
+    output_dir = "GSA"
     
     main()

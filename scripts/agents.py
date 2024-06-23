@@ -39,7 +39,7 @@ class Nomad(ms.Agent):
         self.tribe_movement_bias = np.random.uniform(0, 1)
         self.alpha = np.random.uniform(0, 1)
         self.trade_percentage = np.random.uniform(0, 1)
-        self.reproduction_threshold = np.random.randint(20, 100)
+        self.reproduction_threshold = np.random.randint(10, 100)
         self. visible_positions = []
 
 
@@ -256,8 +256,8 @@ class Spice(ms.Agent):
     def step(self):
         if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice < 20:
-            self.spice += 1 * np.random.binomial(1, .99, 1)[0]
+        elif self.spice > 20:
+            self.spice += np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
