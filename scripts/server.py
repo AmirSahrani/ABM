@@ -1,5 +1,6 @@
 import mesa as ms
 from agents import Nomad, Spice, Water
+import numpy as np
 from experiment_utils import *
 from model import DuneModel
 from mesa.visualization.ModularVisualization import ModularServer, PageHandler
@@ -27,8 +28,8 @@ model_params = {
     "river_generator": no_river,
     "location_generator": tribe_locations_single_cluster_per_tribe,
     "spice_kwargs": {
-        "total_spice": 10000,
-        "cov_range": (8, 20)
+        "total_spice": 1000,
+        "cov_range": (10, 20)
     },
     "spice_threshold": 1000
 }
@@ -80,7 +81,8 @@ def Nomad_portrayal(agent):
         }
 
     elif isinstance(agent, Spice):
-        color = spice_color[agent.spice]
+        spice = np.clip(agent.spice, 0, 20)
+        color = spice_color[spice]
         return {
             "Color": color,
             "Shape": "rect",
