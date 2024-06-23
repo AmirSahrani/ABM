@@ -35,26 +35,15 @@ def plot_all_ofat_results(df, param_name):
 
     def get_last_n_indices(group, n=5):
         # Ensure sorting by 'Unnamed: 0' before processing
-        group_sorted = group.sort_values(by='Unnamed: 0', ascending=True)
-        max_value = group_sorted["Unnamed: 0"].max()
-        trials = len(group_sorted.loc[group_sorted["Unnamed: 0"] == max_value])
+        max_value = group["Unnamed: 0"].max()
+        filtered = group.loc[group["Unnamed: 0"] > (max_value - n)]
+        return filtered
 
-
-        n *= trials
-        print("!!!!!!!!!!!!!!!!!")
-        print(group_sorted["Unnamed: 0"])
-        print("################")
-        print(n)
-        print("################")
-
-        # Get the last n rows
-        result = group_sorted.iloc[-50:]
         
-        return result
+
 
     # Plotting Nomads and total_Clustering
     for i, metric in enumerate(metrics):
-        print(len(df)// 11)
         ax = axs[i // 2, i % 2]
         grouped = df.groupby(param_name).apply(lambda x: get_last_n_indices(x)).reset_index(drop=True)
         grouped_metric = grouped.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
@@ -112,11 +101,11 @@ def plot_all_ofat_results(df, param_name):
     plt.show()
     
 
-plot_all_ofat_results(df, 'n_tribes')
-plot_all_ofat_results(df, 'n_agents')
+# plot_all_ofat_results(df, 'n_tribes')
+# plot_all_ofat_results(df, 'n_agents')
 plot_all_ofat_results(df, 'n_heaps')
-plot_all_ofat_results(df, 'vision_radius')
-plot_all_ofat_results(df, 'trade_percentage')
-plot_all_ofat_results(df, 'spice_movement_bias')
-plot_all_ofat_results(df, 'tribe_movement_bias')
-plot_all_ofat_results(df, 'spice_threshold')
+# plot_all_ofat_results(df, 'vision_radius')
+# plot_all_ofat_results(df, 'trade_percentage')
+# plot_all_ofat_results(df, 'spice_movement_bias')
+# plot_all_ofat_results(df, 'tribe_movement_bias')
+# plot_all_ofat_results(df, 'spice_threshold')
