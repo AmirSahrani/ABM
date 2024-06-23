@@ -12,10 +12,10 @@ EXPERIMENT_NAME = "Joana_trial_1"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
-    "width": 100,
-    "height": 100,
+    "width": 200,
+    "height": 200,
     "n_tribes": 4,
-    "n_agents": 400,
+    "n_agents": 8000,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 500,
@@ -103,7 +103,7 @@ def Nomad_portrayal(agent):
 
     return {}
 
-canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 1000, 1000)
+canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, grid_height=model_params["height"], grid_width=model_params["width"], canvas_height=1000, canvas_width=1000)
 
 chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
