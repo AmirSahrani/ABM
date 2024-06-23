@@ -26,6 +26,7 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
+
     def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float, alpha: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
         super().__init__(id, model)
         self.pos = pos
@@ -41,9 +42,11 @@ class Nomad(ms.Agent):
         self.reproduction_threshold = np.random.randint(20, 100)
         self. visible_positions = []
 
+
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
         return any(isinstance(agent, Nomad) for agent in this_cell)
+
 
     def get_spice(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -51,6 +54,7 @@ class Nomad(ms.Agent):
             if isinstance(agent, Spice):
                 return agent
         return None
+
 
     def is_tribe_member(self, pos):
         """
@@ -64,6 +68,7 @@ class Nomad(ms.Agent):
                     # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
                     return True
         return False
+
 
     def move(self):
         """
@@ -132,9 +137,9 @@ class Nomad(ms.Agent):
 
         best_move = min(immediate_neighbors, key=lambda pos: (pos[0] - chosen_pos[0])**2 + (pos[1] - chosen_pos[1])**2)
         # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
+        # print(f"Nomad {self.unique_id} moved towards {moved_towards} to {best_move}")
         self.model.grid.move_agent(self, best_move)
         self.check_interactions()
-        
         
         
     def non_random_walking(self):
@@ -150,8 +155,6 @@ class Nomad(ms.Agent):
             new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
 
         return new_pos
-
-
 
 
     def sniff(self):
@@ -190,6 +193,7 @@ class Nomad(ms.Agent):
                 elif other.tribe == self.tribe:
                     trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
 
+
     def step(self):
         swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
         self.move()
@@ -220,21 +224,27 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
         weak_agent = agent1
         strong_agent = agent2
 
-    if strong_agent.visible_positions:
-        for p in strong_agent.visible_positions:
-            cellmates = model.grid.get_cell_list_contents([p])
-            other_nomads = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
-            same_tribe = [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
-        
-        cost = (len(other_nomads))/ (len(other_nomads)+len(same_tribe)+1)
-        
-        if (1-cost)*weak_agent.spice > cost * strong_agent.spice:
-            strong_agent.spice += (1-cost) * weak_agent.spice - cost * strong_agent.spice
-            weak_agent.spice -= (1-cost) * weak_agent.spice
-            model.record_fight()
-        elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
-            model.record_cooperation()
+    visible_positions = [i for i in model.grid.get_neighborhood(strong_agent.pos, moore=True, include_center=False, radius=strong_agent.vision)]
     
+    other_nomads = []
+    same_tribe = []
+    
+    for p in visible_positions:
+        cellmates = model.grid.get_cell_list_contents([p])
+        other_nomads += [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe != strong_agent.tribe]
+        same_tribe += [agent for agent in cellmates if isinstance(agent, Nomad) and agent != strong_agent and agent.tribe == strong_agent.tribe]
+    
+    cost = (len(other_nomads)) / (len(other_nomads) + len(same_tribe) + 1)
+    
+    if (1 - cost) * weak_agent.spice > cost * strong_agent.spice:
+        strong_agent.spice += (1 - cost) * weak_agent.spice - cost * strong_agent.spice
+        weak_agent.spice -= (1 - cost) * weak_agent.spice
+        model.record_fight()
+    elif (1-cost)*weak_agent.spice <= cost * strong_agent.spice:
+        strong_agent.spice += 0
+        weak_agent.spice -= 0
+        model.record_cooperation()
+
 
 
 class Spice(ms.Agent):
@@ -248,7 +258,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 0 *np.random.binomial(1, .99, 1)[0]
+            self.spice += np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
