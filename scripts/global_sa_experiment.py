@@ -92,12 +92,13 @@ def main():
     [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
 
     results_dict = {}
-
-    samples = sobol_sample.sample(problem, nr_sobol_samples)
     
-    output_dir = "GSA"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
+    samples = sobol_sample.sample(problem, nr_sobol_samples)
+    samples_csv = pd.DataFrame(samples, columns=problem['names'])
+    samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
 
     for step_count in step_counts:
         print(f"Running sensitivity analysis for step_count: {step_count}")
@@ -132,10 +133,12 @@ def main():
 
 if __name__ == "__main__":
     
-    height = 500
-    width = 500
-    nr_sobol_samples = 4
+    height = 300
+    width = 300
+    nr_sobol_samples = 512
     
     step_counts = [50, 100, 150, 200]
+    
+    output_dir = "GSA_1024"
     
     main()

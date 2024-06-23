@@ -26,6 +26,7 @@ class Nomad(ms.Agent):
     [model ms.Model]: The model they are associated with
     """
 
+
     def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float, alpha: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
         super().__init__(id, model)
         self.pos = pos
@@ -41,9 +42,11 @@ class Nomad(ms.Agent):
         self.reproduction_threshold = np.random.randint(20, 100)
         self. visible_positions = []
 
+
     def is_occupied(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
         return any(isinstance(agent, Nomad) for agent in this_cell)
+
 
     def get_spice(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -51,6 +54,7 @@ class Nomad(ms.Agent):
             if isinstance(agent, Spice):
                 return agent
         return None
+
 
     def is_tribe_member(self, pos):
         """
@@ -64,6 +68,7 @@ class Nomad(ms.Agent):
                     # print(f"Nomad {agent.unique_id} is a member of the same tribe {self.tribe.id}")
                     return True
         return False
+
 
     def move(self):
         """
@@ -137,7 +142,6 @@ class Nomad(ms.Agent):
         self.check_interactions()
         
         
-        
     def non_random_walking(self):
         directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
         
@@ -151,8 +155,6 @@ class Nomad(ms.Agent):
             new_pos = (self.pos[0] + self.current_direction[0], self.pos[1] + self.current_direction[1])
 
         return new_pos
-
-
 
 
     def sniff(self):
@@ -190,6 +192,7 @@ class Nomad(ms.Agent):
                     fighting_game(self, other, alpha=self.alpha, model=self.model)
                 elif other.tribe == self.tribe:
                     trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
+
 
     def step(self):
         swimming_pentaly = 5 ** any(isinstance(x, Water) for x in self.model.grid.get_cell_list_contents(self.pos))
@@ -242,7 +245,6 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
         weak_agent.spice -= 0
         model.record_cooperation()
 
-    
 
 
 class Spice(ms.Agent):
@@ -256,7 +258,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 0 *np.random.binomial(1, .99, 1)[0]
+            self.spice += np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):
