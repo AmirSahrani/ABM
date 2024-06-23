@@ -34,10 +34,27 @@ def plot_all_ofat_results(df, param_name):
     ax4 = axs[1, 1]
 
     def get_last_n_indices(group, n=5):
-        return group.iloc[-n:]
+        # Ensure sorting by 'Unnamed: 0' before processing
+        group_sorted = group.sort_values(by='Unnamed: 0', ascending=True)
+        max_value = group_sorted["Unnamed: 0"].max()
+        trials = len(group_sorted.loc[group_sorted["Unnamed: 0"] == max_value])
+
+
+        n *= trials
+        print("!!!!!!!!!!!!!!!!!")
+        print(group_sorted["Unnamed: 0"])
+        print("################")
+        print(n)
+        print("################")
+
+        # Get the last n rows
+        result = group_sorted.iloc[-50:]
+        
+        return result
 
     # Plotting Nomads and total_Clustering
     for i, metric in enumerate(metrics):
+        print(len(df)// 11)
         ax = axs[i // 2, i % 2]
         grouped = df.groupby(param_name).apply(lambda x: get_last_n_indices(x)).reset_index(drop=True)
         grouped_metric = grouped.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
