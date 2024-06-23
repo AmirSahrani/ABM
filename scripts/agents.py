@@ -39,7 +39,7 @@ class Nomad(ms.Agent):
         self.tribe_movement_bias = np.random.uniform(0, 1)
         self.alpha = np.random.uniform(0, 1)
         self.trade_percentage = np.random.uniform(0, 1)
-        self.reproduction_threshold = np.random.randint(20, 100)
+        self.reproduction_threshold = np.random.randint(10, 100)
         self. visible_positions = []
 
 
