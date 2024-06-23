@@ -138,6 +138,6 @@ if __name__ == "__main__":
     
     step_counts = [50, 100, 150, 200]
     
-    output_dir = "GSA_1024"
+    output_dir = "GSA"
     
     main()
