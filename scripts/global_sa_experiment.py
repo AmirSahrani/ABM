@@ -65,7 +65,7 @@ def main():
         ],
         'bounds': [
             (2, 4),     # n_tribes
-            (400, 1000),# n_agents
+            (400, 2000),# n_agents
             (1, 10),    # n_heaps
             (2, 50),    # vision_radius
             (0.0, 1.0), # alpha
