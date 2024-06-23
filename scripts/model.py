@@ -58,9 +58,9 @@ class DuneModel(ms.Model):
 
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
-            "total_Clustering": lambda m: m.total_clustering(self.n_tribes),
-            "Fights_per_step": lambda m: m.total_fights / (m.total_fights + m.total_cooperation) if (m.total_fights + m.total_cooperation) > 0 else 0,
-            "Cooperation_per_step": lambda m: m.total_cooperation / (m.total_fights + m.total_cooperation) if (m.total_fights + m.total_cooperation) > 0 else 0,
+            "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
+            "Fights_per_step": lambda m: m.total_fights if m.schedule.time > 0 else 0,
+            "Cooperation_per_step": lambda m: m.total_cooperation if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_for_tribe(i)[0]) for i in range(self.n_tribes)},
@@ -251,9 +251,9 @@ class DuneModel(ms.Model):
         self.schedule.step()
         if self.schedule.time % self.frequency == 0:
             self.datacollector.collect(self)
-            total_spice = self.total_spice_in_system()
-            if total_spice < self.spice_threshold:
-                self.regenerate_spice()
+        total_spice = self.total_spice_in_system()
+        if total_spice < self.spice_threshold:
+            self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1
