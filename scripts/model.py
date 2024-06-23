@@ -21,7 +21,7 @@ class DuneModel(ms.Model):
                  vision_radius: int, step_count: int, alpha: float,
                  trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
-                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, self.frequency=10):
+                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=10):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
