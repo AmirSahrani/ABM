@@ -15,8 +15,8 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 4,
-    "n_agents": 100,
-    "n_heaps": 3,
+    "n_agents": 400,
+    "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 500,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
@@ -24,8 +24,8 @@ model_params = {
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
-    "river_generator": gen_river_random,
-    "location_generator": random_locations,
+    "river_generator": no_river,
+    "location_generator": tribe_locations_single_cluster_per_tribe,
     "spice_kwargs": {
         "total_spice": 10000,
         "cov_range": (8, 20)
