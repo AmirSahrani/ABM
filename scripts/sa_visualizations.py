@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('data/ofat_results_joana_finer_grain.csv')
+df = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -47,7 +47,7 @@ def plot_all_ofat_results(df, param_name):
     
     # Plotting Fights_per_step and Cooperation_per_step
     ax5 = axs[1, 1]
-    metrics_to_plot = ['Fights_per_step', 'Cooperation_per_step']
+    metrics_to_plot = ['Cooperation_per_step', 'Fights_per_step']
     for metric in metrics_to_plot:
         grouped = df.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
         replicates = df.groupby(param_name)[metric].count().reindex(grouped[param_name]).values
@@ -56,13 +56,13 @@ def plot_all_ofat_results(df, param_name):
         ax5.fill_between(grouped[param_name], grouped['mean'] - err, grouped['mean'] + err, alpha=0.2)
 
     ax5.set_xlabel(param_name)
-    ax5.set_ylabel('Fights_per_step & Cooperation_per_step')
+    ax5.set_ylabel('Cooperation_per_step')
     ax5.set_title(f'{metric} vs {param_name}')
     ax5.grid(True)
     ax5.legend(loc='upper left')
 
     # Plotting average trades across all tribes
-    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(10)]
+    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(4)]
     df['average_trades'] = df[trades_columns].mean(axis=1)
     grouped = df.groupby(param_name)['average_trades'].agg(['mean', 'max', 'min', 'std']).reset_index()
     replicates = df.groupby(param_name)['average_trades'].count().reindex(grouped[param_name]).values
@@ -84,7 +84,6 @@ plot_all_ofat_results(df, 'n_tribes')
 plot_all_ofat_results(df, 'n_agents')
 plot_all_ofat_results(df, 'n_heaps')
 plot_all_ofat_results(df, 'vision_radius')
-plot_all_ofat_results(df, 'alpha')
 plot_all_ofat_results(df, 'trade_percentage')
 plot_all_ofat_results(df, 'spice_movement_bias')
 plot_all_ofat_results(df, 'tribe_movement_bias')

@@ -248,7 +248,7 @@ class Spice(ms.Agent):
         if self.spice == 0:
             self.model.remove_agent(self)
         elif self.spice > 20:
-            self.spice += 0 *np.random.binomial(1, .99, 1)[0]
+            self.spice += np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):

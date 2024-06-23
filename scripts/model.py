@@ -21,7 +21,7 @@ class DuneModel(ms.Model):
                  vision_radius: int, step_count: int, alpha: float,
                  trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
-                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, self.frequency=10):
+                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=10):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -59,8 +59,8 @@ class DuneModel(ms.Model):
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
             "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
-            "Fights_per_step": lambda m: m.total_fights/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
-            "Cooperation_per_step": lambda m: m.total_cooperation/(m.total_fights + m.total_cooperation) if m.schedule.time > 0 else 0,
+            "Fights_per_step": lambda m: m.total_fights if m.schedule.time > 0 else 0,
+            "Cooperation_per_step": lambda m: m.total_cooperation if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_K_means(i)[0]) for i in range(self.n_tribes)},
@@ -147,7 +147,7 @@ class DuneModel(ms.Model):
             kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
             labels = kmeans.labels_
             unique_labels, counts = np.unique(labels, return_counts=True)
-            average_cluster_size = np.mean(counts) / total_individuals
+            average_cluster_size = np.mean(counts)
         else:
             average_cluster_size = 0
             counts = []
@@ -204,9 +204,9 @@ class DuneModel(ms.Model):
         self.schedule.step()
         if self.schedule.time % self.frequency == 0:
             self.datacollector.collect(self)
-            total_spice = self.total_spice_in_system()
-            if total_spice < self.spice_threshold:
-                self.regenerate_spice()
+        total_spice = self.total_spice_in_system()
+        if total_spice < self.spice_threshold:
+            self.regenerate_spice()
         if self.verbose:
             print([self.schedule.time, self.schedule.get_type_count(Nomad)])
         self.current_step += 1
