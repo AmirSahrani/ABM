@@ -23,7 +23,6 @@ def gen_spice_map(model: DuneModel):
 
     normalization_factor = total_spice * n_heaps / np.sum(spice_map)
     final = (spice_map * normalization_factor).astype(int)
-    print(final.sum())
     return final
 
 
