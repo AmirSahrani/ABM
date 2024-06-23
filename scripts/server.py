@@ -15,7 +15,7 @@ model_params = {
     "width": 100,
     "height": 100,
     "n_tribes": 4,
-    "n_agents": 4000,
+    "n_agents": 400,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 100,

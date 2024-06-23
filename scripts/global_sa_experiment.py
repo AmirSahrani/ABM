@@ -5,6 +5,7 @@ from SALib.analyze import sobol as sobol_analyze
 import sys
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
+from tqdm import tqdm 
 
 sys.path.append("../scripts")
 from model import DuneModel
@@ -38,7 +39,7 @@ def salib_wrapper(target: str, step_count, **kwargs):
     return out_fun
 
 def parallel_evaluation(fun, samples, n_jobs=-1):
-    results = Parallel(n_jobs=n_jobs)(delayed(fun)(sample) for sample in samples)
+    results = Parallel(n_jobs=n_jobs)(delayed(fun)(sample) for sample in tqdm(samples, desc="Evaluating samples")) 
     return np.array(results)
 
 def save_phase_plot_data(problem, samples, results, filename="phase_plot_data.csv"):
@@ -62,10 +63,10 @@ def main():
             "spice_threshold"
         ],
         'bounds': [
-            (2, 10),    # n_tribes
-            (10, 200),  # n_agents
-            (1, 50),    # n_heaps
-            (2, 20),    # vision_radius
+            (2, 4),     # n_tribes
+            (400, 1000),# n_agents
+            (1, 10),    # n_heaps
+            (2, 50),    # vision_radius
             (0.0, 1.0), # alpha
             (0.0, 1.0), # trade_percentage
             (0.0, 1.0), # spice_movement_bias
@@ -94,10 +95,10 @@ def main():
     samples = sobol_sample.sample(problem, nr_sobol_samples)
     
 
-    for step_count in step_counts:
+    for step_count in tqdm(step_counts, desc="Processing step counts"):  
         print(f"Running sensitivity analysis for step_count: {step_count}")
 
-        for param in output_params:
+        for param in tqdm(output_params, desc=f"Processing parameters for step count {step_count}"):
             print(f"Running sensitivity analysis for {param} with step_count {step_count}")
             sensitivity_target = salib_wrapper(param, step_count, **kwargs)
             results = parallel_evaluation(sensitivity_target, samples)
@@ -127,9 +128,9 @@ def main():
 
 if __name__ == "__main__":
     
-    height = 100
-    width = 100
-    nr_sobol_samples = 1024
+    height = 500
+    width = 500
+    nr_sobol_samples = 4
     
     step_counts = [50, 100, 150, 200]
     
