@@ -85,7 +85,6 @@ def main():
         "location_generator": random_locations,
         "spice_kwargs": {"cov_range": (3, 9), "total_spice": 1000}
     }
-
     output_params = [
         # "Nomads", 
         "Fights_per_step", 
