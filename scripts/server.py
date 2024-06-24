@@ -19,16 +19,17 @@ model_params = {
     "n_agents": 800,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
-    "step_count": 500,
+    "step_count": 200,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
-    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
+    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
     "river_generator": no_river,
-    "location_generator": tribe_locations_single_cluster_per_tribe,
+    "river_generator": no_river,
+    "location_generator": random_locations,
     "spice_kwargs": {
-        "total_spice": 1000,
+        "total_spice": 10000,
         "cov_range": (10, 20)
     },
     "spice_threshold": 1000,
@@ -192,5 +193,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8521
+server.port = 8703
 server.launch()
