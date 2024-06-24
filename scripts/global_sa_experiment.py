@@ -108,7 +108,6 @@ def main():
     samples_csv = pd.DataFrame(samples, columns=problem['names'])
     samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
 
-    # sensitivity_target = salib_wrapper(**kwargs)
     all_results = parallel_evaluation(sensitivity_target, samples, n_jobs=8)
 
     output_params = [
@@ -143,7 +142,7 @@ def main():
                     sobol_indices_data[f'S2_conf_{problem["names"][i]}_{problem["names"][j]}'] = S2_conf[i, j]
 
             sobol_indices_df = pd.DataFrame(sobol_indices_data)
-            sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv'), index=False)
+            sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{output_params[param]}_sample_{nr_sobol_samples}_step_{step_count*50}.csv'), index=False)
 
 
 if __name__ == "__main__":
