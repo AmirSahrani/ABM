@@ -7,8 +7,8 @@ import os
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.cluster import DBSCAN
 import warnings
-from copy import deepcopy
 
 MONITOR = False
 
@@ -21,7 +21,7 @@ class DuneModel(ms.Model):
                  vision_radius: int, step_count: int, alpha: float,
                  trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
-                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=10):
+                 spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=1):
         super().__init__()
         self.experiment_name = experiment_name
         self.width = width
@@ -58,12 +58,12 @@ class DuneModel(ms.Model):
 
         self.datacollector = ms.DataCollector({
             "Nomads": lambda m: m.schedule.get_type_count(Nomad),
-            "total_Clustering": lambda m: m.total_clutering(self.n_tribes),
+            "total_Clustering": lambda m: m.total_clustering(self.n_tribes),
             "Fights_per_step": lambda m: m.total_fights if m.schedule.time > 0 else 0,
             "Cooperation_per_step": lambda m: m.total_cooperation if m.schedule.time > 0 else 0,
             **{f"Tribe_{i}_Nomads": (lambda m, i=i: m.count_tribe_nomads(i)) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Spice": (lambda m, i=i: m.total_spice(i)) for i in range(self.n_tribes)},
-            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_K_means(i)[0]) for i in range(self.n_tribes)},
+            **{f"Tribe_{i}_Clustering": (lambda m, i=i: m.clustering_for_tribe(i)[0]) for i in range(self.n_tribes)},
             **{f"Tribe_{i}_Trades": (lambda m, i=i: m.trades_per_tribe[i] / m.schedule.time if m.schedule.time > 0 else 0) for i in range(self.n_tribes)}
         })
 
@@ -104,34 +104,88 @@ class DuneModel(ms.Model):
     def total_spice(self, tribe_id):
         return sum(a.spice for a in self.schedule.agents if isinstance(a, Nomad) and a.tribe.id == tribe_id)
 
-    def determine_optimal_k(self, points, max_k):
-        silhouette_scores = []
-        k_range = range(2, min(max_k, len(points)))
+    # def determine_optimal_k(self, points, max_k):
+    #     silhouette_scores = []
+    #     k_range = range(2, min(max_k, len(points)))
 
+    #     if len(points) < 2:
+    #         return len(points)
+
+    #     for k in k_range:
+    #         if len(points) <= k:
+    #             silhouette_scores.append(-1)
+    #         else:
+    #             kmeans = KMeans(n_clusters=k, random_state=0)
+    #             kmeans.fit(points)
+    #             labels = kmeans.labels_
+    #             if len(set(labels)) > 1:
+    #                 silhouette_scores.append(silhouette_score(points, labels))
+    #             else:
+    #                 silhouette_scores.append(-1)
+
+    #     if all(score == -1 for score in silhouette_scores):
+    #         return len(points)
+
+    #     valid_scores = [(score, k) for score, k in zip(silhouette_scores, k_range) if score != -1]
+    #     optimal_k = max(valid_scores, key=lambda x: x[0])[1]
+
+    #     return optimal_k
+
+    # def clustering_K_means(self, tribe_id, k_max=20):
+    #     positions = []
+    #     for a in self.schedule.agents:
+    #         if isinstance(a, Nomad) and a.tribe.id == tribe_id:
+    #             positions.append(a.pos)
+
+    #     positions = np.array(positions)
+    #     total_individuals = len(positions)
+    #     if total_individuals == 0:
+    #         return 0, []
+    #     k = self.determine_optimal_k(positions, k_max)
+
+    #     if k > 0:
+    #         kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
+    #         labels = kmeans.labels_
+    #         unique_labels, counts = np.unique(labels, return_counts=True)
+    #         average_cluster_size = np.mean(counts) / total_individuals
+    #     else:
+    #         average_cluster_size = 0
+    #         counts = []
+
+    #     return average_cluster_size, counts
+
+    # def total_clutering(self, n_tribes):
+    #     total_clustering = 0
+    #     for i in range(n_tribes):
+    #         clustering, _ = self.clustering_K_means(i)
+    #         if self.schedule.get_type_count(Nomad) > 0:
+    #             total_clustering += self.count_tribe_nomads(i) * clustering / self.schedule.get_type_count(Nomad)
+    #         else:
+    #             total_clustering += 0
+    #     return total_clustering
+
+    def clustering_DBSCAN(self, points, eps, min_samples=3):
         if len(points) < 2:
-            return len(points)
+            return 0, []
 
-        for k in k_range:
-            if len(points) <= k:
-                silhouette_scores.append(-1)
-            else:
-                kmeans = KMeans(n_clusters=k, random_state=0)
-                kmeans.fit(points)
-                labels = kmeans.labels_
-                if len(set(labels)) > 1:
-                    silhouette_scores.append(silhouette_score(points, labels))
-                else:
-                    silhouette_scores.append(-1)
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(points)
+        labels = db.labels_
+        
+        unique_labels = set(labels)
+        n_clusters = len(unique_labels) - (1 if -1 in labels else 0)
+        # print(n_clusters)
 
-        if all(score == -1 for score in silhouette_scores):
-            return len(points)
+        if n_clusters > 0:
+            counts = np.bincount(labels[labels >= 0])
+            average_cluster_size = np.mean(counts) 
+        else:
+            average_cluster_size = 0
+            counts = []
+        return average_cluster_size, counts
 
-        valid_scores = [(score, k) for score, k in zip(silhouette_scores, k_range) if score != -1]
-        optimal_k = max(valid_scores, key=lambda x: x[0])[1]
 
-        return optimal_k
 
-    def clustering_K_means(self, tribe_id, k_max=20):
+    def clustering_for_tribe(self, tribe_id, min_samples=3):
         positions = []
         for a in self.schedule.agents:
             if isinstance(a, Nomad) and a.tribe.id == tribe_id:
@@ -141,25 +195,18 @@ class DuneModel(ms.Model):
         total_individuals = len(positions)
         if total_individuals == 0:
             return 0, []
-        k = self.determine_optimal_k(positions, k_max)
 
-        if k > 0:
-            kmeans = KMeans(n_clusters=k, random_state=0).fit(positions)
-            labels = kmeans.labels_
-            unique_labels, counts = np.unique(labels, return_counts=True)
-            average_cluster_size = np.mean(counts)
-        else:
-            average_cluster_size = 0
-            counts = []
+        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=self.vision_radius, min_samples=min_samples)
 
         return average_cluster_size, counts
-
-    def total_clutering(self, n_tribes):
+    
+    def total_clustering(self, n_tribes, min_samples=3):
         total_clustering = 0
         for i in range(n_tribes):
-            clustering, _ = self.clustering_K_means(i)
-            if self.schedule.get_type_count(Nomad) > 0:
-                total_clustering += self.count_tribe_nomads(i) * clustering / self.schedule.get_type_count(Nomad)
+            clustering, _ = self.clustering_for_tribe(i, min_samples=min_samples)
+            nomad_count = self.schedule.get_type_count(Nomad)
+            if nomad_count > 0:
+                total_clustering += self.count_tribe_nomads(i) * clustering 
             else:
                 total_clustering += 0
         return total_clustering
@@ -291,14 +338,16 @@ class DuneModel(ms.Model):
         if save:
             self.save_results(self.experiment_name)
 
-        print("Data collection successful.")
+        # print("Data collection successful.")
 
         return self.datacollector.get_model_vars_dataframe()
+
+        # return self.datacollector.get_model_vars_dataframe()
 
         # data = self.datacollector.get_model_vars_dataframe()
         # if data is None or data.empty:
         #     print("Data collection returned None or empty DataFrame.")
         # else:
         #     print("Data collection successful.")
-        #
-        return data
+
+        # return data

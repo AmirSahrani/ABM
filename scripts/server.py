@@ -1,5 +1,6 @@
 import mesa as ms
 from agents import Nomad, Spice, Water
+import numpy as np
 from experiment_utils import *
 from model import DuneModel
 from mesa.visualization.ModularVisualization import ModularServer, PageHandler
@@ -8,7 +9,7 @@ import tornado.web
 
 
 
-EXPERIMENT_NAME = "Joana_trial_1"
+EXPERIMENT_NAME = "Babci_trial_1"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
@@ -17,18 +18,22 @@ model_params = {
     "n_tribes": 2,
     "n_agents": 900,
     "n_heaps": 2,
+    "n_tribes": 2,
+    "n_agents": 900,
+    "n_heaps": 2,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 200,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
-    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.1, description="How much do they trade with each other"),
+    "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_generator": gen_spice_map,
     "river_generator": no_river,
+    "river_generator": no_river,
     "location_generator": random_locations,
     "spice_kwargs": {
         "total_spice": 10000,
-        "cov_range": (8, 20)
+        "cov_range": (10, 20)
     },
     "spice_threshold": 9000
 }
@@ -80,7 +85,8 @@ def Nomad_portrayal(agent):
         }
 
     elif isinstance(agent, Spice):
-        color = spice_color[agent.spice]
+        spice = np.clip(agent.spice, 0, 20)
+        color = spice_color[spice]
         return {
             "Color": color,
             "Shape": "rect",
@@ -103,7 +109,7 @@ def Nomad_portrayal(agent):
 
     return {}
 
-canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, 100, 100, 1000, 1000)
+canvas_element = ms.visualization.CanvasGrid(Nomad_portrayal, grid_height=model_params["height"], grid_width=model_params["width"], canvas_height=1000, canvas_width=1000)
 
 chart_element = ms.visualization.ChartModule(
     [{"Label": "Nomad", "Color": "#AA0000"}]
@@ -189,5 +195,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8715
+server.port = 8703
 server.launch()

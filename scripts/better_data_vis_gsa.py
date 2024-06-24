@@ -7,7 +7,7 @@ import numpy as np
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=16)
 
-def plot_sobol_indices(csv_file, phase_plot_data_file):
+def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     sobol_indices_df = pd.read_csv(csv_file)
 
     problem_names = sobol_indices_df['Parameter'].tolist()
@@ -40,7 +40,7 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'First-order Sobol Indices ($S_1$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_S1_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S1_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -51,7 +51,7 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'Total-order Sobol Indices ($S_T$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_ST_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_ST_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -66,14 +66,14 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'Second-order Sobol Indices ($S_2$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_S2_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S2_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
     sns.heatmap(S2_matrix, xticklabels=problem_names, yticklabels=problem_names, annot=True, fmt=".2f", cmap='coolwarm', ax=ax)
     ax.set_title(f'Second-order Sobol Indices Heatmap for {os.path.basename(csv_file)}')
     plt.tight_layout()
-    plt.savefig(f'sobol_S2_heatmap_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S2_heatmap_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     phase_data = pd.read_csv(phase_plot_data_file)
@@ -90,14 +90,12 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
         plt.ylabel(param2)
         plt.title(rf'Phase plot of {result_col} in {param1}-{param2} space')
         plt.tight_layout()
-        plt.savefig(f'phase_plot_{param1}_{param2}_{os.path.splitext(os.path.basename(phase_plot_data_file))[0]}.png')
+        plt.savefig(os.path.join(output_dir, f'phase_plot_{param1}_{param2}_{os.path.splitext(os.path.basename(phase_plot_data_file))[0]}.png'))
         plt.close()
 
     parameter_pairs = [
-        ("width", "height"),
         ("n_tribes", "n_agents"),
-        ("n_heaps", "vision_radius"),
-        ("step_count", "alpha"),
+        ("alpha", "vision_radius"),
         ("trade_percentage","spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
@@ -106,8 +104,11 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
         generate_phase_plots(phase_data, param1, param2)
 
 if __name__ == "__main__":
-    csv_files = [file for file in os.listdir() if file.startswith('sobol_results_') and file.endswith('.csv')]
-    phase_plot_data_files = [file for file in os.listdir() if file.startswith('phase_plot_data_') and file.endswith('.csv')]
+    input_dir = "GSA"
+    output_dir = "GSA"
+
+    csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv')]
+    phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
 
     for csv_file, phase_plot_data_file in zip(csv_files, phase_plot_data_files):
-        plot_sobol_indices(csv_file, phase_plot_data_file)
+        plot_sobol_indices(csv_file, phase_plot_data_file, output_dir)
