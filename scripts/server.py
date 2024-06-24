@@ -16,7 +16,7 @@ model_params = {
     "width": 200,
     "height": 200,
     "n_tribes": 4,
-    "n_agents": 8000,
+    "n_agents": 800,
     "n_heaps": 8,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 500,
@@ -31,7 +31,8 @@ model_params = {
         "total_spice": 1000,
         "cov_range": (10, 20)
     },
-    "spice_threshold": 1000
+    "spice_threshold": 1000,
+    "frequency": 3
 }
 
 

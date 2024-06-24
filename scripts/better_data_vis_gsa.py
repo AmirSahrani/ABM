@@ -7,6 +7,7 @@ import numpy as np
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=16)
 
+
 def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     sobol_indices_df = pd.read_csv(csv_file)
 
@@ -55,9 +56,9 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])), 
-           S2_matrix[np.triu_indices(len(problem_names), 1)], 
-           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)], 
+    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])),
+           S2_matrix[np.triu_indices(len(problem_names), 1)],
+           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)],
            align='center', capsize=5)
     ax.set_xticks(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])))
     S2_labels = [f'{problem_names[i]}-{problem_names[j]}' for i in range(num_vars) for j in range(i + 1, num_vars)]
@@ -96,12 +97,13 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     parameter_pairs = [
         ("n_tribes", "n_agents"),
         ("alpha", "vision_radius"),
-        ("trade_percentage","spice_threshold"),
+        ("trade_percentage", "spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
 
     for param1, param2 in parameter_pairs:
         generate_phase_plots(phase_data, param1, param2)
+
 
 if __name__ == "__main__":
     input_dir = "GSA"

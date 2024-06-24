@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv('../data/ofat_results_joana_finer_grain.csv')
 
-#This produces a plot similar to the one in the paper. 
+# This produces a plot similar to the one in the paper.
+
+
 def plot_single_ofat_result(df, param_name, output_name):
     grouped = df.groupby(param_name)[output_name].agg(['mean', 'max', 'min']).reset_index()
-    
+
     plt.figure(figsize=(10, 6))
     for idx, row in grouped.iterrows():
         plt.scatter(row[param_name], row['mean'], label='Mean' if idx == 0 else "", marker='o', color='blue')
@@ -19,16 +21,16 @@ def plot_single_ofat_result(df, param_name, output_name):
     plt.title(f'Mean, Max, and Min of {output_name} for {param_name}')
     plt.legend()
     plt.show()
-    
 
-#Give the parameter you're looking at and the particular output of interest. 
-#plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
+
+# Give the parameter you're looking at and the particular output of interest.
+# plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
 
 
 def plot_all_ofat_results(df, param_name):
     metrics = ['Nomads', 'Cooperation_per_step', 'Fights_per_step', 'total_Clustering']
-    fig, axs = plt.subplots(1, 4, figsize=(30,5))
-    
+    fig, axs = plt.subplots(1, 4, figsize=(30, 5))
+
     for i, metric in enumerate(metrics):
         ax = axs[i]
         grouped = df.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
@@ -39,14 +41,14 @@ def plot_all_ofat_results(df, param_name):
         ax.set_xlabel(param_name)
         ax.set_ylabel(metric)
         ax.set_title(f'{metric} vs {param_name}')
-        ax.grid(True) #For Sandor lol, I like em too
-    
+        ax.grid(True)  # For Sandor lol, I like em too
+
     plt.subplots_adjust(left=0.042,
-                    bottom=0.1, 
-                    right=0.994, 
-                    top=0.9, 
-                    wspace=0.326, 
-                    hspace=0.2)
+                        bottom=0.1,
+                        right=0.994,
+                        top=0.9,
+                        wspace=0.326,
+                        hspace=0.2)
     plt.show()
 
 
