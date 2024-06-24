@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
+df = pd.read_csv('data/ofat_new_nominal_values.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -82,7 +82,7 @@ def plot_all_ofat_results(df, param_name):
     ax5.legend(loc='upper left')
 
     # Plotting average trades across all tribes
-    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(4)]
+    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(3)]
     df['average_trades'] = df[trades_columns].mean(axis=1)
     grouped = df.groupby(param_name).apply(lambda x: get_last_n_indices(x)).reset_index(drop=True)
     grouped_metric = grouped.groupby(param_name)['average_trades'].agg(['mean', 'max', 'min', 'std']).reset_index()
@@ -101,11 +101,11 @@ def plot_all_ofat_results(df, param_name):
     plt.show()
     
 
-# plot_all_ofat_results(df, 'n_tribes')
-# plot_all_ofat_results(df, 'n_agents')
+#plot_all_ofat_results(df, 'n_tribes')
+plot_all_ofat_results(df, 'n_agents')
 plot_all_ofat_results(df, 'n_heaps')
-# plot_all_ofat_results(df, 'vision_radius')
-# plot_all_ofat_results(df, 'trade_percentage')
-# plot_all_ofat_results(df, 'spice_movement_bias')
-# plot_all_ofat_results(df, 'tribe_movement_bias')
-# plot_all_ofat_results(df, 'spice_threshold')
+plot_all_ofat_results(df, 'vision_radius')
+plot_all_ofat_results(df, 'trade_percentage')
+plot_all_ofat_results(df, 'spice_movement_bias')
+plot_all_ofat_results(df, 'tribe_movement_bias')
+plot_all_ofat_results(df, 'spice_threshold')
