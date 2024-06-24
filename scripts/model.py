@@ -173,7 +173,7 @@ class DuneModel(ms.Model):
         
         unique_labels = set(labels)
         n_clusters = len(unique_labels) - (1 if -1 in labels else 0)
-        # print(n_clusters)
+        print(n_clusters)
 
         if n_clusters > 0:
             counts = np.bincount(labels[labels >= 0])
