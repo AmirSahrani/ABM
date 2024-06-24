@@ -1,8 +1,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+from scipy.interpolate import make_interp_spline
 
-df = pd.read_csv('data/ofat_new_nominal_values.csv')
+#Pay no attention to the man behind the screen.
+warnings.filterwarnings("ignore", category=DeprecationWarning, message="DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.")
+
+df = pd.read_csv('data/sandor_ofat_new_nominal_values.csv')
 
 #This produces a plot similar to the one in the paper. 
 def plot_single_ofat_result(df, param_name, output_name):
@@ -39,8 +44,16 @@ def plot_all_ofat_results(df, param_name):
         filtered = group.loc[group["Unnamed: 0"] > (max_value - n)]
         return filtered
 
-        
+    def plot_with_interpolation(ax, x, y, yerr, label, color):
+        x_smooth = np.linspace(x.min(), x.max(), 300)
+        spline_mean = make_interp_spline(x, y, k=2)
+        y_smooth = spline_mean(x_smooth)
 
+        spline_err = make_interp_spline(x, yerr, k=2)
+        yerr_smooth = spline_err(x_smooth)
+
+        ax.plot(x_smooth, y_smooth, label=f'{label} Interpolated', color=color)
+        ax.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.2)
 
     # Plotting Nomads and total_Clustering
     for i, metric in enumerate(metrics):
@@ -49,8 +62,9 @@ def plot_all_ofat_results(df, param_name):
         grouped_metric = grouped.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
         replicates = grouped.groupby(param_name)[metric].count().reindex(grouped_metric[param_name]).values
         err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
-        ax.plot(grouped_metric[param_name], grouped_metric['mean'], label='Mean', color='blue', marker='o')
-        ax.fill_between(grouped_metric[param_name], grouped_metric['mean'] - err, grouped_metric['mean'] + err, color='blue', alpha=0.2)
+        
+        plot_with_interpolation(ax, grouped_metric[param_name], grouped_metric['mean'], err, 'Mean', 'blue')
+        
         ax.set_xlabel(param_name)
         ax.set_ylabel(metric)
         ax.set_title(f'{metric} vs {param_name}')
@@ -58,7 +72,7 @@ def plot_all_ofat_results(df, param_name):
 
         max_mean_value = grouped_metric['mean'].max()
         max_param_value = grouped_metric.loc[grouped_metric['mean'].idxmax(), param_name]
-        print(f'Max Parameter Value: {max_param_value}   Max Mean Value: {max_mean_value}')
+        print(f'Max Parameter Value: {max_param_value}   Max Mean Value of {metric}: {max_mean_value}')
     
     # Plotting Fights_per_step and Cooperation_per_step
     ax5 = axs[1, 1]
@@ -68,33 +82,32 @@ def plot_all_ofat_results(df, param_name):
         grouped_metric = grouped.groupby(param_name)[metric].agg(['mean', 'max', 'min', 'std']).reset_index()
         replicates = grouped.groupby(param_name)[metric].count().reindex(grouped_metric[param_name]).values
         err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
-        ax5.plot(grouped_metric[param_name], grouped_metric['mean'], label=metric, linestyle='-', marker='o')
-        ax5.fill_between(grouped_metric[param_name], grouped_metric['mean'] - err, grouped_metric['mean'] + err, alpha=0.2)
         
+        plot_with_interpolation(ax5, grouped_metric[param_name], grouped_metric['mean'], err, metric, 'orange' if metric == 'Fights_per_step' else 'green')
+
         max_mean_value = grouped_metric['mean'].max()
         max_param_value = grouped_metric.loc[grouped_metric['mean'].idxmax(), param_name]
-        print(f'Max Parameter Value: {max_param_value}   Max Mean Value: {max_mean_value}')
+        print(f'Max Parameter Value: {max_param_value}   Max Mean Value of {metric}: {max_mean_value}')
 
     ax5.set_xlabel(param_name)
     ax5.set_ylabel('Cooperation_per_step')
     ax5.set_title(f'{metric} vs {param_name}')
     ax5.grid(True)
-    ax5.legend(loc='upper left')
 
     # Plotting average trades across all tribes
-    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(3)]
+    trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(2)]
     df['average_trades'] = df[trades_columns].mean(axis=1)
     grouped = df.groupby(param_name).apply(lambda x: get_last_n_indices(x)).reset_index(drop=True)
     grouped_metric = grouped.groupby(param_name)['average_trades'].agg(['mean', 'max', 'min', 'std']).reset_index()
     replicates = grouped.groupby(param_name)['average_trades'].count().reindex(grouped_metric[param_name]).values
     err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
-    ax3.plot(grouped_metric[param_name], grouped_metric['mean'], label='Average Trades', color='purple', marker='o')
-    ax3.fill_between(grouped_metric[param_name], grouped_metric['mean'] - err, grouped_metric['mean'] + err, color='purple', alpha=0.2)
+    
+    plot_with_interpolation(ax3, grouped_metric[param_name], grouped_metric['mean'], err, 'Average Trades', 'purple')
+
     ax3.set_xlabel(param_name)
     ax3.set_ylabel('Average Trades')
     ax3.set_title(f'Average Trades vs {param_name}')
     ax3.grid(True)
-    ax3.legend(loc='upper left')
 
     plt.tight_layout()
     plt.subplots_adjust(left=0.046, bottom=0.268, right=0.988, top=0.964, wspace=0.129, hspace=0.23)
