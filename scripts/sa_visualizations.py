@@ -7,6 +7,7 @@ from scipy.interpolate import make_interp_spline
 #Pay no attention to the man behind the screen.
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.")
 
+df_old_model = pd.read_csv('data/ofat_new_nominal_values.csv')
 df_random = pd.read_csv('data/sandor_ofat_new_nominal_values_random_locations.csv')
 df_clustered = pd.read_csv('data/sandor_ofat_new_nominal_values.csv')
 
@@ -56,7 +57,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
         spline_err = make_interp_spline(x, yerr, k=3)
         yerr_smooth = spline_err(x_smooth)
 
-        ax.plot(x_smooth, y_smooth, label=f'{label} Interpolated', color=color, alpha=0.5)
+        ax.plot(x_smooth, y_smooth, label=f'{label}', color=color, alpha=0.5)
         ax.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.1)
 
     def plot_normal(ax, x, y, yerr, label, color):
@@ -145,7 +146,8 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     plt.subplots_adjust(left=0.046, bottom=0.268, right=0.988, top=0.964, wspace=0.129, hspace=0.23)
     plt.show()
 
-plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
+#plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
+plot_all_ofat_results([df_old_model], 'n_agents', use_interpolation=True)
 # plot_all_ofat_results([df_random, df_clustered], 'n_heaps')
 # plot_all_ofat_results([df_random, df_clustered], 'vision_radius')
 # plot_all_ofat_results([df_random, df_clustered], 'trade_percentage')
