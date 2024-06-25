@@ -19,7 +19,7 @@ class DuneModel(ms.Model):
     def __init__(self, experiment_name: str, width: int, height: int,
                  n_tribes: int, n_agents: int, n_heaps: int,
                  vision_radius: int, step_count: int, alpha: float,
-                 trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_generator: Callable,
+                 trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_grow_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
                  spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=1):
         super().__init__()
@@ -33,6 +33,7 @@ class DuneModel(ms.Model):
         self.total_cooperation = 0
         self.tribes = []
         self.spice_threshold = spice_threshold
+        self.spice_grow_threshold = spice_grow_threshold
         self.step_count = step_count
         self.current_step = 0
         self.vision_radius = vision_radius
@@ -78,7 +79,7 @@ class DuneModel(ms.Model):
                 self.grid.place_agent(water, (x, y))
                 self.schedule.add(water)
             elif max_spice > 0:
-                spice = Spice(self.id, (x, y), self, max_spice)
+                spice = Spice(self.id, (x, y), self, max_spice, self.spice_grow_threshold)
                 self.id += 1
                 self.grid.place_agent(spice, (x, y))
                 self.schedule.add(spice)
@@ -242,7 +243,7 @@ class DuneModel(ms.Model):
                         break
                     else:
                         self.id += 1
-                        new_spice = Spice(self.id, (x, y), self, max_spice)
+                        new_spice = Spice(self.id, (x, y), self, max_spice, self.spice_grow_threshold)
                         self.grid.place_agent(new_spice, (x, y))
                         self.schedule.add(new_spice)
                         break

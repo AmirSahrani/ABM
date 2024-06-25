@@ -27,6 +27,7 @@ model_params = {
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
+    "spice_grow_threshold": ms.visualization.Slider("Spice Regeneration Threshold", 1, 0, 20, 1, description="Threshold for spice regeneration"),
     "spice_generator": gen_central_spice_heap,
     "river_generator": no_river,
     "location_generator": split_tribes_locations,

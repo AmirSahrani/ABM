@@ -247,16 +247,17 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
 
 
 class Spice(ms.Agent):
-    def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int):
+    def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int, grow_threshold: int):
         super().__init__(id, model)
         self.pos = pos
         self.spice = max_spice
         self.max_spice = max_spice
+        self.grow_threshold = grow_threshold
 
     def step(self):
         if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice <1:
+        elif self.spice < self.grow_threshold:
             self.spice += np.random.binomial(1, .99, 1)[0]
 
 
