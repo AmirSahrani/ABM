@@ -86,7 +86,7 @@ def main():
         ],
         'bounds': [
             (2, 4),     # n_tribes
-            (20, 100),  # n_agents
+            (100, 2000),  # n_agents
             (1, 10),    # n_heaps
             (2, 50),    # vision_radius
             (0.0, 1.0),  # alpha
@@ -100,7 +100,7 @@ def main():
     [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
 
     results_dict = {}
-
+le
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -108,7 +108,7 @@ def main():
     samples_csv = pd.DataFrame(samples, columns=problem['names'])
     samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
 
-    all_results = parallel_evaluation(sensitivity_target, samples, n_jobs=8)
+    all_results = parallel_evaluation(sensitivity_target, samples, n_jobs=32)
 
     output_params = [
         "total_Clustering",
@@ -123,7 +123,7 @@ def main():
             Si = sobol_analyze.analyze(problem, results.flatten())
             results_dict[param] = Si
 
-            save_phase_plot_data(problem, samples, results, filename=os.path.join(output_dir, f"phase_plot_data_{param}_sample_{nr_sobol_samples}_step_{step_count}.csv"))
+            save_phase_plot_data(problem, samples, results, filename=os.path.join(output_dir, f"phase_plot_data_{output_dir[param]}_sample_{nr_sobol_samples}_step_{(step_count + 1 )*50}.csv"))
 
             sobol_indices_data = {
                 'Parameter': problem['names'],
@@ -142,14 +142,14 @@ def main():
                     sobol_indices_data[f'S2_conf_{problem["names"][i]}_{problem["names"][j]}'] = S2_conf[i, j]
 
             sobol_indices_df = pd.DataFrame(sobol_indices_data)
-            sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{output_params[param]}_sample_{nr_sobol_samples}_step_{step_count*50}.csv'), index=False)
+            sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{output_params[param]}_sample_{nr_sobol_samples}_step_{(step_count+1)*50}.csv'), index=False)
 
 
 if __name__ == "__main__":
 
-    height = 100
-    width = 100
-    nr_sobol_samples = 4
+    height = 500
+    width = 500
+    nr_sobol_samples = 1024
 
     output_dir = "GSA"
 
