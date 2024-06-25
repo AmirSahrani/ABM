@@ -27,15 +27,14 @@ model_params = {
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
-    "spice_generator": gen_spice_map,
+    "spice_generator": gen_central_spice_heap,
     "river_generator": no_river,
-    "river_generator": no_river,
-    "location_generator": random_locations,
+    "location_generator": split_tribes_locations,
     "spice_kwargs": {
         "total_spice": 10000,
         "cov_range": (10, 20)
     },
-    "spice_threshold": 9000
+    "spice_threshold": 0
 }
 
 
@@ -195,5 +194,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8703
+server.port = 8706
 server.launch()

@@ -147,7 +147,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     plt.show()
 
 #plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-plot_all_ofat_results([df_old_model], 'n_agents', use_interpolation=True)
+plot_all_ofat_results([df_old_model, df_random], 'n_agents', use_interpolation=True)
 # plot_all_ofat_results([df_random, df_clustered], 'n_heaps')
 # plot_all_ofat_results([df_random, df_clustered], 'vision_radius')
 # plot_all_ofat_results([df_random, df_clustered], 'trade_percentage')

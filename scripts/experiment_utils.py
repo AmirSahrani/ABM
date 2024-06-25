@@ -153,4 +153,27 @@ def tribe_locations_single_cluster_per_tribe(model: DuneModel):
 
     return locations
 
+def gen_central_spice_heap(model: DuneModel):
+    width, height = model.width, model.height
+    total_spice = model.spice_kwargs["total_spice"]
+    center_x, center_y = width // 2, height // 2
+    radius = min(width, height) // 4 
+    spice_map = np.zeros((width, height))
+
+    angles = np.random.uniform(0, 2 * np.pi, total_spice)
+    radii = np.random.uniform(0, radius, total_spice)
+
+    x_offsets = radii * np.cos(angles)
+    y_offsets = radii * np.sin(angles)
+
+    spice_positions_x = (center_x + x_offsets).astype(int)
+    spice_positions_y = (center_y + y_offsets).astype(int)
+
+    for (x, y) in zip(spice_positions_x, spice_positions_y):
+        if 0 <= x < width and 0 <= y < height:
+            spice_map[x, y] += 1
+
+    normalization_factor = total_spice / np.sum(spice_map)
+    final = (spice_map * normalization_factor).astype(int)
+    return final
 
