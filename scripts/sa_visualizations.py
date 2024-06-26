@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import warnings
 from scipy.interpolate import make_interp_spline
 
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif', size=16)
+
 #Pay no attention to the man behind the screen.
 warnings.filterwarnings("ignore", category=DeprecationWarning, message='DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.')
 
@@ -167,11 +170,10 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     ax3.legend(loc='upper left')
 
     plt.tight_layout()
-    plt.subplots_adjust(left=0.046, bottom=0.268, right=0.988, top=0.964, wspace=0.129, hspace=0.23)
+    plt.subplots_adjust(left=0.055, bottom=0.079, right=0.992, top=0.95, wspace=0.179, hspace=0.31)
     plt.show()
 
 
-# df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
 # plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
@@ -179,6 +181,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 # plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'spice_grow_threshold', use_interpolation=False)
 
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'n_agents', use_interpolation=False)
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'n_heaps', use_interpolation=False)
@@ -187,6 +190,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'spice_movement_bias', use_interpolation=False)
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'tribe_movement_bias', use_interpolation=False)
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'spice_threshold', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'spice_grow_threshold', use_interpolation=False)
 
 def plot_averaged_results(df, param_values):
     filtered_df = df[
@@ -221,11 +225,14 @@ def plot_averaged_results(df, param_values):
 
         plot_normal(ax, x, y, yerr, metric, colors[i])
 
-        ax.set_xlabel('Time')
-        ax.set_ylabel(metric)
-        ax.set_title(f'{metric} over Time')
+        ax.set_xlabel('Time Step')
+        axs[0,0].set_ylabel('Population')
+        axs[0,0].set_title('Population over Time')
+        axs[0,1].set_ylabel('Clustering')
+        axs[0,1].set_title('Clustering over Time')
+        axs[1,0].set_ylabel('Average Trades')
+        axs[1,0].set_title('Average Trades over Time')
         ax.grid(True)
-        ax.legend()
 
     # Plot Fights_per_step and Cooperation_per_step
     ax = axs[1, 1]
@@ -242,7 +249,7 @@ def plot_averaged_results(df, param_values):
     ax.grid(True)
     ax.legend()
     
-    plt.subplots_adjust(left=0.054, bottom=0.071, right=0.98, top=0.958, wspace=0.175, hspace=0.243)
+    plt.subplots_adjust(left=0.058, bottom=0.087, right=0.985, top=0.932, wspace=0.2, hspace=0.32)
     plt.tight_layout()
     plt.show()
 
@@ -261,5 +268,8 @@ param_values = {
     'spice_threshold': 9150
 }
 
-plot_averaged_results(df_random, param_values=param_values)
-plot_averaged_results(df_clustered, param_values=param_values)
+# plot_averaged_results(df_random, param_values=param_values)
+# plot_averaged_results(df_clustered, param_values=param_values)
+
+plot_averaged_results(df_center_random, param_values=param_values)
+plot_averaged_results(df_center_clustered, param_values=param_values)
