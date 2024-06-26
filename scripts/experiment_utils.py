@@ -20,7 +20,7 @@ def gen_spice_map(model: DuneModel):
         for (x, y) in zip(heap[:, 0], heap[:, 1]):
             if 0 < x < width and 0 < y < height:
                 spice_map[x, y] += 1
-
+                
     normalization_factor = total_spice * n_heaps / np.sum(spice_map)
     final = (spice_map * normalization_factor).astype(int)
     return final

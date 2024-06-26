@@ -257,8 +257,8 @@ class Spice(ms.Agent):
     def step(self):
         if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice < self.grow_threshold:
-            self.spice += np.random.binomial(1, .99, 1)[0]
+        elif self.spice > self.grow_threshold:
+            self.spice += 0 * np.random.binomial(1, .99, 1)[0]
 
 
 class Water(ms.Agent):

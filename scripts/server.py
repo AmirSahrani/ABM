@@ -15,27 +15,24 @@ model_params = {
     "experiment_name": EXPERIMENT_NAME,
     "width": 100,
     "height": 100,
-    "n_tribes": 2,
-    "n_agents": 900,
-    "n_heaps": 2,
-    "n_tribes": 2,
-    "n_agents": 900,
-    "n_heaps": 2,
+    "n_tribes": 3,
+    "n_agents": 740,
+    "n_heaps": 3,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
-    "step_count": 200,
+    "step_count": 100,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_grow_threshold": ms.visualization.Slider("Spice Regeneration Threshold", 1, 0, 20, 1, description="Threshold for spice regeneration"),
-    "spice_generator": gen_central_spice_heap,
+    "spice_generator": gen_spice_map,
     "river_generator": no_river,
-    "location_generator": split_tribes_locations,
+    "location_generator": random_locations,
     "spice_kwargs": {
         "total_spice": 10000,
         "cov_range": (10, 20)
     },
-    "spice_threshold": 0
+    "spice_threshold": 9150
 }
 
 
@@ -195,5 +192,5 @@ server = CustomModularServer(
     description=description
 )
 
-server.port = 8706
+server.port = 8709
 server.launch()

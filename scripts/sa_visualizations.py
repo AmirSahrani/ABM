@@ -146,11 +146,14 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     plt.subplots_adjust(left=0.046, bottom=0.268, right=0.988, top=0.964, wspace=0.129, hspace=0.23)
     plt.show()
 
-#plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-plot_all_ofat_results([df_old_model, df_random], 'n_agents', use_interpolation=True)
-# plot_all_ofat_results([df_random, df_clustered], 'n_heaps')
-# plot_all_ofat_results([df_random, df_clustered], 'vision_radius')
-# plot_all_ofat_results([df_random, df_clustered], 'trade_percentage')
-# plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias')
-# plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias')
-# plot_all_ofat_results([df_random, df_clustered], 'spice_threshold')
+
+df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
+plot_all_ofat_results([df_more_fight], 'n_agents', use_interpolation=False)
+
+# plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
