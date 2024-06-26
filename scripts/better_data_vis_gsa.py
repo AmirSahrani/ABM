@@ -7,6 +7,7 @@ import numpy as np
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=16)
 
+
 def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     sobol_indices_df = pd.read_csv(csv_file)
 
@@ -55,9 +56,9 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])), 
-           S2_matrix[np.triu_indices(len(problem_names), 1)], 
-           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)], 
+    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])),
+           S2_matrix[np.triu_indices(len(problem_names), 1)],
+           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)],
            align='center', capsize=5)
     ax.set_xticks(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])))
     S2_labels = [f'{problem_names[i]}-{problem_names[j]}' for i in range(num_vars) for j in range(i + 1, num_vars)]
@@ -78,10 +79,15 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
 
     phase_data = pd.read_csv(phase_plot_data_file)
 
-    def generate_phase_plots(data, param1, param2, result_col='result'):
+    result_col_raw = os.path.basename(phase_plot_data_file).split('_sample_')[0].replace('phase_plot_data_', '')
+    result_col = result_col_raw.replace('_', ' ').title()
+    print(f"result_col: {result_col}")
+    print(f"Columns: {phase_data.columns.tolist()}")
+
+    def generate_phase_plots(data, param1, param2, result_col):
         x = data[param1]
         y = data[param2]
-        z = data[result_col]
+        z = data['result']
 
         plt.figure(figsize=(10, 8))
         plt.tricontourf(x, y, z, levels=14, cmap='RdBu_r')
@@ -96,19 +102,20 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     parameter_pairs = [
         ("n_tribes", "n_agents"),
         ("alpha", "vision_radius"),
-        ("trade_percentage","spice_threshold"),
+        ("trade_percentage", "spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
 
     for param1, param2 in parameter_pairs:
-        generate_phase_plots(phase_data, param1, param2)
+        generate_phase_plots(phase_data, param1, param2, result_col)
 
 if __name__ == "__main__":
-    input_dir = "GSA"
-    output_dir = "GSA"
+    input_dir = "GSA_1024"
+    output_dir = "GSA_1024"
 
     csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv')]
     phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
 
     for csv_file, phase_plot_data_file in zip(csv_files, phase_plot_data_files):
+        print(f"Processing {phase_plot_data_file}...")
         plot_sobol_indices(csv_file, phase_plot_data_file, output_dir)
