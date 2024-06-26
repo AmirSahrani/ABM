@@ -5,11 +5,12 @@ import warnings
 from scipy.interpolate import make_interp_spline
 
 #Pay no attention to the man behind the screen.
-warnings.filterwarnings("ignore", category=DeprecationWarning, message="DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.")
+warnings.filterwarnings("ignore", category=DeprecationWarning, message='DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.')
 
-df_old_model = pd.read_csv('data/ofat_new_nominal_values.csv')
-df_random = pd.read_csv('data/sandor_ofat_new_nominal_values_random_locations.csv')
-df_clustered = pd.read_csv('data/sandor_ofat_new_nominal_values.csv')
+df_random = pd.read_csv('data/sandor_random_old_vision.csv')
+df_clustered = pd.read_csv('data/sandor_clustered_old_vision.csv')
+df_center_random = pd.read_csv('data/sandor_center_heap_random_old_vision.csv')
+df_center_clustered = pd.read_csv('data/sandor_center_heap_clustered_old_vision.csv')
 
 # This produces a plot similar to the one in the paper.
 
@@ -32,6 +33,10 @@ def plot_single_ofat_result(df, param_name, output_name):
 
 # Give the parameter you're looking at and the particular output of interest.
 # plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
+
+def plot_normal(ax, x, y, yerr, label, color):
+        ax.plot(x, y, label=label, color=color)
+        ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.2)
 
 def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     print(f'Parameter of Interest: {param_name}')
@@ -61,10 +66,6 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 
         ax.plot(x_smooth, y_smooth, label=f'{label}', color=color, alpha=0.5)
         ax.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.1)
-
-    def plot_normal(ax, x, y, yerr, label, color):
-        ax.plot(x, y, label=label, color=color)
-        ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.2)
 
     dataset_labels = ['Random', 'Clustered']
     colors = ['blue', 'red']
@@ -120,7 +121,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
                 
                 spline_err = make_interp_spline(grouped_metric[param_name], err, k=3)
                 yerr_smooth = spline_err(x_smooth)
-                ax5.plot(x_smooth, y_smooth, label=f'{label} Interpolated', color=color, alpha=0.5)
+                ax5.plot(x_smooth, y_smooth, label=f'{label}', color=color, alpha=0.5)
                 ax5.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.1)
                 
             else:
@@ -171,10 +172,94 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 
 
 # df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
-plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
+
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'n_agents', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'n_heaps', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'vision_radius', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'trade_percentage', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'spice_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'tribe_movement_bias', use_interpolation=False)
+# plot_all_ofat_results([df_center_random, df_center_clustered], 'spice_threshold', use_interpolation=False)
+
+def plot_averaged_results(df, param_values):
+    filtered_df = df[
+        (df['n_tribes'] == param_values['n_tribes']) &
+        (df['n_agents'] == param_values['n_agents']) &
+        (df['n_heaps'] == param_values['n_heaps']) &
+        (df['vision_radius'] == param_values['vision_radius']) &
+        (df['step_count'] == param_values['step_count']) &
+        (df['alpha'] == param_values['alpha']) &
+        (df['trade_percentage'] == param_values['trade_percentage']) &
+        (df['spice_movement_bias'] == param_values['spice_movement_bias']) &
+        (df['tribe_movement_bias'] == param_values['tribe_movement_bias']) &
+        (df['spice_grow_threshold'] == param_values['spice_grow_threshold']) &
+        (df['spice_threshold'] == param_values['spice_threshold'])
+    ]
+
+    metrics = ['Nomads', 'total_Clustering', 'average_trades']
+    interaction_metrics = ['Fights_per_step', 'Cooperation_per_step']
+    fig, axs = plt.subplots(2, 2)
+    trades_columns = ['Tribe_0_Trades', 'Tribe_1_Trades', 'Tribe_2_Trades']
+    filtered_df['average_trades'] = filtered_df[trades_columns].mean(axis=1)
+    grouped = filtered_df.groupby(filtered_df.iloc[:, 0]).agg({metric: ['mean', 'std'] for metric in metrics + interaction_metrics}).reset_index()
+
+    colors = ['blue', 'green', 'red', 'purple', 'orange']
+
+    # Plot Nomads, total_Clustering, and average_trades
+    for i, metric in enumerate(metrics):
+        ax = axs[i // 2, i % 2]
+        x = grouped.iloc[:, 0]
+        y = grouped[metric]['mean']
+        yerr = grouped[metric]['std']
+
+        plot_normal(ax, x, y, yerr, metric, colors[i])
+
+        ax.set_xlabel('Time')
+        ax.set_ylabel(metric)
+        ax.set_title(f'{metric} over Time')
+        ax.grid(True)
+        ax.legend()
+
+    # Plot Fights_per_step and Cooperation_per_step
+    ax = axs[1, 1]
+    for i, metric in enumerate(interaction_metrics):
+        x = grouped.iloc[:, 0]
+        y = grouped[metric]['mean']
+        yerr = grouped[metric]['std']
+
+        plot_normal(ax, x, y, yerr, metric, colors[len(metrics) + i])
+
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Interactions per Step')
+    ax.set_title('Fights and Cooperation over Time')
+    ax.grid(True)
+    ax.legend()
+    
+    plt.subplots_adjust(left=0.054, bottom=0.071, right=0.98, top=0.958, wspace=0.175, hspace=0.243)
+    plt.tight_layout()
+    plt.show()
+
+#Parameter Values for Filtering
+param_values = {
+    'n_tribes': 3,
+    'n_agents': 900,
+    'n_heaps': 3,
+    'vision_radius': 10,
+    'step_count': 100,
+    'alpha': 0.5,
+    'trade_percentage': 0.8,
+    'spice_movement_bias': 0.07,
+    'tribe_movement_bias': 0.15,
+    'spice_grow_threshold': 20,
+    'spice_threshold': 9150
+}
+
+plot_averaged_results(df_random, param_values=param_values)
+plot_averaged_results(df_clustered, param_values=param_values)
