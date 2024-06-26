@@ -24,7 +24,9 @@ def generate_experiments(kwargs, variables, trials):
 
 
 def main(kwargs: dict):
+    id = np.random.randint(2e7)
     model = DuneModel(**kwargs)
+    print(f"finished an experiment {id}")
     return kwargs, model.run_model()
 
 
@@ -49,8 +51,9 @@ if __name__ == "__main__":
 
     if variables:
         experiments = generate_experiments(kwargs, variables, trials)
+        print(f"Running {len(experiments)} experiments")
         resulting_dfs = []
-        with multiprocessing.Pool() as pool:
+        with multiprocessing.Pool(30) as pool:
             for kwargs, result in tqdm(pool.map(main, experiments)):
                 for key, val in kwargs.items():
                     result[key] = val

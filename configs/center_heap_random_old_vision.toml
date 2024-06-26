@@ -35,11 +35,10 @@ river_generator = "no_river"
 location_generator = "random_locations"
 
 [ranges]
-n_agents = [500, 1000, 50]
-n_heaps = [1, 10, 1]
+n_agents = [500, 800, 50]
 vision_radius = [10, 50, 2]
-trade_percentage = [0.0, 1.0, 0.05]
-spice_movement_bias = [0.0, 1.0, 0.05]
-tribe_movement_bias = [0.0, 1.0, 0.05]
+trade_percentage = [0.0, 1.0, 0.1]
+spice_movement_bias = [0.0, 1.0, 0.1]
+tribe_movement_bias = [0.0, 1.0, 0.1]
 spice_threshold = [1000, 10000, 100]
-spice_grow_threshold = [1, 20, 2]
+spice_grow_threshold = [5, 20, 2]
