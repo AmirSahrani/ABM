@@ -11,10 +11,12 @@ df_old_model = pd.read_csv('data/ofat_new_nominal_values.csv')
 df_random = pd.read_csv('data/sandor_ofat_new_nominal_values_random_locations.csv')
 df_clustered = pd.read_csv('data/sandor_ofat_new_nominal_values.csv')
 
-#This produces a plot similar to the one in the paper. 
+# This produces a plot similar to the one in the paper.
+
+
 def plot_single_ofat_result(df, param_name, output_name):
     grouped = df.groupby(param_name)[output_name].agg(['mean', 'max', 'min']).reset_index()
-    
+
     plt.figure(figsize=(10, 6))
     for idx, row in grouped.iterrows():
         plt.scatter(row[param_name], row['mean'], label='Mean' if idx == 0 else "", marker='o', color='blue')
@@ -26,10 +28,10 @@ def plot_single_ofat_result(df, param_name, output_name):
     plt.title(f'Mean, Max, and Min of {output_name} for {param_name}')
     plt.legend()
     plt.show()
-    
 
-#Give the parameter you're looking at and the particular output of interest. 
-#plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
+
+# Give the parameter you're looking at and the particular output of interest.
+# plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
 
 def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     print(f'Parameter of Interest: {param_name}')
