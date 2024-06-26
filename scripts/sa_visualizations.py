@@ -61,7 +61,7 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
         ax.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.1)
 
     def plot_normal(ax, x, y, yerr, label, color):
-        ax.plot(x, y, label=label, color=color, marker='o')
+        ax.plot(x, y, label=label, color=color)
         ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.2)
 
     dataset_labels = ['Random', 'Clustered']
@@ -77,17 +77,19 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
             err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
 
             if use_interpolation:
-                plot_with_interpolation(ax, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} {metric}', color)
+                plot_with_interpolation(ax, grouped_metric[param_name], grouped_metric['mean'], err, f'{label}', color)
             else:
-                plot_normal(ax, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} {metric}', color)
+                plot_normal(ax, grouped_metric[param_name], grouped_metric['mean'], err, f'{label}', color)
             
             max_mean_value = grouped_metric['mean'].max()
             max_param_value = grouped_metric.loc[grouped_metric['mean'].idxmax(), param_name]
             print(f'{label} - Max Parameter Value for {metric}: {max_param_value}   Max Mean Value: {max_mean_value}')
         
         ax.set_xlabel(param_name)
-        ax.set_ylabel(metric)
-        ax.set_title(f'{metric} vs {param_name}')
+        axs[0,0].set_ylabel('Population')
+        axs[0,1].set_ylabel('Clustering')
+        axs[0,0].set_title(f'Population vs {param_name}')
+        axs[0,1].set_title(f'Clustering vs {param_name}')
         ax.grid(True)
         ax.legend()
 
@@ -96,6 +98,9 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     metrics_to_plot = ['Cooperation_per_step', 'Fights_per_step']
     cooperation_colors = ['green', 'orange']
     fighting_colors = ['purple', 'brown']
+    dataset_labels = ['Random Cooperation', 'Clustered Cooperation', 'Random Fights', 'Clustered Fights']
+    
+    handles = []
     for metric, color_set in zip(metrics_to_plot, [cooperation_colors, fighting_colors]):
         for df, label, color in zip(dfs, dataset_labels, color_set):
             grouped = df.groupby(param_name).apply(lambda x: get_last_n_indices(x)).reset_index(drop=True)
@@ -104,9 +109,23 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
             err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
 
             if use_interpolation:
-                plot_with_interpolation(ax5, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} {metric}', color)
+                handle, = ax5.plot(grouped_metric[param_name], grouped_metric['mean'], label=label, color=color, marker='o')
+                ax5.fill_between(grouped_metric[param_name], grouped_metric['mean'] - err, grouped_metric['mean'] + err, color=color, alpha=0.2)
+            
+                x_smooth = np.linspace(grouped_metric[param_name].min(), grouped_metric[param_name].max(), 300)
+                spline_mean = make_interp_spline(grouped_metric[param_name], grouped_metric['mean'], k=3)
+                y_smooth = spline_mean(x_smooth)
+                
+                spline_err = make_interp_spline(grouped_metric[param_name], err, k=3)
+                yerr_smooth = spline_err(x_smooth)
+                ax5.plot(x_smooth, y_smooth, label=f'{label} Interpolated', color=color, alpha=0.5)
+                ax5.fill_between(x_smooth, y_smooth - yerr_smooth, y_smooth + yerr_smooth, color=color, alpha=0.1)
+                
             else:
-                plot_normal(ax5, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} {metric}', color)
+                handle, = ax5.plot(grouped_metric[param_name], grouped_metric['mean'], label=label, color=color)
+                ax5.fill_between(grouped_metric[param_name], grouped_metric['mean'] - err, grouped_metric['mean'] + err, color=color, alpha=0.2)
+
+            handles.append(handle)
             
             max_mean_value = grouped_metric['mean'].max()
             max_param_value = grouped_metric.loc[grouped_metric['mean'].idxmax(), param_name]
@@ -114,11 +133,13 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 
     ax5.set_xlabel(param_name)
     ax5.set_ylabel('Interactions per Step')
-    ax5.set_title(f'Cooperation and Fights per Step vs {param_name}')
+    ax5.set_title(f'Interactions vs {param_name}')
     ax5.grid(True)
-    ax5.legend(loc='upper left')
+    ax5.legend(handles, dataset_labels, loc='upper left')
+
 
     # Plotting average trades across all tribes
+    dataset_labels = ['Random', 'Clustered']
     trades_columns = ['Tribe_{}_Trades'.format(i) for i in range(2)]
     for df, label, color in zip(dfs, dataset_labels, colors):
         df['average_trades'] = df[trades_columns].mean(axis=1)
@@ -128,9 +149,9 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
         err = (1.96 * grouped_metric['std']) / np.sqrt(replicates)
 
         if use_interpolation:
-            plot_with_interpolation(ax3, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} Average Trades', color)
+            plot_with_interpolation(ax3, grouped_metric[param_name], grouped_metric['mean'], err, f'{label}', color)
         else:
-            plot_normal(ax3, grouped_metric[param_name], grouped_metric['mean'], err, f'{label} Average Trades', color)
+            plot_normal(ax3, grouped_metric[param_name], grouped_metric['mean'], err, f'{label}', color)
         
         max_mean_value = grouped_metric['mean'].max()
         max_param_value = grouped_metric.loc[grouped_metric['mean'].idxmax(), param_name]
@@ -147,13 +168,11 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     plt.show()
 
 
-df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
-plot_all_ofat_results([df_more_fight], 'n_agents', use_interpolation=False)
-
-# plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
+# df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
+plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
+plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
