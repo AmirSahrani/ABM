@@ -1,4 +1,4 @@
-trials = 10
+trials = 9 # Kept deadlocking at 10
 
 [parameters]
 experiment_name = "center_heap_random_old_vision"
