@@ -172,6 +172,7 @@ def plot_averaged_results(df, param_values):
     grouped = filtered_df.groupby(filtered_df.iloc[:, 0]).agg({metric: ['mean', 'std'] for metric in metrics + interaction_metrics}).reset_index()
 
     colors = ['blue', 'red', 'green']
+    labels = ["Total Fights", "Total Cooperation"]
 
     # Plot total_Clustering
     ax = axs[0]
@@ -194,10 +195,10 @@ def plot_averaged_results(df, param_values):
         y = grouped[metric]['mean']
         yerr = grouped[metric]['std']
 
-        plot_normal(ax, x, y, yerr, metric, colors[len(metrics) + i])
+        plot_normal(ax, x, y, yerr, labels[i], colors[len(metrics) + i])
 
     ax.set_xlabel('Time')
-    ax.set_ylabel('Interactions per Step')
+    ax.set_ylabel('Cumulative Interactions')
     ax.set_title('Fights and Cooperation over Time')
     ax.grid(True)
     ax.legend()
@@ -212,7 +213,7 @@ param_values = {
     'n_agents': 740,
     'n_heaps': 3,
     'vision_radius': 10,
-    'step_count': 100,
+    'step_count': 500,
     'alpha': 0.5,
     'trade_percentage': 0.8,
     'spice_movement_bias': 0.07,
@@ -223,6 +224,5 @@ param_values = {
 
 plot_averaged_results(df_random, param_values=param_values)
 plot_averaged_results(df_clustered, param_values=param_values)
-
-# plot_averaged_results(df_center_random, param_values=param_values)
-# plot_averaged_results(df_center_clustered, param_values=param_values)
+plot_averaged_results(df_center_random, param_values=param_values)
+plot_averaged_results(df_center_clustered, param_values=param_values)

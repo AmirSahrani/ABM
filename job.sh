@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Loop through each file in the configs directory
-for conf in ./configs/center* ./configs/random*
+for conf in ./configs/sandor2*
 do
   echo $conf
   echo "starting"

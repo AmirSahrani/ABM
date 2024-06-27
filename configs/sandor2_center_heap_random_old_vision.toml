@@ -8,7 +8,7 @@ n_tribes = 3
 n_agents = 740
 n_heaps = 3
 vision_radius = 10
-step_count = 100
+step_count = 500
 alpha = 0.5
 trade_percentage = 0.8
 spice_movement_bias = 0.07
@@ -34,12 +34,12 @@ spice_generator = "gen_central_spice_heap"
 river_generator = "no_river" 
 location_generator = "random_locations"
 
-[ranges]
-n_agents = [1000, 10000, 500]
-n_heaps = [1, 10, 1]
-vision_radius = [10, 50, 2]
-trade_percentage = [0.0, 1.0, 0.05]
-spice_movement_bias = [0.7, 1.0, 0.05]
-tribe_movement_bias = [0.0, 0.3, 0.05]
-spice_threshold = [1000, 10000, 100]
-spice_grow_threshold = [1, 20, 2]
+# [ranges]
+# n_agents = [1000, 10000, 500]
+# n_heaps = [1, 10, 1]
+# vision_radius = [10, 50, 2]
+# trade_percentage = [0.0, 1.0, 0.05]
+# spice_movement_bias = [0.7, 1.0, 0.05]
+# tribe_movement_bias = [0.0, 0.3, 0.05]
+# spice_threshold = [1000, 10000, 100]
+# spice_grow_threshold = [1, 20, 2]
