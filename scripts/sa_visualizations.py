@@ -209,7 +209,7 @@ def plot_averaged_results(df, param_values):
 #Parameter Values for Filtering
 param_values = {
     'n_tribes': 3,
-    'n_agents': 900,
+    'n_agents': 740,
     'n_heaps': 3,
     'vision_radius': 10,
     'step_count': 100,
@@ -221,8 +221,8 @@ param_values = {
     'spice_threshold': 9150
 }
 
-# plot_averaged_results(df_random, param_values=param_values)
-# plot_averaged_results(df_clustered, param_values=param_values)
+plot_averaged_results(df_random, param_values=param_values)
+plot_averaged_results(df_clustered, param_values=param_values)
 
-plot_averaged_results(df_center_random, param_values=param_values)
-plot_averaged_results(df_center_clustered, param_values=param_values)
+# plot_averaged_results(df_center_random, param_values=param_values)
+# plot_averaged_results(df_center_clustered, param_values=param_values)

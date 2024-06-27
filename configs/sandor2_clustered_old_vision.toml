@@ -2,8 +2,8 @@ trials = 10
 
 [parameters]
 experiment_name = "sandor2_clustered_old_vision"
-width = 300
-height = 300
+width = 100
+height = 100
 n_tribes = 3
 n_agents = 740
 n_heaps = 3
