@@ -165,7 +165,7 @@ class DuneModel(ms.Model):
     #             total_clustering += 0
     #     return total_clustering
 
-    def clustering_DBSCAN(self, points, eps, min_samples=3):
+    def clustering_DBSCAN(self, points, eps, min_samples=2):
         if len(points) < 2:
             return 0, []
 
@@ -186,7 +186,7 @@ class DuneModel(ms.Model):
 
 
 
-    def clustering_for_tribe(self, tribe_id, min_samples=3):
+    def clustering_for_tribe(self, tribe_id, min_samples=2):
         positions = []
         for a in self.schedule.agents:
             if isinstance(a, Nomad) and a.tribe.id == tribe_id:
@@ -197,11 +197,11 @@ class DuneModel(ms.Model):
         if total_individuals == 0:
             return 0, []
 
-        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=3, min_samples=min_samples)
+        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=1, min_samples=min_samples)
 
         return average_cluster_size, counts
     
-    def total_clustering(self, n_tribes, min_samples=3):
+    def total_clustering(self, n_tribes, min_samples=2):
         total_clustering = 0
         for i in range(n_tribes):
             clustering, _ = self.clustering_for_tribe(i, min_samples=min_samples)
