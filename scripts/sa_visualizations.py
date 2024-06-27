@@ -10,10 +10,10 @@ plt.rc('font', family='serif', size=16)
 #Pay no attention to the man behind the screen.
 warnings.filterwarnings("ignore", category=DeprecationWarning, message='DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.')
 
-df_random = pd.read_csv('data/sandor_random_old_vision.csv')
-df_clustered = pd.read_csv('data/sandor_clustered_old_vision.csv')
-df_center_random = pd.read_csv('data/sandor_center_heap_random_old_vision.csv')
-df_center_clustered = pd.read_csv('data/sandor_center_heap_clustered_old_vision.csv')
+df_random = pd.read_csv('data/sandor2_random_old_vision.csv')
+df_clustered = pd.read_csv('data/sandor2_clustered_old_vision.csv')
+df_center_random = pd.read_csv('data/sandor2_center_heap_random_old_vision.csv')
+df_center_clustered = pd.read_csv('data/sandor2_center_heap_clustered_old_vision.csv')
 
 # This produces a plot similar to the one in the paper.
 
