@@ -165,7 +165,7 @@ class DuneModel(ms.Model):
     #             total_clustering += 0
     #     return total_clustering
 
-    def clustering_DBSCAN(self, points, eps, min_samples=2):
+    def clustering_DBSCAN(self, points, eps=2, min_samples=2):
         if len(points) < 2:
             return 0, []
 
@@ -197,7 +197,7 @@ class DuneModel(ms.Model):
         if total_individuals == 0:
             return 0, []
 
-        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=1, min_samples=min_samples)
+        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=2, min_samples=min_samples)
 
         return average_cluster_size, counts
     
