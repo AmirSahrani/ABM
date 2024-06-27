@@ -9,17 +9,17 @@ import tornado.web
 
 
 
-EXPERIMENT_NAME = "Babci_trial_1"
+EXPERIMENT_NAME = "Babci_trial_2"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
-    "width": 100,
-    "height": 100,
+    "width": 50,
+    "height": 50,
     "n_tribes": 2,
-    "n_agents": 740,
-    "n_heaps": 10,
+    "n_agents": 190,
+    "n_heaps": 2,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
-    "step_count": 100,
+    "step_count": 500,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
@@ -27,12 +27,12 @@ model_params = {
     "spice_grow_threshold": ms.visualization.Slider("Spice Regeneration Threshold", 1, 0, 20, 1, description="Threshold for spice regeneration"),
     "spice_generator": gen_spice_map,
     "river_generator": no_river,
-    "location_generator": split_tribes_locations,
+    "location_generator": random_locations,
     "spice_kwargs": {
-        "total_spice": 400000,
+        "total_spice": 1300,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 399990
+    "spice_threshold": 1290
 }
 
 

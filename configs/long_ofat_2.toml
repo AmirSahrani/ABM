@@ -1,0 +1,43 @@
+trials = 5
+
+[parameters]
+experiment_name = "ofat_500_high_spice2"
+width = 50
+height = 50
+n_tribes = 2
+n_agents = 390
+n_heaps = 1
+vision_radius = 10
+step_count = 500
+alpha = 0.5
+trade_percentage = 0.5
+spice_movement_bias = 1.0
+tribe_movement_bias = 0.0
+spice_threshold = 900
+spice_grow_threshold = 20
+
+
+    [parameters.spice_kwargs]
+    total_spice = 901
+    cov_range = [8, 20]
+
+    [parameters.river_kwargs]
+    cov_range = [10, 100]
+
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+
+[functions]
+spice_generator = "gen_spice_map"
+river_generator = "no_river" 
+location_generator = "random_locations"
+
+[ranges]
+n_tribes = [1, 5, 1]
+n_agents = [50, 400, 50]
+n_heaps = [1, 51, 5]
+vision_radius = [1, 41, 5]
+trade_percentage = [0.0, 1.0, 0.1]
+spice_movement_bias = [0.0, 1.0, 0.1]
+tribe_movement_bias = [0.0, 1.0, 0.1]
+spice_threshold = [0, 2000, 200]

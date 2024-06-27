@@ -4,13 +4,13 @@ from experiment_utils import *
 import pandas as pd
 
 parameter_ranges = {
-    "n_tribes": [2, 3, 4, 5, 6],
+    "n_tribes": [1, 2, 3, 4, 5, 6],
     "n_agents": [100, 250, 500, 750, 1000],
-    "n_heaps": [2, 4, 6, 8, 10],
+    "n_heaps": [1, 3, 7, 9, 10],
     "vision_radius": [2, 3, 4, 5, 6],
     "alpha": [0.1, 0.3, 0.5, 0.7],
     "trade_percentage": [0.1, 0.3, 0.5, 0.7],
-    "spice_threshold": [0, 100, 300, 500, 700]
+    "spice_threshold": [0, 2000, 500, 500, 700]
 }
 
 def run_simulation(params):

@@ -7,8 +7,8 @@ from scipy.interpolate import make_interp_spline
 #Pay no attention to the man behind the screen.
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.")
 
-df_old_model = pd.read_csv('data/ofat_new_nominal_values.csv')
-df_random = pd.read_csv('data/sandor_ofat_new_nominal_values_random_locations.csv')
+df_random = pd.read_csv('data/ofat_500_just_heaps.csv')
+df_random_lol = pd.read_csv('data/sandor_ofat_new_nominal_values_random_locations.csv')
 df_clustered = pd.read_csv('data/sandor_ofat_new_nominal_values.csv')
 
 # This produces a plot similar to the one in the paper.
@@ -31,7 +31,7 @@ def plot_single_ofat_result(df, param_name, output_name):
 
 
 # Give the parameter you're looking at and the particular output of interest.
-# plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
+plot_single_ofat_result(df_random, 'step_count', 'Nomads')
 
 def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     print(f'Parameter of Interest: {param_name}')
@@ -171,10 +171,10 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 
 
 # df_more_fight = pd.read_csv('data/ofat_results_sophie_coop_issue.csv')
-plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'trade_percentage', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'spice_movement_bias', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'tribe_movement_bias', use_interpolation=False)
-plot_all_ofat_results([df_random, df_clustered], 'spice_threshold', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'n_agents', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'n_heaps', use_interpolation=True)
+plot_all_ofat_results([df_random, df_random], 'vision_radius', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'trade_percentage', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'spice_movement_bias', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'tribe_movement_bias', use_interpolation=False)
+plot_all_ofat_results([df_random, df_random], 'spice_threshold', use_interpolation=True)
