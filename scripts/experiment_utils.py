@@ -20,10 +20,11 @@ def gen_spice_map(model: DuneModel):
         for (x, y) in zip(heap[:, 0], heap[:, 1]):
             if 0 < x < width and 0 < y < height:
                 spice_map[x, y] += 1
-
+                
     normalization_factor = total_spice * n_heaps / np.sum(spice_map)
-    final = np.clip((spice_map * normalization_factor).astype(int), 0, 20)
+    final = (spice_map * normalization_factor).astype(int)
     return final
+
 
 def gen_river_line(model: DuneModel):
     width, height = model.width, model.height
@@ -100,6 +101,30 @@ def tribe_locations_naturally_distributed(model: DuneModel):
 
 
 
+# def tribe_locations_single_cluster_per_tribe(model: DuneModel):
+#     width, height = model.width, model.height
+#     n_tribes = model.n_tribes//model.n_tribes
+#     agents_per_tribe = model.n_agents // n_tribes
+#     cov_range = model.spice_kwargs["cov_range"]
+
+#     tribe_centers = np.column_stack((
+#         np.random.randint(0, width, n_tribes),
+#         np.random.randint(0, height, n_tribes)
+#     ))
+
+#     locations = []
+#     for center_x, center_y in tribe_centers:
+#         cov_value = np.random.uniform(cov_range[0], cov_range[1])
+#         cov = np.array([[cov_value, 0], [0, cov_value]])
+#         tribe = np.random.multivariate_normal([center_x, center_y], cov, size=agents_per_tribe).astype(int)
+#         tribe = np.clip(tribe, [0, 0], [width - 1, height - 1])
+#         locations.extend(tribe)
+
+#     locations = np.array(locations)
+
+#     return zip(locations[:, 0], locations[:, 1])
+
+
 def tribe_locations_single_cluster_per_tribe(model: DuneModel):
     width, height = model.width, model.height
     n_tribes = model.n_tribes//model.n_tribes
@@ -111,15 +136,44 @@ def tribe_locations_single_cluster_per_tribe(model: DuneModel):
         np.random.randint(0, height, n_tribes)
     ))
 
+    occupied_positions = set()
     locations = []
     for center_x, center_y in tribe_centers:
         cov_value = np.random.uniform(cov_range[0], cov_range[1])
         cov = np.array([[cov_value, 0], [0, cov_value]])
         tribe = np.random.multivariate_normal([center_x, center_y], cov, size=agents_per_tribe).astype(int)
         tribe = np.clip(tribe, [0, 0], [width - 1, height - 1])
-        locations.extend(tribe)
+        
+        for pos in tribe:
+            position = tuple(pos)
+            while position in occupied_positions:
+                position = (np.random.randint(0, width), np.random.randint(0, height))
+            occupied_positions.add(position)
+            locations.append(position)
 
-    locations = np.array(locations)
+    return locations
 
-    return zip(locations[:, 0], locations[:, 1])
+def gen_central_spice_heap(model: DuneModel):
+    width, height = model.width, model.height
+    total_spice = model.spice_kwargs["total_spice"]
+    center_x, center_y = width // 2, height // 2
+    radius = min(width, height) // 4 
+    spice_map = np.zeros((width, height))
+
+    angles = np.random.uniform(0, 2 * np.pi, total_spice)
+    radii = np.random.uniform(0, radius, total_spice)
+
+    x_offsets = radii * np.cos(angles)
+    y_offsets = radii * np.sin(angles)
+
+    spice_positions_x = (center_x + x_offsets).astype(int)
+    spice_positions_y = (center_y + y_offsets).astype(int)
+
+    for (x, y) in zip(spice_positions_x, spice_positions_y):
+        if 0 <= x < width and 0 <= y < height:
+            spice_map[x, y] += 1
+
+    normalization_factor = total_spice / np.sum(spice_map)
+    final = (spice_map * normalization_factor).astype(int)
+    return final
 

@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def generate_experiments(kwargs, variables):
+def generate_experiments(kwargs, variables, trials):
     experiments = []
 
     if variables:
@@ -19,7 +19,7 @@ def generate_experiments(kwargs, variables):
             for iter_val in np.arange(val[0], val[1], val[2]):
                 new_kwargs = kwargs.copy()
                 new_kwargs[param] = iter_val
-                experiments.append(new_kwargs)
+                experiments.extend([new_kwargs] * trials)
     return experiments
 
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         kwargs[key] = eval(func_name) if isinstance(func_name, str) else func_name
 
     if variables:
-        experiments = generate_experiments(kwargs, variables)
+        experiments = generate_experiments(kwargs, variables, trials)
         resulting_dfs = []
         with multiprocessing.Pool() as pool:
             for kwargs, result in tqdm(pool.map(main, experiments)):

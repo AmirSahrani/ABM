@@ -7,7 +7,8 @@ import numpy as np
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=16)
 
-def plot_sobol_indices(csv_file, phase_plot_data_file):
+
+def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     sobol_indices_df = pd.read_csv(csv_file)
 
     problem_names = sobol_indices_df['Parameter'].tolist()
@@ -40,7 +41,7 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'First-order Sobol Indices ($S_1$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_S1_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S1_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -51,13 +52,13 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'Total-order Sobol Indices ($S_T$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_ST_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_ST_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])), 
-           S2_matrix[np.triu_indices(len(problem_names), 1)], 
-           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)], 
+    ax.bar(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])),
+           S2_matrix[np.triu_indices(len(problem_names), 1)],
+           yerr=S2_conf_matrix[np.triu_indices(len(problem_names), 1)],
            align='center', capsize=5)
     ax.set_xticks(range(len(S2_matrix[np.triu_indices(len(problem_names), 1)])))
     S2_labels = [f'{problem_names[i]}-{problem_names[j]}' for i in range(num_vars) for j in range(i + 1, num_vars)]
@@ -66,22 +67,27 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
     ax.set_title(f'Second-order Sobol Indices ($S_2$) for {os.path.basename(csv_file)}')
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f'sobol_S2_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S2_results_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(12, 8))
     sns.heatmap(S2_matrix, xticklabels=problem_names, yticklabels=problem_names, annot=True, fmt=".2f", cmap='coolwarm', ax=ax)
     ax.set_title(f'Second-order Sobol Indices Heatmap for {os.path.basename(csv_file)}')
     plt.tight_layout()
-    plt.savefig(f'sobol_S2_heatmap_{os.path.splitext(os.path.basename(csv_file))[0]}.png')
+    plt.savefig(os.path.join(output_dir, f'sobol_S2_heatmap_{os.path.splitext(os.path.basename(csv_file))[0]}.png'))
     plt.close()
 
     phase_data = pd.read_csv(phase_plot_data_file)
 
-    def generate_phase_plots(data, param1, param2, result_col='result'):
+    result_col_raw = os.path.basename(phase_plot_data_file).split('_sample_')[0].replace('phase_plot_data_', '')
+    result_col = result_col_raw.replace('_', ' ').title()
+    print(f"result_col: {result_col}")
+    print(f"Columns: {phase_data.columns.tolist()}")
+
+    def generate_phase_plots(data, param1, param2, result_col):
         x = data[param1]
         y = data[param2]
-        z = data[result_col]
+        z = data['result']
 
         plt.figure(figsize=(10, 8))
         plt.tricontourf(x, y, z, levels=14, cmap='RdBu_r')
@@ -90,22 +96,26 @@ def plot_sobol_indices(csv_file, phase_plot_data_file):
         plt.ylabel(param2)
         plt.title(rf'Phase plot of {result_col} in {param1}-{param2} space')
         plt.tight_layout()
-        plt.savefig(f'phase_plot_{param1}_{param2}_{os.path.splitext(os.path.basename(phase_plot_data_file))[0]}.png')
+        plt.savefig(os.path.join(output_dir, f'phase_plot_{param1}_{param2}_{os.path.splitext(os.path.basename(phase_plot_data_file))[0]}.png'))
         plt.close()
 
     parameter_pairs = [
         ("n_tribes", "n_agents"),
         ("alpha", "vision_radius"),
-        ("trade_percentage","spice_threshold"),
+        ("trade_percentage", "spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
 
     for param1, param2 in parameter_pairs:
-        generate_phase_plots(phase_data, param1, param2)
+        generate_phase_plots(phase_data, param1, param2, result_col)
 
 if __name__ == "__main__":
-    csv_files = [file for file in os.listdir() if file.startswith('sobol_results_') and file.endswith('.csv')]
-    phase_plot_data_files = [file for file in os.listdir() if file.startswith('phase_plot_data_') and file.endswith('.csv')]
+    input_dir = "GSA_1024"
+    output_dir = "GSA_1024"
+
+    csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv')]
+    phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
 
     for csv_file, phase_plot_data_file in zip(csv_files, phase_plot_data_files):
-        plot_sobol_indices(csv_file, phase_plot_data_file)
+        print(f"Processing {phase_plot_data_file}...")
+        plot_sobol_indices(csv_file, phase_plot_data_file, output_dir)
