@@ -197,7 +197,7 @@ class DuneModel(ms.Model):
         if total_individuals == 0:
             return 0, []
 
-        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=self.vision_radius, min_samples=min_samples)
+        average_cluster_size, counts = self.clustering_DBSCAN(positions, eps=3, min_samples=min_samples)
 
         return average_cluster_size, counts
     
@@ -207,7 +207,8 @@ class DuneModel(ms.Model):
             clustering, _ = self.clustering_for_tribe(i, min_samples=min_samples)
             nomad_count = self.schedule.get_type_count(Nomad)
             if nomad_count > 0:
-                total_clustering += self.count_tribe_nomads(i) * clustering 
+                total_clustering += clustering 
+                total_clustering /= n_tribes
             else:
                 total_clustering += 0
         return total_clustering

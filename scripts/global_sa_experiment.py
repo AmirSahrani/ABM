@@ -100,7 +100,7 @@ def main():
     [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
 
     results_dict = {}
-le
+    
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
