@@ -49,7 +49,9 @@ if __name__ == "__main__":
 
     if variables:
         experiments = generate_experiments(kwargs, variables, trials)
+        
         resulting_dfs = []
+        print(f"Running {len(experiments)} experiments")
         with multiprocessing.Pool() as pool:
             for kwargs, result in tqdm(pool.map(main, experiments)):
                 for key, val in kwargs.items():
