@@ -13,11 +13,11 @@ EXPERIMENT_NAME = "Babci_trial_2"
 
 model_params = {
     "experiment_name": EXPERIMENT_NAME,
-    "width": 50,
-    "height": 50,
+    "width": 150,
+    "height": 150,
     "n_tribes": 2,
-    "n_agents": 190,
-    "n_heaps": 2,
+    "n_agents": 790,
+    "n_heaps": 10,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 500,
     "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
@@ -26,13 +26,13 @@ model_params = {
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
     "spice_grow_threshold": ms.visualization.Slider("Spice Regeneration Threshold", 1, 0, 20, 1, description="Threshold for spice regeneration"),
     "spice_generator": gen_spice_map,
-    "river_generator": no_river,
+    "river_generator": gen_river_random,
     "location_generator": random_locations,
     "spice_kwargs": {
-        "total_spice": 1300,
+        "total_spice": 200000,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 1290
+    "spice_threshold": 9900
 }
 
 

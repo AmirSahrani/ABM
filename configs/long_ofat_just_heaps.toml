@@ -1,7 +1,7 @@
 trials = 10
 
 [parameters]
-experiment_name = "ofat_500_just_heaps"
+experiment_name = "ofat_500_just_heaps2"
 width = 50
 height = 50
 n_tribes = 2
@@ -33,7 +33,7 @@ river_generator = "no_river"
 location_generator = "random_locations"
 
 [ranges]
-n_tribes = [1, 2, 1]
+n_tribes = [2, 3, 1]
 n_agents = [199, 200, 1]
 n_heaps = [1, 11, 1]
 vision_radius = [9, 10, 1]
