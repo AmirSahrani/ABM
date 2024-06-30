@@ -1,0 +1,45 @@
+trials = 10
+
+[parameters]
+experiment_name = "sandor2_center_heap_clustered_old_vision"
+width = 100
+height = 100
+n_tribes = 3
+n_agents = 740
+n_heaps = 3
+vision_radius = 10
+step_count = 500
+alpha = 0.5
+trade_percentage = 0.8
+spice_movement_bias = 0.07
+tribe_movement_bias = 0.15
+spice_grow_threshold = 20
+spice_threshold = 9150
+
+
+    [parameters.spice_kwargs]
+    total_spice = 10000
+    cov_range = [8, 20]
+
+    [parameters.river_kwargs]
+    cov_range = [10, 100]
+    total_spice = 1000
+
+    [parameters.location_kwargs]
+    cov_range = [3, 9]
+    total_spice = 1000
+
+[functions]
+spice_generator = "gen_central_spice_heap"
+river_generator = "no_river" 
+location_generator = "tribe_locations_naturally_distributed"
+
+# [ranges]
+# n_agents = [1000, 10000, 500]
+# n_heaps = [1, 10, 1]
+# vision_radius = [10, 50, 2]
+# trade_percentage = [0.0, 1.0, 0.05]
+# spice_movement_bias = [0.7, 1.0, 0.05]
+# tribe_movement_bias = [0.0, 0.3, 0.05]
+# spice_threshold = [1000, 10000, 100]
+# spice_grow_threshold = [1, 20, 2]

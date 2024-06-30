@@ -86,7 +86,7 @@ def main():
         ],
         'bounds': [
             (2, 4),     # n_tribes
-            (100, 2000),  # n_agents
+            (100, 2000),# n_agents
             (1, 10),    # n_heaps
             (2, 50),    # vision_radius
             (0.0, 1.0),  # alpha
@@ -100,7 +100,7 @@ def main():
     [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
 
     results_dict = {}
-    
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
