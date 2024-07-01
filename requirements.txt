@@ -3,3 +3,4 @@ numpy
 nashpy
 toml
 salib
+tqdm
