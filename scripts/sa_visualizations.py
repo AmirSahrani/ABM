@@ -222,7 +222,63 @@ param_values = {
     'spice_threshold': 9150
 }
 
-plot_averaged_results(df_random, param_values=param_values)
-plot_averaged_results(df_clustered, param_values=param_values)
-plot_averaged_results(df_center_random, param_values=param_values)
-plot_averaged_results(df_center_clustered, param_values=param_values)
+# plot_averaged_results(df_random, param_values=param_values)
+# plot_averaged_results(df_clustered, param_values=param_values)
+# plot_averaged_results(df_center_random, param_values=param_values)
+# plot_averaged_results(df_center_clustered, param_values=param_values)
+
+def plot_clustering(df, ax, title):
+    param_name = 'Time Step'
+    metric = 'total_Clustering'
+
+    grouped = df.groupby(df.iloc[:, 0]).agg({metric: ['mean', 'std']}).reset_index()
+    x = grouped.iloc[:, 0]
+    y = grouped[metric]['mean']
+    yerr = grouped[metric]['std']
+
+    plot_normal(ax, x, y, yerr, metric, 'blue')
+    ax.set_xlabel('Time Step')
+    ax.set_ylabel('Clustering')
+    ax.set_title(title)
+    ax.grid(True)
+
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+
+# plot_clustering(df_random, axs[0, 0], 'Random Agents\nDistributed Heaps of Spice')
+# plot_clustering(df_clustered, axs[0, 1], 'Clustered Agents\nDistributed Heaps of Spice')
+# plot_clustering(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
+# plot_clustering(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
+plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
+plt.tight_layout()
+plt.show()
+
+def plot_interactions(df, ax, title, show_legend=False):
+    param_name = 'Time Step'
+    metrics = ['Fights_per_step', 'Cooperation_per_step']
+    colors = ['red', 'green']
+    
+    grouped = df.groupby(df.iloc[:, 0]).agg({metric: ['mean', 'std'] for metric in metrics}).reset_index()
+    x = grouped.iloc[:, 0]
+    
+    for i, metric in enumerate(metrics):
+        y = grouped[metric]['mean']
+        yerr = grouped[metric]['std']
+
+        plot_normal(ax, x, y, yerr, f'Total {metric.replace("_per_step", "").capitalize()}', colors[i])
+    
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Cumulative Interactions')
+    ax.set_title(title)
+    ax.grid(True)
+    if show_legend:
+        ax.legend()
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+
+plot_interactions(df_random, axs[0, 0], 'Random Agents\nHeaps of Spice', show_legend=True)
+plot_interactions(df_clustered, axs[0, 1], 'Clustered Agents\nHeaps of Spice')
+plot_interactions(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
+plot_interactions(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
+
+plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
+plt.tight_layout()
+plt.show()
