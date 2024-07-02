@@ -2,6 +2,10 @@ import numpy as np
 from model import DuneModel
 import pandas as pd
 
+'''
+This file should contain any terain generation or agent distriubtion related functions, for use in `experiment.py`, pick which every way of generation your prefer, and put it verbatim in a toml file in configs/you_config.toml
+'''
+
 
 def gen_spice_map(model: DuneModel):
     width, height, n_heaps = model.width, model.height, model.n_heaps

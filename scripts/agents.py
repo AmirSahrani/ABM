@@ -247,11 +247,19 @@ def fighting_game(agent1: Nomad, agent2: Nomad, model: ms.Model):
 
 
 class Spice(ms.Agent):
-    def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int, grow_threshold: int):
+    '''
+    This is the resource Nomads look for, it has the following attributes:
+
+    pos (int, int): The position inside a grid of the spice object
+    model (ms.Model): The model the Spice is a part of
+    spice (int): The amount of spice this instance of spice still has
+    grow_threshold (int): how large this spice cell can get before it stops growing
+    id (int): Unique id to represent the Spice in the model
+    '''
+    def __init__(self, id: int, pos: tuple, model: ms.Model, spice: int, grow_threshold: int):
         super().__init__(id, model)
         self.pos = pos
-        self.spice = max_spice
-        self.max_spice = max_spice
+        self.spice = spice
         self.grow_threshold = grow_threshold
 
     def step(self):
@@ -262,6 +270,13 @@ class Spice(ms.Agent):
 
 
 class Water(ms.Agent):
+    '''
+    This is a barrier block, making movement for nomad harder. 
+
+    pos (int, int): The position inside a grid of the Water object
+    model (ms.Model): The model the Water is a part of
+    id (int): Unique id to represent the Water in the model
+    '''
     def __init__(self, id: int, pos: tuple, model: ms.Model):
         super().__init__(id, model)
         self.pos = pos

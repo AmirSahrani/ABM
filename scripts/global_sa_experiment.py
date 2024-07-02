@@ -122,8 +122,6 @@ def main():
         ]
     }
 
-    # [f"Tribe_{i}_Clustering" for i in range(num_tribes)]
-
     results_dict = {}
 
     if not os.path.exists(output_dir):
@@ -133,6 +131,7 @@ def main():
     samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
 
     all_results = parallel_evaluation(sensitivity_target, samples, n_jobs=32)
+    all_results.save
 
     output_params = [
         "total_Clustering",
@@ -144,7 +143,7 @@ def main():
 
         for param in range(all_results.shape[1]):
             results = all_results[:, param, step_count]
-            Si = sobol_analyze.analyze(problem, results.flatten())
+            Si = sobol_analyze.analyze(problem, results.flatten(), calc_second_order=False)
             results_dict[param] = Si
 
             save_phase_plot_data(problem, samples, results, filename=os.path.join(output_dir, f"phase_plot_data_{output_params[param]}_sample_{nr_sobol_samples}_step_{(step_count + 1 )*50}.csv"))
@@ -157,13 +156,6 @@ def main():
                 'ST_conf': Si['ST_conf']
             }
 
-            # num_vars = problem['num_vars']
-            # S2 = Si['S2']
-            # S2_conf = Si['S2_conf']
-            # for i in range(num_vars):
-            #     for j in range(i + 1, num_vars):
-            #         sobol_indices_data[f'S2_{problem["names"][i]}_{problem["names"][j]}'] = S2[i, j]
-            #         sobol_indices_data[f'S2_conf_{problem["names"][i]}_{problem["names"][j]}'] = S2_conf[i, j]
 
             sobol_indices_df = pd.DataFrame(sobol_indices_data)
             sobol_indices_df.to_csv(os.path.join(output_dir, f'sobol_results_{output_params[param]}_sample_{nr_sobol_samples}_step_{(step_count+1)*50}.csv'), index=False)
