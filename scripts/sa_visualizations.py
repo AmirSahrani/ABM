@@ -37,9 +37,9 @@ def plot_single_ofat_result(df, param_name, output_name):
 # Give the parameter you're looking at and the particular output of interest.
 # plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
 
-def plot_normal(ax, x, y, yerr, label, color):
-        ax.plot(x, y, label=label, color=color)
-        ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.2)
+def plot_normal(ax, x, y, yerr, label, color, linestyle):
+    ax.plot(x, y, label=label, color=color, linestyle=linestyle)
+    ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.1)
 
 def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     print(f'Parameter of Interest: {param_name}')
@@ -242,15 +242,15 @@ def plot_clustering(df, ax, title):
     ax.set_title(title)
     ax.grid(True)
 
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+# fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
 # plot_clustering(df_random, axs[0, 0], 'Random Agents\nDistributed Heaps of Spice')
 # plot_clustering(df_clustered, axs[0, 1], 'Clustered Agents\nDistributed Heaps of Spice')
 # plot_clustering(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
 # plot_clustering(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
-plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
-plt.tight_layout()
-plt.show()
+# plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
+# plt.tight_layout()
+# plt.show()
 
 def plot_interactions(df, ax, title, show_legend=False):
     param_name = 'Time Step'
@@ -268,17 +268,63 @@ def plot_interactions(df, ax, title, show_legend=False):
     
     ax.set_xlabel('Time')
     ax.set_ylabel('Cumulative Interactions')
+    ax.set_ylim((0,80000))
+    ax.set_xlim((0,500))
     ax.set_title(title)
     ax.grid(True)
     if show_legend:
         ax.legend()
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+# fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
-plot_interactions(df_random, axs[0, 0], 'Random Agents\nHeaps of Spice', show_legend=True)
-plot_interactions(df_clustered, axs[0, 1], 'Clustered Agents\nHeaps of Spice')
-plot_interactions(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
-plot_interactions(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
+# plot_interactions(df_random, axs[0, 0], 'Random Agents\nHeaps of Spice', show_legend=True)
+# plot_interactions(df_clustered, axs[0, 1], 'Clustered Agents\nHeaps of Spice')
+# plot_interactions(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
+# plot_interactions(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
 
-plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
+# plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
+# plt.tight_layout()
+# plt.show()
+
+
+def plot_scenario(ax, dfs, scenario_titles, colors, linestyles, common_ylim):
+    metrics = ['Fights_per_step', 'Cooperation_per_step']
+    
+    for df, scenario_title, color, linestyle in zip(dfs, scenario_titles, colors, linestyles):
+        grouped = df.groupby(df.iloc[:, 0]).agg({metric: ['mean', 'std'] for metric in metrics}).reset_index()
+        x = grouped.iloc[:, 0]
+        
+        for metric, linestyle in zip(metrics, linestyles):
+            y = grouped[metric]['mean']
+            yerr = grouped[metric]['std']
+
+            plot_normal(ax, x, y, yerr, f'{scenario_title} - {metric.replace("_per_step", "").capitalize()}', color, linestyle)
+            ax.set_ylim(common_ylim)
+    
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Cumulative Interactions')
+    ax.grid(True)
+    ax.set_xlim(0,500)
+common_ylim = (0, 80000) 
+fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+
+# Random spice heap scenarios
+plot_scenario(axs[0], 
+              [df_random, df_clustered], 
+              ['Random', 'Clustered'], 
+              ['blue', 'green'], 
+              ['-', '--'], 
+              common_ylim)
+axs[0].set_title('Interactions for Random Spice Heaps')
+axs[0].legend(loc='upper left')
+# Central spice heap scenarios
+plot_scenario(axs[1], 
+              [df_center_random, df_center_clustered], 
+              ['Random', 'Clustered'], 
+              ['blue', 'green'], 
+              ['-', '--'], 
+              common_ylim)
+axs[1].set_title('Interactions for Central Spice Heaps')
+plt.subplot_tool()
+#plt.subplots_adjust(left=0.086, bottom=0.085, right=0.971, top=0.93, wspace=0.2, hspace=0.2)
 plt.tight_layout()
 plt.show()
