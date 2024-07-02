@@ -12,6 +12,9 @@ warnings.filterwarnings("ignore")
 
 
 def generate_experiments(kwargs, variables, trials):
+    '''
+    Given a dictionary, variables to vary and a number of trials, generate all needed experiments.
+    '''
     experiments = []
 
     if variables:

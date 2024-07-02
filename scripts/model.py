@@ -15,10 +15,34 @@ MONITOR = False
 
 class DuneModel(ms.Model):
     verbose = MONITOR
-
+    """
+    Initializes the experiment with the given parameters.
+    
+    Parameters:
+    experiment_name (str): The name of the experiment.
+    width (int): The width of the grid.
+    height (int): The height of the grid.
+    n_tribes (int): The number of tribes.
+    n_agents (int): The total number of agents.
+    n_heaps (int): The number of spice heaps.
+    vision_radius (int): The radius of vision for agents.
+    step_count (int): The number of steps in the experiment.
+    trade_percentage (float): The percentage of their own spice agents give in a trade.
+    spice_movement_bias (float): The bias for spice movement.
+    tribe_movement_bias (float): The bias for tribe movement.
+    spice_threshold (int): The threshold of spice before a new heap is generated.
+    spice_grow_threshold (int): The maximum amount of spice and individual spice-object can grow, does not affect the initial generation of spice. 
+    spice_generator (Callable): Function to generate spice.
+    river_generator (Callable): Function to generate rivers.
+    location_generator (Callable): Function to generate initial locations.
+    spice_kwargs (dict): Additional arguments for spice generator.
+    river_kwargs (dict, optional): Additional arguments for river generator. Defaults to {}.
+    location_kwargs (dict, optional): Additional arguments for location generator. Defaults to {}.
+    frequency (int, optional): The frequency of data recording and calculation of the clustering.
+    """
     def __init__(self, experiment_name: str, width: int, height: int,
                  n_tribes: int, n_agents: int, n_heaps: int,
-                 vision_radius: int, step_count: int, alpha: float,
+                 vision_radius: int, step_count: int,
                  trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float, spice_threshold: int, spice_grow_threshold: int, spice_generator: Callable,
                  river_generator: Callable, location_generator: Callable,
                  spice_kwargs: dict, river_kwargs: dict = {}, location_kwargs: dict = {}, frequency=1):
@@ -37,7 +61,6 @@ class DuneModel(ms.Model):
         self.step_count = step_count
         self.current_step = 0
         self.vision_radius = vision_radius
-        self.alpha = alpha
         self.trade_percentage = trade_percentage
         self.spice_movement_bias = spice_movement_bias
         self.tribe_movement_bias = tribe_movement_bias
@@ -92,7 +115,7 @@ class DuneModel(ms.Model):
                 vision = vision_radius
                 metabolism = .1
                 self.id += 1
-                nom = Nomad(self.id, self, (x, y), spice, vision, tribe, metabolism, alpha, trade_percentage, spice_movement_bias, tribe_movement_bias)
+                nom = Nomad(self.id, self, (x, y), spice, vision, tribe, metabolism, trade_percentage, spice_movement_bias, tribe_movement_bias)
                 self.grid.place_agent(nom, (x, y))
                 self.schedule.add(nom)
 
@@ -278,7 +301,7 @@ class DuneModel(ms.Model):
             tribe = parent_agent.tribe
 
             self.id += 1
-            new_agent = Nomad(self.id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, alpha=parent_agent.alpha, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
+            new_agent = Nomad(self.id, self, new_pos, spice, vision, tribe, metabolism=parent_agent.metabolism, trade_percentage=parent_agent.trade_percentage, spice_movement_bias=parent_agent.spice_movement_bias, tribe_movement_bias=parent_agent.tribe_movement_bias)
             self.grid.place_agent(new_agent, new_pos)
             self.schedule.add(new_agent)
             parent_agent.spice = spice
