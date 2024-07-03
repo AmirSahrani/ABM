@@ -1,0 +1,37 @@
+# Number of trails for each configution
+trials = 10
+
+[parameters]
+# In case you specify a range, the experiment_name is the base for the name, the experiment folder will contain the parameter that varied and its value
+experiment_name = "test"
+width = 50
+height = 50
+n_tribes = 2
+n_agents = 390
+n_heaps = 10
+vision_radius = 10
+step_count = 200
+alpha = 0.2
+trade_percentage = 0.3
+spice_movement_bias = 1
+tribe_movement_bias = 0
+spice_threshold = 49000
+frequency=1
+spice_grow_threshold = 20
+
+    [parameters.spice_kwargs]
+    cov_range = [3, 9]
+    total_spice = 50000
+
+    # [parameters.river_kwargs]
+    # cov_range = [3, 9]
+    # total_spice = 1000
+    #
+    # [parameters.location_kwargs]
+    # cov_range = [3, 9]
+    # total_spice = 1000
+
+[functions]
+spice_generator = "gen_spice_map"
+river_generator = "no_river"
+location_generator = "split_tribes_locations"

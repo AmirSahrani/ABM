@@ -1,0 +1,8 @@
+Parameter,S1,S1_conf,ST,ST_conf
+n_tribes,,,,
+n_heaps,,,,
+vision_radius,,,,
+trade_percentage,,,,
+spice_movement_bias,,,,
+tribe_movement_bias,,,,
+spice_threshold,,,,
