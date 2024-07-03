@@ -26,6 +26,17 @@ def gen_spice_map(model: DuneModel):
     return final
 
 
+def gen_spice_random(model: DuneModel):
+    width, height = model.width, model.height
+    total_spice = model.spice_kwargs["total_spice"]
+    spice_map = np.zeros((width, height))
+
+    for _ in range(total_spice):
+        x, y = np.random.randint(0, width), np.random.randint(0, height)
+        spice_map[x, y] += 1
+
+    return spice_map
+
 def gen_river_line(model: DuneModel):
     width, height = model.width, model.height
     river = np.zeros((width, height))
@@ -127,19 +138,19 @@ def tribe_locations_naturally_distributed(model: DuneModel):
 
 def tribe_locations_single_cluster_per_tribe(model: DuneModel):
     width, height = model.width, model.height
-    n_tribes = model.n_tribes//model.n_tribes
+    n_tribes = model.n_tribes 
     agents_per_tribe = model.n_agents // n_tribes
     cov_range = model.spice_kwargs["cov_range"]
 
     tribe_centers = np.column_stack((
-        np.random.randint(0, width, n_tribes),
-        np.random.randint(0, height, n_tribes)
+        np.random.randint(0, width, n_tribes // n_tribes),
+        np.random.randint(0, height, n_tribes // n_tribes)
     ))
 
     occupied_positions = set()
     locations = []
     for center_x, center_y in tribe_centers:
-        cov_value = np.random.uniform(cov_range[0], cov_range[1])
+        cov_value = np.random.uniform(cov_range[0], cov_range[1]) * 15
         cov = np.array([[cov_value, 0], [0, cov_value]])
         tribe = np.random.multivariate_normal([center_x, center_y], cov, size=agents_per_tribe).astype(int)
         tribe = np.clip(tribe, [0, 0], [width - 1, height - 1])
@@ -147,11 +158,12 @@ def tribe_locations_single_cluster_per_tribe(model: DuneModel):
         for pos in tribe:
             position = tuple(pos)
             while position in occupied_positions:
-                position = (np.random.randint(0, width), np.random.randint(0, height))
+                position = tuple(np.clip(np.random.multivariate_normal([center_x, center_y], cov).astype(int), [0, 0], [width - 1, height - 1]))
             occupied_positions.add(position)
             locations.append(position)
 
     return locations
+
 
 def gen_central_spice_heap(model: DuneModel):
     width, height = model.width, model.height
@@ -177,3 +189,66 @@ def gen_central_spice_heap(model: DuneModel):
     final = (spice_map * normalization_factor).astype(int)
     return final
 
+
+def gen_spice_heap_with_trail(model: DuneModel):
+    width, height = model.width, model.height
+    total_spice = model.spice_kwargs["total_spice"]
+    cov_range = model.spice_kwargs["cov_range"]
+    spice_map = np.zeros((width, height))
+
+    # Define the corner for the big heap
+    corner_x, corner_y = width // 10, height // 10  # Close to the top-left corner
+    radius = min(width, height) // 4
+
+    # Create the big heap in the corner using normal distribution
+    cov_value = np.random.uniform(cov_range[0], cov_range[1])
+    cov = np.array([[cov_value, 0], [0, cov_value]])
+    heap = np.random.multivariate_normal([corner_x, corner_y], cov, size=total_spice).astype(int)
+    heap = np.clip(heap, [0, 0], [width - 1, height - 1])
+
+    for (x, y) in heap:
+        spice_map[x, y] += 1
+
+    # Create a trail from one diagonal to the other using normal distribution
+    trail_cov_value = np.random.uniform(cov_range[0], cov_range[1])
+    trail_cov = np.array([[trail_cov_value, 0], [0, trail_cov_value]])
+    trail_length = total_spice // 10
+    trail_points = np.linspace(0, width - 1, trail_length).astype(int)
+    trail = np.random.multivariate_normal([0, 0], trail_cov, size=trail_length).astype(int)
+    trail = np.clip(trail, [0, 0], [width - 1, height - 1])
+
+    for (x, y) in zip(trail_points, trail_points):
+        spice_map[x, y] += 1
+
+    normalization_factor = total_spice / np.sum(spice_map)
+    final = (spice_map * normalization_factor).astype(int)
+    return final
+
+def tribe_locations_single_defined_cluster_per_tribe(model: DuneModel):
+    width, height = model.width, model.height
+    n_tribes = model.n_tribes
+    agents_per_tribe = model.n_agents // n_tribes
+    cov_range = model.spice_kwargs["cov_range"]
+
+    # Define the positions for the two tribes close to opposite corners
+    tribe_centers = np.array([
+        [width // 10, height // 10],  # Close to the top-left corner
+        [width * 9 // 10, height * 9 // 10]  # Close to the bottom-right corner
+    ])
+
+    occupied_positions = set()
+    locations = []
+    for center_x, center_y in tribe_centers:
+        cov_value = np.random.uniform(cov_range[0], cov_range[1])
+        cov = np.array([[cov_value, 0], [0, cov_value]])
+        tribe = np.random.multivariate_normal([center_x, center_y], cov, size=agents_per_tribe).astype(int)
+        tribe = np.clip(tribe, [0, 0], [width - 1, height - 1])
+
+        for pos in tribe:
+            position = tuple(pos)
+            while position in occupied_positions:
+                position = tuple(np.clip(np.random.multivariate_normal([center_x, center_y], cov).astype(int), [0, 0], [width - 1, height - 1]))
+            occupied_positions.add(position)
+            locations.append(position)
+
+    return zip(*np.array(locations).T)
