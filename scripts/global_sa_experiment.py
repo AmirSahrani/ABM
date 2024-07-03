@@ -14,7 +14,7 @@ sys.path.append("../scripts")
 sys.path.remove("../scripts")
 
 
-def sensitivity_target(inp, i):
+def sensitivity_target(inp):
     '''
     Wrapper for the model, averages over all the possible maps we have defined, cov_range, total_spice,spice_grow_threshold, and step_count are hard coded. total_spice is 0.2*width*height of the grid. 
     '''
@@ -46,7 +46,6 @@ def sensitivity_target(inp, i):
             **kwargs
         )
         out = m.run_model()
-        print(f'Experiment {i}')
         return out
     except Exception as e:
         print(f"Error processing input: {inp}, Error: {e}")
@@ -64,7 +63,7 @@ def parallel_evaluation(fun, samples, n_jobs=None):
     n_jobs (int, optional): The number of jobs to run in parallel. Defaults to the number of CPU cores.
     
     Returns:
-    np.ndarray: A 3D numpy array with evaluation results.
+    np.ndarray [len(samples), len(output_parameters), 10]: A numpy array with evaluation results.
     '''
     if n_jobs is None:
         n_jobs = os.cpu_count()  # Automatically set to the number of available CPU cores
@@ -79,7 +78,7 @@ def parallel_evaluation(fun, samples, n_jobs=None):
 
     # Use joblib's Parallel and delayed for multiprocessing
     print(f'Starting experiments, total: {len(samples)}')
-    results = Parallel(n_jobs=n_jobs, backend='multiprocessing')(delayed(fun)(sample, i) for i, sample in enumerate(samples))
+    results = Parallel(n_jobs=n_jobs verbose=1, backend='multiprocessing')(delayed(fun)(sample) for i, sample in enumerate(samples))
 
     for i, result in enumerate(results):
         for j, param in enumerate(output_params):
