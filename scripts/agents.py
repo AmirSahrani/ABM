@@ -16,18 +16,20 @@ class Nomad(ms.Agent):
     """
     A Nomad is an agent foraging for spice, it has the following attributes:
 
-    [pos (int, int)]: and x,y coordinate representing its location on a finite grid
-    [spice int]: Their spice level, if it gets below a threshold it dies
-    [vision int]: Their range of vision, they can see spice and enemy Nomads within their vision
-    [tribe Tribe]: a tribe they are associated with, they only attack enemy tribes
-    [hardship float]: their spice level, defined as 1/exp(spice*lamb), 1 represents maximum hardship
-    [legitimacy dict(Tribe, float)]: a dict containing the legitimacy felt toward each other tribe 1/exp((self.tribe.total_spice - other.tribe.total_spice)*lamb).
-    [id int]: Unique id to represent them in the model
-    [model ms.Model]: The model they are associated with
+    pos (int, int): and x,y coordinate representing its location on a finite grid
+    spice (int): Their spice level, if it gets below a threshold it dies
+    vision (int): Their range of vision, they can see spice and enemy Nomads within their vision
+    tribe (Tribe): a tribe they are associated with, they only attack enemy tribes
+    metabolism (float): amount of spice a nomad loses each step
+    trade_percentage (float): fraction of spice to give to an ally when trading
+    spice_movement_bias (float): The preferrence of moving towards spice when inside the vision radius (1 is always moving towards spice)
+    tribe_movement_bias (float): The preferrence of moving towards tribe members if they are inside the vision radius.
+    id (int): Unique id to represent them in the model
+    model (ms.Model): The model they are associated with
     """
 
 
-    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float, alpha: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
+    def __init__(self, id: int, model: ms.Model, pos: tuple, spice: int, vision: int, tribe: Tribe, metabolism: float, trade_percentage: float, spice_movement_bias: float, tribe_movement_bias: float):
         super().__init__(id, model)
         self.pos = pos
         self.spice = spice
@@ -37,7 +39,6 @@ class Nomad(ms.Agent):
         self.metabolism = np.random.uniform(0, 0.4)
         self.spice_movement_bias = np.random.uniform(0, 1)
         self.tribe_movement_bias = np.random.uniform(0, 1)
-        self.alpha = np.random.uniform(0, 1)
         self.trade_percentage = np.random.uniform(0, 1)
         self.reproduction_threshold = np.random.randint(10, 100)
         self. visible_positions = []
@@ -188,7 +189,7 @@ class Nomad(ms.Agent):
 
             for other in other_nomads:
                 if other.tribe != self.tribe:
-                    fighting_game(self, other, alpha=self.alpha, model=self.model)
+                    fighting_game(self, other, model=self.model)
                 elif other.tribe == self.tribe:
                     trade(agent1=self, agent2=other, trade_percentage=self.trade_percentage, model=self.model)
 
@@ -215,7 +216,7 @@ def trade(agent1: Nomad, agent2: Nomad, trade_percentage: float, model: ms.Model
     model.record_trade(agent1.tribe.id)
 
 
-def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
+def fighting_game(agent1: Nomad, agent2: Nomad, model: ms.Model):
     if agent1.spice >= agent2.spice:
         weak_agent = agent2
         strong_agent = agent1
@@ -246,21 +247,36 @@ def fighting_game(agent1: Nomad, agent2: Nomad, alpha: float, model: ms.Model):
 
 
 class Spice(ms.Agent):
-    def __init__(self, id: int, pos: tuple, model: ms.Model, max_spice: int, grow_threshold: int):
+    '''
+    This is the resource Nomads look for, it has the following attributes:
+
+    pos (int, int): The position inside a grid of the spice object
+    model (ms.Model): The model the Spice is a part of
+    spice (int): The amount of spice this instance of spice still has
+    grow_threshold (int): how large this spice cell can get before it stops growing
+    id (int): Unique id to represent the Spice in the model
+    '''
+    def __init__(self, id: int, pos: tuple, model: ms.Model, spice: int, grow_threshold: int):
         super().__init__(id, model)
         self.pos = pos
-        self.spice = max_spice
-        self.max_spice = max_spice
+        self.spice = spice
         self.grow_threshold = grow_threshold
 
     def step(self):
         if self.spice == 0:
             self.model.remove_agent(self)
-        elif self.spice > self.grow_threshold:
-            self.spice += 0 * np.random.binomial(1, .99, 1)[0]
+        elif self.spice < self.grow_threshold:
+            self.spice += 1 * np.random.binomial(1, .01, 1)[0]
 
 
 class Water(ms.Agent):
+    '''
+    This is a barrier block, making movement for nomad harder. 
+
+    pos (int, int): The position inside a grid of the Water object
+    model (ms.Model): The model the Water is a part of
+    id (int): Unique id to represent the Water in the model
+    '''
     def __init__(self, id: int, pos: tuple, model: ms.Model):
         super().__init__(id, model)
         self.pos = pos

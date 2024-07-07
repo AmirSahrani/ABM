@@ -12,6 +12,7 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     sobol_indices_df = pd.read_csv(csv_file)
 
     problem_names = sobol_indices_df['Parameter'].tolist()
+    problem_names = [x.replace("_", " ").capitalize() for x in problem_names]
     S1 = sobol_indices_df['S1'].values
     S1_conf = sobol_indices_df['S1_conf'].values
     ST = sobol_indices_df['ST'].values
@@ -20,17 +21,17 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
     S2_matrix = np.zeros((len(problem_names), len(problem_names)))
     S2_conf_matrix = np.zeros((len(problem_names), len(problem_names)))
     num_vars = len(problem_names)
-    for i in range(num_vars):
-        for j in range(i + 1, num_vars):
-            S2_label = f'S2_{problem_names[i]}_{problem_names[j]}'
-            S2_conf_label = f'S2_conf_{problem_names[i]}_{problem_names[j]}'
-            if S2_label in sobol_indices_df.columns and S2_conf_label in sobol_indices_df.columns:
-                S2_matrix[i, j] = sobol_indices_df[S2_label].values[0]
-                S2_matrix[j, i] = sobol_indices_df[S2_label].values[0]
-                S2_conf_matrix[i, j] = sobol_indices_df[S2_conf_label].values[0]
-                S2_conf_matrix[j, i] = sobol_indices_df[S2_conf_label].values[0]
-            else:
-                print(f"Warning: {S2_label} or {S2_conf_label} not found in the CSV columns")
+    # for i in range(num_vars):
+    #     for j in range(i + 1, num_vars):
+    #         S2_label = f'S2_{problem_names[i]}_{problem_names[j]}'
+    #         S2_conf_label = f'S2_conf_{problem_names[i]}_{problem_names[j]}'
+    #         if S2_label in sobol_indices_df.columns and S2_conf_label in sobol_indices_df.columns:
+    #             S2_matrix[i, j] = sobol_indices_df[S2_label].values[0]
+    #             S2_matrix[j, i] = sobol_indices_df[S2_label].values[0]
+    #             S2_conf_matrix[i, j] = sobol_indices_df[S2_conf_label].values[0]
+    #             S2_conf_matrix[j, i] = sobol_indices_df[S2_conf_label].values[0]
+    #         else:
+    #             print(f"Warning: {S2_label} or {S2_conf_label} not found in the CSV columns")
 
     fig, ax = plt.subplots(figsize=(12, 8))
     indices = range(len(problem_names))
@@ -100,8 +101,8 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
         plt.close()
 
     parameter_pairs = [
-        ("n_tribes", "n_agents"),
-        ("alpha", "vision_radius"),
+        # ("n_tribes", "n_agents"),
+        # ("alpha", "vision_radius"),
         ("trade_percentage", "spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
@@ -110,8 +111,8 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
         generate_phase_plots(phase_data, param1, param2, result_col)
 
 if __name__ == "__main__":
-    input_dir = "GSA_1024"
-    output_dir = "GSA_1024"
+    input_dir = "GSA"
+    output_dir = "GSA"
 
     csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv')]
     phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]

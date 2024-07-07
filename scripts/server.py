@@ -15,12 +15,11 @@ model_params = {
     "experiment_name": EXPERIMENT_NAME,
     "width": 100,
     "height": 100,
-    "n_tribes": 2,
-    "n_agents": 740,
-    "n_heaps": 10,
+    "n_tribes": 3,
+    "n_agents": 1000,
+    "n_heaps": 4,
     "vision_radius": ms.visualization.Slider("Vision radius", 10, 1, 40, 1, description="How far can they see"),
     "step_count": 100,
-    "alpha": ms.visualization.Slider("Fighting cost", 0.5, 0.0, 1.0, 0.1, description="How much do they lose when fighting"),
     "trade_percentage": ms.visualization.Slider("Trade Percentage", 0.5, 0.0, 1.0, 0.01, description="How much do they trade with each other"),
     "spice_movement_bias": ms.visualization.Slider("Spice movement bias", 1.0, 0.0, 1.0, 0.1, description="How much do they value moving towards spice"),
     "tribe_movement_bias": ms.visualization.Slider("Tribe movement bias", 0.0, 0.0, 1.0, 0.1, description="How much do they value moving towards their tribe"),
@@ -29,10 +28,10 @@ model_params = {
     "river_generator": no_river,
     "location_generator": split_tribes_locations,
     "spice_kwargs": {
-        "total_spice": 400000,
+        "total_spice": 10000,
         "cov_range": (8, 20)
     },
-    "spice_threshold": 399990
+    "spice_threshold": 0.6 * 20000 
 }
 
 
