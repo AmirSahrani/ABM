@@ -6,36 +6,12 @@ from scipy.interpolate import make_interp_spline
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=16)
-
-#Pay no attention to the man behind the screen.
 warnings.filterwarnings("ignore", category=DeprecationWarning, message='DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.')
 
 df_random = pd.read_csv('data/sandor2_random_old_vision.csv')
 df_clustered = pd.read_csv('data/sandor2_clustered_old_vision.csv')
 df_center_random = pd.read_csv('data/sandor2_center_heap_random_old_vision.csv')
 df_center_clustered = pd.read_csv('data/sandor2_center_heap_clustered_old_vision.csv')
-
-# This produces a plot similar to the one in the paper.
-
-
-def plot_single_ofat_result(df, param_name, output_name):
-    grouped = df.groupby(param_name)[output_name].agg(['mean', 'max', 'min']).reset_index()
-
-    plt.figure(figsize=(10, 6))
-    for idx, row in grouped.iterrows():
-        plt.scatter(row[param_name], row['mean'], label='Mean' if idx == 0 else "", marker='o', color='blue')
-        plt.scatter(row[param_name], row['max'], label='Max' if idx == 0 else "", marker='^', color='green')
-        plt.scatter(row[param_name], row['min'], label='Min' if idx == 0 else "", marker='s', color='red')
-
-    plt.xlabel(f'{param_name}')
-    plt.ylabel(f'{output_name}')
-    plt.title(f'Mean, Max, and Min of {output_name} for {param_name}')
-    plt.legend()
-    plt.show()
-
-
-# Give the parameter you're looking at and the particular output of interest.
-# plot_single_ofat_result(df, 'vision_radius', 'Fights_per_step')
 
 def plot_normal(ax, x, y, yerr, label, color, linestyle):
     ax.plot(x, y, label=label, color=color, linestyle=linestyle)
@@ -145,7 +121,6 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
 # plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
 # plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
-
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'n_agents', use_interpolation=False)
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'n_heaps', use_interpolation=False)
 # plot_all_ofat_results([df_center_random, df_center_clustered], 'vision_radius', use_interpolation=False)
@@ -307,24 +282,24 @@ def plot_scenario(ax, dfs, scenario_titles, colors, linestyles, common_ylim):
 common_ylim = (0, 80000) 
 fig, axs = plt.subplots(1, 2, figsize=(20, 10))
 
-# Random spice heap scenarios
-plot_scenario(axs[0], 
-              [df_random, df_clustered], 
-              ['Random', 'Clustered'], 
-              ['blue', 'green'], 
-              ['-', '--'], 
-              common_ylim)
-axs[0].set_title('Interactions for Random Spice Heaps')
-axs[0].legend(loc='upper left')
-# Central spice heap scenarios
-plot_scenario(axs[1], 
-              [df_center_random, df_center_clustered], 
-              ['Random', 'Clustered'], 
-              ['blue', 'green'], 
-              ['-', '--'], 
-              common_ylim)
-axs[1].set_title('Interactions for Central Spice Heaps')
-plt.subplot_tool()
-#plt.subplots_adjust(left=0.086, bottom=0.085, right=0.971, top=0.93, wspace=0.2, hspace=0.2)
-plt.tight_layout()
-plt.show()
+# # Random spice heap scenarios
+# plot_scenario(axs[0], 
+#               [df_random, df_clustered], 
+#               ['Random', 'Clustered'], 
+#               ['blue', 'green'], 
+#               ['-', '--'], 
+#               common_ylim)
+# axs[0].set_title('Interactions for Random Spice Heaps')
+# axs[0].legend(loc='upper left')
+# # Central spice heap scenarios
+# plot_scenario(axs[1], 
+#               [df_center_random, df_center_clustered], 
+#               ['Random', 'Clustered'], 
+#               ['blue', 'green'], 
+#               ['-', '--'], 
+#               common_ylim)
+# axs[1].set_title('Interactions for Central Spice Heaps')
+# plt.subplot_tool()
+# #plt.subplots_adjust(left=0.086, bottom=0.085, right=0.971, top=0.93, wspace=0.2, hspace=0.2)
+# plt.tight_layout()
+# plt.show()
