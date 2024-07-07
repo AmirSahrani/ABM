@@ -13,7 +13,7 @@ The main objectives of this model are to study the dynamics of resource acquisit
     pip install -r requirements.txt
     ```
 
-*All* files assume you are running them from the main directory, do not try to run e.g. the scripts from inside the scripts directory. 
+*All* files assume you are running them from the main directory, do not try to run the scripts from inside the scripts directory. 
 
 ### Server
 

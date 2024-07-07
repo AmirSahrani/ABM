@@ -22,7 +22,6 @@ def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
     problem_names = [x.replace("_", " ").capitalize() for x in problem_names]
 
     output_parameters = all_sobol_indices_df['Output'].unique()
-    clean_out = ["Cooperation", "Fights", "Clusteing"]
 
     num_params = len(problem_names)
     num_outputs = len(output_parameters)
@@ -32,32 +31,32 @@ def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
     for i, output_param in enumerate(output_parameters):
         data = all_sobol_indices_df[all_sobol_indices_df['Output'] == output_param]
         indices = np.arange(num_params)
-        ax.bar(indices + i * bar_width, data['S1'], yerr=data['S1_conf'], width=bar_width, align='center', alpha=0.7, capsize=5, label=clean_out[i])
+        ax.bar(indices + i * bar_width, data['S1'], yerr=data['S1_conf'], width=bar_width, align='center', capsize=5, label=output_param)
 
     ax.set_xticks(indices + bar_width * (num_outputs - 1) / 2)
     ax.set_xticklabels(problem_names, rotation=90)
     ax.set_ylabel(r'$S_1$')
-    # ax.set_title(f'First-order Sobol Indices ($S_1$) at Time Step {timestep} across Output Parameters')
+    ax.set_title(f'First-order Sobol Indices ($S_1$) at Time Step {timestep} across Output Parameters')
     ax.legend()
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'sobol_S1_combined_timestep_{timestep}.png'))
+    plt.savefig(os.path.join(output_dir, f'sobol_S1_combined_timestep_{specific_time_step}.png'))
     plt.close()
 
     fig, ax = plt.subplots(figsize=(14, 10))
     for i, output_param in enumerate(output_parameters):
         data = all_sobol_indices_df[all_sobol_indices_df['Output'] == output_param]
         indices = np.arange(num_params)
-        ax.bar(indices + i * bar_width, data['ST'], yerr=data['ST_conf'], width=bar_width, align='center', capsize=5, alpha=0.7, label=clean_out[i])
+        ax.bar(indices + i * bar_width, data['ST'], yerr=data['ST_conf'], width=bar_width, align='center', capsize=5, alpha=0.7, label=output_param)
 
     ax.set_xticks(indices + bar_width * (num_outputs - 1) / 2)
     ax.set_xticklabels(problem_names, rotation=90)
     ax.set_ylabel(r'$S_T$')
-    # ax.set_title(f'Total-order Sobol Indices ($S_T$) at Time Step {timestep} across Output Parameters')
+    ax.set_title(f'Total-order Sobol Indices ($S_T$) at Time Step {specific_time_step} across Output Parameters')
     ax.legend()
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'sobol_ST_combined_timestep_{timestep}.png'))
+    plt.savefig(os.path.join(output_dir, f'sobol_ST_combined_timestep_{specific_time_step}.png'))
     plt.close()
 
     for phase_plot_data_file in phase_plot_data_files:
@@ -97,7 +96,7 @@ def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
 if __name__ == "__main__":
     input_dir = "GSA"
     output_dir = "GSA"
-    timestep = 100
+    timestep = 300
 
     csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv') and str(timestep) in file]
     phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
