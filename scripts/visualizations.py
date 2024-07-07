@@ -1,3 +1,7 @@
+"""
+Contains code for visualizations from OFAT and experiments.
+Example function calls are commented below them.
+"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,10 +18,19 @@ df_center_random = pd.read_csv('data/sandor2_center_heap_random_old_vision.csv')
 df_center_clustered = pd.read_csv('data/sandor2_center_heap_clustered_old_vision.csv')
 
 def plot_normal(ax, x, y, yerr, label, color, linestyle):
+    """
+    Plots the values without interpolation and a 95% confidence interval. 
+    Requires the figure axis, x and y values from data, yerr as standard deviation from data, label for legend,
+    desired color for the line, and desired line style. 
+    """
     ax.plot(x, y, label=label, color=color, linestyle=linestyle)
     ax.fill_between(x, y - yerr, y + yerr, color=color, alpha=0.1)
 
 def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
+    """
+    Plots the data with varying parameter values on the x-axis. 
+    Requires the data as a dataframes, the desired parameter of interest, and a boolean for interpolation or not. 
+    """
     print(f'Parameter of Interest: {param_name}')
     metrics = ['total_Clustering']
     
@@ -46,7 +59,6 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     dataset_labels = ['Random', 'Clustered']
     colors = ['blue', 'red']
     
-    # Plotting total_Clustering
     for i, metric in enumerate(metrics):
         ax = ax1
         for df, label, color in zip(dfs, dataset_labels, colors):
@@ -70,7 +82,6 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
         ax.grid(True)
         ax.legend()
 
-    # Plotting Fights_per_step and Cooperation_per_step
     metrics_to_plot = ['Cooperation_per_step', 'Fights_per_step']
     cooperation_colors = ['green', 'orange']
     fighting_colors = ['purple', 'brown']
@@ -117,15 +128,13 @@ def plot_all_ofat_results(dfs, param_name, use_interpolation=True):
     plt.tight_layout()
     plt.show()
 
-
 # plot_all_ofat_results([df_random, df_clustered], 'n_agents', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'n_heaps', use_interpolation=False)
-# plot_all_ofat_results([df_random, df_clustered], 'vision_radius', use_interpolation=False)
-# plot_all_ofat_results([df_center_random, df_center_clustered], 'n_agents', use_interpolation=False)
-# plot_all_ofat_results([df_center_random, df_center_clustered], 'n_heaps', use_interpolation=False)
-# plot_all_ofat_results([df_center_random, df_center_clustered], 'vision_radius', use_interpolation=False)
 
 def plot_averaged_results(df, param_values):
+    """
+    Plots the results from a specific experiment. 
+    Requires the data from a dataframe and specific parameter values from a particular config file. 
+    """
     filtered_df = df[
         (df['n_tribes'] == param_values['n_tribes']) &
         (df['n_agents'] == param_values['n_agents']) &
@@ -149,7 +158,6 @@ def plot_averaged_results(df, param_values):
     colors = ['blue', 'red', 'green']
     labels = ["Total Fights", "Total Cooperation"]
 
-    # Plot total_Clustering
     ax = axs[0]
     for i, metric in enumerate(metrics):
         x = grouped.iloc[:, 0]
@@ -163,7 +171,6 @@ def plot_averaged_results(df, param_values):
         ax.set_title('Clustering over Time')
         ax.grid(True)
 
-    # Plot Fights_per_step and Cooperation_per_step
     ax = axs[1]
     for i, metric in enumerate(interaction_metrics):
         x = grouped.iloc[:, 0]
@@ -182,7 +189,7 @@ def plot_averaged_results(df, param_values):
     plt.tight_layout()
     plt.show()
 
-#Parameter Values for Filtering
+
 param_values = {
     'n_tribes': 3,
     'n_agents': 740,
@@ -198,11 +205,12 @@ param_values = {
 }
 
 # plot_averaged_results(df_random, param_values=param_values)
-# plot_averaged_results(df_clustered, param_values=param_values)
-# plot_averaged_results(df_center_random, param_values=param_values)
-# plot_averaged_results(df_center_clustered, param_values=param_values)
 
 def plot_clustering(df, ax, title):
+    """
+    Plots all types of clustering for a particular simulation initialization.
+    Requires data as a dataframe, a figure axis, and a string for a title. 
+    """
     param_name = 'Time Step'
     metric = 'total_Clustering'
 
@@ -218,7 +226,6 @@ def plot_clustering(df, ax, title):
     ax.grid(True)
 
 # fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-
 # plot_clustering(df_random, axs[0, 0], 'Random Agents\nDistributed Heaps of Spice')
 # plot_clustering(df_clustered, axs[0, 1], 'Clustered Agents\nDistributed Heaps of Spice')
 # plot_clustering(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
@@ -228,6 +235,10 @@ def plot_clustering(df, ax, title):
 # plt.show()
 
 def plot_interactions(df, ax, title, show_legend=False):
+    """
+    Plots the fighting and cooperation from a particular experiment.  
+    Requires data as a dataframe, the figure axis, a string for a title, and boolean for including a legend. 
+    """
     param_name = 'Time Step'
     metrics = ['Fights_per_step', 'Cooperation_per_step']
     colors = ['red', 'green']
@@ -249,19 +260,23 @@ def plot_interactions(df, ax, title, show_legend=False):
     ax.grid(True)
     if show_legend:
         ax.legend()
-# fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 
+# fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 # plot_interactions(df_random, axs[0, 0], 'Random Agents\nHeaps of Spice', show_legend=True)
 # plot_interactions(df_clustered, axs[0, 1], 'Clustered Agents\nHeaps of Spice')
 # plot_interactions(df_center_random, axs[1, 0], 'Random Agents\nCentral Spice')
 # plot_interactions(df_center_clustered, axs[1, 1], 'Clustered Agents\nCentral Spice')
-
 # plt.subplots_adjust(left=0.062, bottom=0.08, right=0.983, top=0.9, wspace=0.156, hspace=0.485)
 # plt.tight_layout()
 # plt.show()
 
 
 def plot_scenario(ax, dfs, scenario_titles, colors, linestyles, common_ylim):
+    """
+    Plots interactions for differing spice distributions. 
+    Requires the figure axis, data as a dataframe, strings as titles for the figures, desired colors
+    for the plots, desired line styles, and the desired y_axis range.
+    """
     metrics = ['Fights_per_step', 'Cooperation_per_step']
     
     for df, scenario_title, color, linestyle in zip(dfs, scenario_titles, colors, linestyles):
