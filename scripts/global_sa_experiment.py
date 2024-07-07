@@ -157,16 +157,15 @@ def main(data_prov):
     # samples_csv.to_csv(os.path.join(output_dir, f'sobol_samples_{nr_sobol_samples}.csv'), index=False)
     samples = pd.read_csv('GSA/sobol_samples_1024.csv')
 
-    # 1024*(7+2) = 9216, 9216/2 = 4608, so I generate 75%
+    ### 1024*(7+2) = 9216, 9216/2 = 4608, so I generate 75%
     # samples, user = samples.iloc[0: 4608], 'amir_pc' # AMIR COMPUTER DATA
-    samples, user = samples.iloc[4608:], 'amir_part_2'  # AMIR LAPTOP DATA
-    # samples, user = samples.iloc [int(4608 + 4608/2):], 'sandor' # SANDOR DATA
+    # samples, user = samples.iloc[4608:], 'amir_part_2'  # AMIR LAPTOP DATA
     samples = samples.to_numpy()
 
     if not data_prov:
         all_results = parallel_evaluation(sensitivity_target, samples, user, n_jobs=32)
     else:
-        all_results = np.load(f'GSA/final_512.npy')
+        all_results = np.load(f'final_1024.npy')
 
     output_params = [
         "total_Clustering",
@@ -203,4 +202,4 @@ if __name__ == "__main__":
 
     output_dir = "GSA"
 
-    main(0)
+    main(1)

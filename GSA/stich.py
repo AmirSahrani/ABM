@@ -3,38 +3,26 @@ import matplotlib.pyplot as plt
 from glob import glob
 
 
-files = [f for f in glob("*.npy")]
-files.remove("final_amir_laptop_23.npy")
-files.remove('intermediate_amir_laptop.npy')
-arrays = [np.load(x) for x in files]
+files = [f for f in glob("GSA/*.npy")]
+print(files)
+arrays = [np.load(x) for x in files if 'part_2' not in x and 'laptop' not in x]
+# arrays.extend([np.load('GSA/final_amir_pc.npy')])
+arrays_part_2 = [np.load(x) for x in files if 'part_2' in x and 'laptop' not in x]
 
-small = 'intermediate_amir_laptop.npy'
-small_array = np.load(small)
-mask = np.any(small_array != 0, axis=1)
-small_array_filter = small_array[mask]
-print(small_array_filter.shape)
+all_arrays = np.sum(arrays, axis=0)
+all_arrays_2 = np.sum(arrays_part_2, axis=0)
+all = np.vstack((all_arrays, all_arrays_2))
 
-# small_arrays[1][:23, ...] = 0
+print(all.shape)
+mask = all!= 0
 
-# print(small_arrays[1].shape)
+plt.plot(mask[mask.shape[0]//2:, :, -1])
+plt.plot(mask[:mask.shape[0]//2, :, -1])
+plt.show()
 
-
-last = [np.sum(small_arrays, axis=0)]
-# print(np.max(last), np.max(small_arrays[0]), np.max(small_arrays[1]))
-
-
-first = [x for x in arrays if x.shape[0] == 4608]
-[last.append(x) for x in arrays if x.shape[0] != 4608]
-
-second = np.vstack(last)
-
-big_array = np.sum(first, axis=0)
-np.save('final_512.npy', big_array)
+np.save('final_1024.npy', all)
 
 
-# stacked = np.vstack([big_array, second])
-# plt.yscale('log')
-# plt.plot(stacked[:, 0, -1], 'o')
-# plt.show()
-
-
+plt.yscale('log')
+plt.plot(all[:, 0, 0], 'o')
+plt.show()
