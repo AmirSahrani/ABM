@@ -9,6 +9,8 @@ import sys
 import matplotlib.pyplot as plt
 import multiprocessing
 from joblib import Parallel, delayed
+import joblib
+import time
 
 sys.path.append("../scripts")
 sys.path.remove("../scripts")
@@ -78,7 +80,7 @@ def parallel_evaluation(fun, samples, user, n_jobs=None):
         "Cooperation_per_step"
     ]
 
-    batch_size = 32
+    batch_size = 24
 
     out = np.empty((len(samples), len(output_params), NUM_SAMPLES))
     results = []
@@ -86,9 +88,16 @@ def parallel_evaluation(fun, samples, user, n_jobs=None):
 
     # Use joblib's Parallel and delayed for multiprocessing
     print(samples.shape)
-    for batch in range(0, samples.shape[0], batch_size):
+    for batch in range(32*9 , samples.shape[0], batch_size):
         print(f'Starting with batch: {batch//batch_size}, {(batch)/samples.shape[0] * 100:.2f}% done')
-        batch_results = Parallel(n_jobs=n_jobs, verbose=0, backend='multiprocessing')(delayed(fun)(sample) for sample in samples[batch:batch + batch_size, :])
+        while True:
+            try:
+                with Parallel(n_jobs=n_jobs, backend='loky', verbose=1) as parallel:
+                    batch_results = parallel(delayed(fun)(sample) for sample in samples[batch:batch + batch_size, :])
+                break  # Exit the while loop if successful
+            except joblib.externals.loky.process_executor.TerminatedWorkerError as e:
+                print(f'TerminatedWorkerError encountered: {e}. Retrying...')
+                time.sleep(1)
 
         for i, result in enumerate(batch_results, start=batch):
             for j, param in enumerate(output_params):
@@ -150,14 +159,14 @@ def main(data_prov):
 
     # 1024*(7+2) = 9216, 9216/2 = 4608, so I generate 75%
     # samples, user = samples.iloc[0: 4608], 'amir_pc' # AMIR COMPUTER DATA
-    samples, user = samples.iloc[4608: int(4608 + 4608 / 2)], 'amir_laptop'  # AMIR LAPTOP DATA
+    samples, user = samples.iloc[4608:], 'amir_part_2'  # AMIR LAPTOP DATA
     # samples, user = samples.iloc [int(4608 + 4608/2):], 'sandor' # SANDOR DATA
     samples = samples.to_numpy()
 
     if not data_prov:
         all_results = parallel_evaluation(sensitivity_target, samples, user, n_jobs=32)
     else:
-        all_results = np.load(f'GSA/final_{user}.npy')
+        all_results = np.load(f'GSA/final_512.npy')
 
     output_params = [
         "total_Clustering",

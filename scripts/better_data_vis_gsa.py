@@ -100,8 +100,8 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
         plt.close()
 
     parameter_pairs = [
-        ("n_tribes", "n_agents"),
-        ("alpha", "vision_radius"),
+        # ("n_tribes", "n_agents"),
+        # ("alpha", "vision_radius"),
         ("trade_percentage", "spice_threshold"),
         ("tribe_movement_bias", "spice_movement_bias")
     ]
@@ -110,8 +110,8 @@ def plot_sobol_indices(csv_file, phase_plot_data_file, output_dir):
         generate_phase_plots(phase_data, param1, param2, result_col)
 
 if __name__ == "__main__":
-    input_dir = "GSA_1024"
-    output_dir = "GSA_1024"
+    input_dir = "GSA"
+    output_dir = "GSA"
 
     csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv')]
     phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
