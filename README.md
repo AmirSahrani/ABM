@@ -8,19 +8,19 @@ The main objectives of this model are to study the dynamics of resource acquisit
 
 ## Usage
 **Install Dependencies**: Ensure that you have Python and required packages installed. You can install the necessary packages using `pip`:
-
-    ```sh
+```sh
     pip install -r requirements.txt
-    ```
+```
 
 *All* files assume you are running them from the main directory, do not try to run the scripts from inside the scripts directory. 
 
 ### Server
 
 **Run the Server**: Start the server by executing:
-    ```sh
+
+```sh
     python scripts/server.py
-    ```
+```
 
 ### Experimenting
 
@@ -77,4 +77,4 @@ To run experiments with different configurations, you can use a TOML file to spe
 
 ### Sensitivity analysis 
 
-You can run `scripts/global_sa_experiment.py`, this will rerun with our exact set-up. It wil take about a day to finish on a computer with 16-cores and 32 threads.
+You can run `scripts/global_sa_experiment.py`, this will rerun with our exact set-up. It wil take about 2 days (50 hours) to finish on a computer with 16-cores and 32 threads, however all data is also stored in the `GSA` folder.

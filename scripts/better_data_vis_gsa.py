@@ -5,7 +5,7 @@ import seaborn as sns
 import numpy as np
 
 plt.rc('text', usetex=True)
-plt.rc('font', family='serif', size=16)
+plt.rc('font', family='serif', size=24)
 
 
 def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
@@ -54,7 +54,7 @@ def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
     ax.set_xticklabels(problem_names, rotation=90)
     ax.set_ylabel(r'$S_T$')
     # ax.set_title(f'Total-order Sobol Indices ($S_T$) at Time Step {timestep} across Output Parameters')
-    ax.legend()
+    # ax.legend()
     ax.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, f'sobol_ST_combined_timestep_{timestep}.png'))
@@ -97,7 +97,7 @@ def plot_sobol_indices(csv_files, phase_plot_data_files, output_dir):
 if __name__ == "__main__":
     input_dir = "GSA"
     output_dir = "GSA"
-    timestep = 100
+    timestep = 300
 
     csv_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('sobol_results_') and file.endswith('.csv') and str(timestep) in file]
     phase_plot_data_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.startswith('phase_plot_data_') and file.endswith('.csv')]
